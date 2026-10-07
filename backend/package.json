@@ -9,7 +9,7 @@
     "dev": "node --watch server.js",
     "migrate": "node scripts/migrate.js",
     "import:astech": "node scripts/import-astech.js",
-    "test": "node --test test/"
+    "test": "node --test \"test/*.test.js\""
   },
   "dependencies": {
     "axios": "^1.7.9",

@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
-import { Map as MapIcon, LayoutDashboard, Building2, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, User as UserIcon } from 'lucide-react';
+import { Map as MapIcon, LayoutDashboard, Building2, Settings, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
 import { getRecents, type Recent } from '../lib/recents';
 import { Toaster } from './ui';
+import { useGeneral, logoUrl } from '../lib/general';
 
 interface Item { to: string; label: string; icon: ReactNode; perm: string; badge?: boolean }
 const GROUPS: { title: string; items: Item[] }[] = [
@@ -29,6 +30,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     { to: '/audit', label: 'Historique & Audit', icon: <ScrollText size={18} />, perm: 'audit.read' },
   ] },
   { title: 'Configuration', items: [
+    { to: '/admin/general', label: 'Paramètres généraux', icon: <Settings size={18} />, perm: 'admin.users' },
     { to: '/referentiels', label: 'Référentiels', icon: <ListChecks size={18} />, perm: 'referentiels.read' },
     { to: '/admin/droits', label: 'Comptes & droits', icon: <ShieldCheck size={18} />, perm: 'admin.users' },
     { to: '/admin/ged', label: 'Stockage / GED', icon: <HardDrive size={18} />, perm: 'admin.ged' },
@@ -38,7 +40,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
 
 export default function Layout() {
   const { user, logout, can } = useAuth();
-  const nav = useNavigate();
+  const nav = useNavigate(); const gen = useGeneral();
   const [q, setQ] = useState('');
   const [alertes, setAlertes] = useState(0);
   const [recents, setRecents] = useState<Recent[]>(getRecents());
@@ -63,10 +65,10 @@ export default function Layout() {
       <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none">
         <div className="flex flex-col min-h-0">
           <div className="h-14 px-space-md flex items-center gap-space-sm">
-            <Link to="/" title="Ville d'Ivry-sur-Seine" className="flex-shrink-0"><img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-10 w-auto rounded shadow-sm bg-white" /></Link>
+            <Link to="/" title={gen.ville_nom} className="flex-shrink-0"><img src={logoUrl(gen)} alt={gen.ville_nom} className="h-10 w-auto rounded shadow-sm bg-white" /></Link>
             <div className="flex flex-col min-w-0">
               <span className="text-headline-sm text-primary truncate leading-tight">VibeLocatif</span>
-              <span className="text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Ville d'Ivry-sur-Seine</span>
+              <span className="text-label-sm text-on-surface-variant truncate uppercase tracking-wider">{gen.ville_nom}</span>
             </div>
           </div>
           <div className="px-space-md py-space-xs">
@@ -81,7 +83,7 @@ export default function Layout() {
               if (!items.length) return null;
               return (
                 <div key={g.title}>
-                  <div className="px-space-sm pt-space-sm pb-0.5 text-label-sm text-on-surface-variant uppercase tracking-wider">{g.title}</div>
+                  <div className="px-space-sm pt-space-sm pb-0.5 text-label-sm font-bold text-on-surface uppercase tracking-wider">{g.title}</div>
                   {items.map((i) => (
                     <NavLink key={i.to} to={i.to} end={i.to === '/'}
                       className={({ isActive }) => `flex items-center justify-between px-space-sm py-2 rounded-lg transition-colors ${isActive ? 'bg-primary-container text-on-primary font-semibold shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`}>

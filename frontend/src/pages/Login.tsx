@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { errMsg } from '../lib/api';
+import { useGeneral, logoUrl } from '../lib/general';
 import { Field, Input, Btn, Notice } from '../components/ui';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login } = useAuth(); const gen = useGeneral();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +21,10 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-background p-space-md">
       <form onSubmit={submit} className="w-full max-w-sm bg-surface-container-lowest rounded-xl shadow-lg p-space-xl flex flex-col gap-space-md">
         <div className="flex items-center gap-space-sm">
-          <img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-14 w-auto rounded flex-shrink-0" />
+          <img src={logoUrl(gen)} alt={gen.ville_nom} className="h-14 w-auto rounded flex-shrink-0" />
           <div>
             <h1 className="text-headline-md text-primary font-bold leading-tight">VibeLocatif</h1>
-            <p className="text-body-sm text-on-surface-variant">Ville d'Ivry-sur-Seine</p>
+            <p className="text-body-sm text-on-surface-variant">{gen.ville_nom}</p>
           </div>
         </div>
         <Field label="Identifiant"><Input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus required /></Field>

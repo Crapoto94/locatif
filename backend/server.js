@@ -37,6 +37,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
 
 const v1 = express.Router();
 v1.use('/auth', require('./src/modules/auth/auth.routes'));
+v1.use('/general', require('./src/modules/admin/general.routes').publicRouter); // nom + logo : lisibles avant connexion
 v1.use(authenticate); // tout ce qui suit exige un jeton valide
 v1.use('/dashboard', require('./src/modules/dashboard/dashboard.routes'));
 v1.use('/biens', require('./src/modules/biens/biens.routes'));
@@ -56,6 +57,7 @@ v1.use('/audit', require('./src/modules/audit/audit.routes'));
 v1.use('/referentiels', require('./src/modules/referentiels/referentiels.routes'));
 v1.use('/ville', require('./src/modules/ville/ville.routes'));
 v1.use('/admin/users', require('./src/modules/admin/users.routes'));
+v1.use('/admin/general', require('./src/modules/admin/general.routes').adminRouter);
 v1.use('/admin/ged', require('./src/modules/admin/ged.routes'));
 v1.use('/admin/reprise', require('./src/modules/reprise/reprise.routes'));
 app.use('/api/v1', v1);

@@ -20,6 +20,7 @@ import Cartographie from './pages/Cartographie';
 import Audit from './pages/Audit';
 import Referentiels from './pages/Referentiels';
 import { AdminDroits, AdminGed, AdminReprise } from './pages/Admin';
+import AdminGeneral from './pages/AdminGeneral';
 import { Loading } from './components/ui';
 
 export default function App() {
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="audit" element={<Audit />} />
         <Route path="referentiels" element={<Referentiels />} />
         <Route path="admin/droits" element={<AdminDroits />} />
+        <Route path="admin/general" element={<AdminGeneral />} />
         <Route path="admin/ged" element={<AdminGed />} />
         <Route path="admin/reprise" element={<AdminReprise />} />
         <Route path="*" element={<Navigate to="/" replace />} />

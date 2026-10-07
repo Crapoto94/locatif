@@ -58,7 +58,20 @@ router.get('/:id/download', requirePerm('documents.read'), async (req, res) => {
   try { file = await store.get(d.storage_key); } catch (e) { throw httpError(502, e.message); }
   if (d.sensible) await audit.log(req.user, 'document.consulted', 'document', d.id, { details: { sensible: true } });
   res.setHeader('Content-Type', d.mime || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `${req.query.inline ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(d.nom)}`);
+  res.setHeader('Content-Disposition', `${req.query.inline || req.query.mode === 'inline' ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(d.nom)}`);
+  res.send(file.buffer);
+});
+
+// Contenu d'une version précise (visionneuse) : mode=inline pour l'affichage dans la page, sinon téléchargement.
+router.get('/:id/versions/:version/content', requirePerm('documents.read'), async (req, res) => {
+  const d = await loadDoc(req);
+  const v = await db.get(`SELECT storage_key FROM ${t('document_versions')} WHERE document_id = $1 AND version = $2`, [d.id, Number(req.params.version)]);
+  if (!v) throw httpError(404, 'Version introuvable');
+  let file;
+  try { file = await store.get(v.storage_key); } catch (e) { throw httpError(502, e.message); }
+  if (d.sensible) await audit.log(req.user, 'document.consulted', 'document', d.id, { details: { sensible: true, version: Number(req.params.version) } });
+  res.setHeader('Content-Type', d.mime || 'application/octet-stream');
+  res.setHeader('Content-Disposition', `${req.query.mode === 'inline' ? 'inline' : 'attachment'}; filename*=UTF-8''${encodeURIComponent(d.nom)}`);
   res.send(file.buffer);
 });
 

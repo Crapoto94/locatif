@@ -6,6 +6,7 @@ import { useFetch, useDebounced } from '../lib/hooks';
 import { useLabel, useRefList } from '../lib/refs';
 import { bytes, dateFr, dateTimeFr } from '../lib/format';
 import { Card, PageHeader, Tabs, DataTable, Pagination, Badge, Input, Select, Loading, ErrorBox } from '../components/ui';
+import DocumentViewer from '../components/DocumentViewer';
 
 const LIEN = { bien: '/biens', contrat: '/contrats', contractant: '/contractants' } as Record<string, string>;
 
@@ -15,6 +16,7 @@ export default function Documents() {
   const { data, loading, error, reload } = useFetch<any>(tab === 'tous' ? '/documents' : null, { q: dq, type_code: type, offset, limit: 30 });
   const { data: obl } = useFetch<any[]>(tab === 'obligations' ? '/documents/obligations' : null);
   const today = new Date().toISOString().slice(0, 10);
+  const [vue, setVue] = useState<number | null>(null);
 
   const liens = (d: any) => (d.liens || []).map((l: any, i: number) => LIEN[l.objet_type] ? <Link key={i} className="text-secondary hover:underline mr-2" to={`${LIEN[l.objet_type]}/${l.objet_id}`}>{l.objet_type} {l.objet_id}</Link> : null);
   return (
@@ -30,7 +32,7 @@ export default function Documents() {
           {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !data ? <Loading /> : (
             <>
               <DataTable rows={data?.rows || []} cols={[
-                { key: 'n', label: 'Document', render: (d: any) => <div className="flex items-center gap-2">{d.verrouille && <Lock size={14} className="text-error" />}<span className="font-semibold text-primary">{d.verrouille ? 'Pièce sensible (accès restreint)' : d.nom}</span>{d.sensible && <Badge tone="error">Sensible</Badge>}{d.en_ged && <Badge tone="info">GED</Badge>}</div> },
+                { key: 'n', label: 'Document', render: (d: any) => <div className="flex items-center gap-2">{d.verrouille && <Lock size={14} className="text-error" />}{d.verrouille ? <span className="font-semibold text-primary">Pièce sensible (accès restreint)</span> : <button className="font-semibold text-primary hover:underline text-left" onClick={() => setVue(d.id)}>{d.nom}</button>}{d.sensible && <Badge tone="error">Sensible</Badge>}{d.en_ged && <Badge tone="info">GED</Badge>}</div> },
                 { key: 't', label: 'Type', render: (d: any) => label('type_document', d.type_code) },
                 { key: 'l', label: 'Rattaché à', render: liens },
                 { key: 'v', label: 'Version', render: (d: any) => `v${d.version}` }, { key: 's', label: 'Taille', render: (d: any) => bytes(d.taille) },
@@ -52,6 +54,7 @@ export default function Documents() {
           ]} />}
         </Card>
       )}
+      {vue && <DocumentViewer documentId={vue} onClose={() => setVue(null)} />}
     </>
   );
 }

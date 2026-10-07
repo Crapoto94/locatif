@@ -26,6 +26,7 @@ const REF = {
     ['kbis', 'Kbis'], ['statuts', "Statuts d'association"], ['siren', 'Numéro SIREN'], ['notification', 'Notification / décharge'],
     ['attestation_assurance', "Attestation d'assurance"], ['arrete', 'Arrêté'], ['avenant', 'Avenant'], ['quittance', 'Quittance'],
     ['courrier', 'Courrier'], ['certificat_administratif', 'Certificat administratif (DSF)'], ['modele_word', 'Modèle Word'],
+    ['convention_occupation', "Convention / autorisation d'occupation (AOT, COP…)"], ['titre_recette', 'Titre de recette'], ['piece_justificative', 'Autre pièce justificative du tiers'],
     ['piece_identite', "Pièce d'identité", { sensible: true }], ['rib', 'RIB', { sensible: true }], ['autre', 'Autre']],
   type_indice: [['IRL', 'IRL', { astech_typ: 1 }], ['ICC', 'ICC', { astech_typ: 2 }], ['ILC', 'ILC', { astech_typ: 5 }], ['ILAT', 'ILAT', { astech_typ: 6 }]],
 };

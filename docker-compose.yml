@@ -1,0 +1,29 @@
+# Gestion Locative — déploiement : copier .env.example en .env, le renseigner, puis :
+#   docker compose up -d --build
+# Application : http://<serveur>:${FRONT_PORT:-3321}   (API relayée par nginx sur /api)
+services:
+  backend:
+    build: { context: ./backend }
+    restart: always
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3320
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3321}
+    volumes:
+      # Documents du mode « filer » (modifiable dans Administration > Stockage / GED).
+      - locatif_storage:/app/storage
+    expose: ["3320"]
+    ports: ["${BACK_PORT:-3320}:3320"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=${APP_API_URL:-}
+    restart: always
+    depends_on: [backend]
+    ports: ["${FRONT_PORT:-3321}:80"]
+
+volumes:
+  locatif_storage:

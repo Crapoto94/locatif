@@ -117,7 +117,7 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const genre = genres.get(String(r.ARB_GENRE)); const cat = cats.get(String(r.ARB_CAT)); const scat = scats.get(String(r.ARB_SCAT));
         const code = str(r.ARB_CODE); const m = /^(S\d+)(B\d+)?/i.exec(code || '');
         const parent = m && code.length > (m[0].length) ? await ensureParent(m[0].toUpperCase(), m[2] ? 'batiment' : 'site', null) : null;
-        const adresse = [pick(a, /^ARBA_(NUM|NUMERO)$/), pick(a, /^ARBA_(ADR1?|RUE|VOIE|LIB\w*|ADRESSE)$/)].filter(Boolean).join(' ') || null;
+        const adresse = [pick(a, /^ARBA_(NUMVOIE|NUM|NUMERO)$/), pick(a, /^ARBA_(ADR1?|RUE|VOIE|LIB\w*|ADRESSE)$/)].filter(Boolean).join(' ') || null;
         const data = {
           parent_id: parent, niveau: 'unite', code, designation: str(r.ARB_DES) || str(r.ARB_NOMC) || code || `Bien ${r.ARB_ID}`,
           type_code: typeBien(`${genre || ''} ${cat || ''} ${scat || ''} ${r.ARB_DES || ''}`), categorie: [genre, cat, scat].filter(Boolean).join(' / ') || null,
@@ -147,7 +147,7 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const mtact = num(l.CONTL_MTACT);
         const data = {
           numero: str(r.CONT_COD) || `ASTECH-${r.CONT_ID}`, position: 'bailleur', type_code: typeRaw ? norm(typeRaw).toLowerCase().replace(/ /g, '_').slice(0, 50) : null,
-          statut_code: statut, objet: str(pick(r, /^CONT_(DES|LIB|OBJ)\w*$/)), gratuit: !mtact,
+          statut_code: statut, objet: str(r.CONT_DES), gratuit: !mtact || String(r.CONT_GRATUIT || l.CONTL_GRATUIT || '').toUpperCase() === 'O',
           date_signature: fmtDate(pick(l, /^CONTL_DAT(SIGN|SIG)\w*$/)), date_debut: fmtDate(r.CONT_DATDEB), date_fin: fmtDate(r.CONT_DATFIN),
           date_entree: fmtDate(l.CONTL_DATENTREE), date_sortie: fmtDate(l.CONTL_DATSORTIE), date_debut_quittancement: fmtDate(l.CONTL_DATDEBQUIT), date_cloture: fmtDate(l.CONTL_DATCLO),
           periodicite: 'mensuelle', indice_type: refInd?.type || null, indice_reference_id: refInd?.id || null,
@@ -196,7 +196,7 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const libelle = str(pick(r, /^CONTRU_(DES|LIB)\w*$/));
         const montant = num(pick(r, /^CONTRU_(MT|MONT)\w*$/, /MT/));
         if (!montant) continue;
-        const code = /PROVISION/i.test(libelle || '') ? 'provision_charges' : /CHARGE/i.test(libelle || '') ? 'charges' : /TAXE/i.test(libelle || '') ? 'taxe_fonciere' : 'loyer';
+        const code = /PROVISION/i.test(libelle || '') ? 'provision_charges' : (String(r.CONTRU_CHARGE || '').toUpperCase() === 'O' || /CHARGE/i.test(libelle || '')) ? 'charges' : /TAXE/i.test(libelle || '') ? 'taxe_fonciere' : 'loyer';
         const de = fmtDate(pick(r, /^CONTRU_(DATDEB|DATEFF\w*|DATD\w*)$/)); const df = fmtDate(pick(r, /^CONTRU_(DATFIN|DATF\w*)$/));
         (rubParContrat.get(cid) || rubParContrat.set(cid, []).get(cid)).push({ code, libelle, montant, de, df, id: pick(r, /^CONTRU_ID$/) });
       }

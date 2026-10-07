@@ -1,0 +1,394 @@
+<!DOCTYPE html><html lang="fr" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"inverse-surface":"#213145","primary-fixed":"#dbe1ff","on-surface":"#0b1c30","secondary":"#0051d5","surface-tint":"#465c9a","on-primary":"#ffffff","error":"#ba1a1a","tertiary-fixed-dim":"#b9c7df","on-secondary-fixed":"#00174b","surface":"#f8f9ff","tertiary":"#0b1a2c","surface-container-high":"#dce9ff","primary-container":"#0f2a66","error-container":"#ffdad6","background":"#f8f9ff","surface-container-highest":"#d3e4fe","surface-dim":"#cbdbf5","surface-variant":"#d3e4fe","on-secondary-container":"#fefcff","on-error":"#ffffff","surface-container-lowest":"#ffffff","on-primary-container":"#7e93d5","on-secondary-fixed-variant":"#003ea8","on-tertiary":"#ffffff","on-surface-variant":"#444650","secondary-container":"#316bf3","tertiary-container":"#212f41","surface-container-low":"#eff4ff","tertiary-fixed":"#d5e3fc","on-error-container":"#93000a","secondary-fixed":"#dbe1ff","on-background":"#0b1c30","secondary-fixed-dim":"#b4c5ff","on-tertiary-container":"#8897ad","outline":"#757681","surface-bright":"#f8f9ff","inverse-on-surface":"#eaf1ff","inverse-primary":"#b3c5ff","on-primary-fixed":"#00184a","surface-container":"#e5eeff","primary":"#001645","on-secondary":"#ffffff","outline-variant":"#c5c6d1","on-primary-fixed-variant":"#2d4480","primary-fixed-dim":"#b3c5ff","on-tertiary-fixed":"#0d1c2e","on-tertiary-fixed-variant":"#3a485b"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"gutter-desktop":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","space-xs":"0.25rem","space-lg":"1.25rem","gutter":"1rem","space-md":"0.75rem","margin-desktop":"2rem","margin":"1rem"},fontFamily:{"label-md":["Inter"],"headline-sm":["Inter"],"display":["Inter"],"body-lg":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-sm":["Inter"],"numeric-tabular":["Inter"],"body-md":["Inter"],"headline-md":["Inter"]},fontSize:{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-sm":["15px",{"lineHeight":"20px","fontWeight":"600"}],"display":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"numeric-tabular":["13px",{"lineHeight":"18px","fontWeight":"500"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-hidden"><div class="flex flex-col flex-1 min-h-0"><div class="h-14 px-space-md flex items-center gap-space-sm bg-surface-container"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span><div class="flex flex-col"><span class="font-label-sm text-primary uppercase tracking-wider">Collectivité Territoriale</span><span class="font-headline-sm text-on-surface text-[13px] leading-tight">Patrimoine &amp; Foncier</span></div></div><div class="p-space-sm bg-surface-container-high mx-space-sm mt-space-sm rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-secondary text-[16px]">calendar_today</span><span class="font-label-sm text-on-surface uppercase">Exercice 2025</span></div><span class="font-label-sm px-space-xs py-0.5 bg-surface text-secondary rounded">M57</span></div><nav class="flex-1 overflow-y-auto px-space-sm py-space-sm space-y-space-md" data-active-classes="bg-primary-container text-on-primary-container font-headline-sm rounded-lg shadow-sm"><div class="space-y-space-xs"><span class="px-space-sm font-label-sm text-on-surface-variant uppercase tracking-wider block">Gestion Opérationnelle</span><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="tableau-de-bord" href="#"><span class="material-symbols-outlined text-[18px]">grid_view</span>Tableau de bord</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="biens-et-locaux" href="#"><span class="material-symbols-outlined text-[18px]">apartment</span>Biens &amp; Locaux</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="contractants" href="#"><span class="material-symbols-outlined text-[18px]">groups</span>Contractants</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="contrats-et-baux" href="#"><span class="material-symbols-outlined text-[18px]">description</span>Contrats &amp; Baux</a></div></div><div class="space-y-space-xs"><span class="px-space-sm font-label-sm text-on-surface-variant uppercase tracking-wider block">Finances &amp; Quittancement</span><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="echeancier" href="#"><span class="material-symbols-outlined text-[18px]">event_upcoming</span>Échéancier</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="charges-et-regularisation" href="#"><span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>Charges &amp; Régularisation</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="campagne-mensuelle" href="#"><span class="material-symbols-outlined text-[18px]">payments</span>Campagne mensuelle</a></div></div><div class="space-y-space-xs"><span class="px-space-sm font-label-sm text-on-surface-variant uppercase tracking-wider block">Pilotage &amp; Traçabilité</span><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="18-generation-documentaire" href="#"><span class="material-symbols-outlined text-[18px]">folder_shared</span>Centre documentaire</a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="centre-des-alertes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">warning</span>Centre des alertes</div><span class="px-1.5 py-0.5 bg-error text-on-error font-label-sm rounded-full">4</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="recherche-globale" href="#"><span class="material-symbols-outlined text-[18px]">manage_search</span>Recherche globale</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="historique-et-audit" href="#"><span class="material-symbols-outlined text-[18px]">history</span>Historique &amp; Audit</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="24-etats-et-statistiques" href="#"><span class="material-symbols-outlined text-[18px]">insights</span>États &amp; Statistiques</a></div></div><div class="space-y-space-xs"><span class="px-space-sm font-label-sm text-on-surface-variant uppercase tracking-wider block">Configuration &amp; Droit</span><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="27-referentiels" href="#"><span class="material-symbols-outlined text-[18px]">settings_input_component</span>Référentiels</a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="28-administration-et-droits" href="#"><span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>Administration &amp; Droits</a></div></div></nav></div><div class="p-space-sm bg-surface-container border-t border-surface-container-highest"><div class="flex items-center gap-space-xs font-label-sm text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-secondary inline-block animate-pulse"></span><span class="uppercase font-label-sm">Connexion Sécurisée</span></div><div class="font-label-sm text-on-surface-variant text-[10px] mt-0.5 truncate">Connexion sécurisée Microsoft Entra ID</div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-14 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs font-body-sm text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">corporate_fare</span><span class="">Patrimoine</span><span class="text-outline-variant">/</span><span class="font-headline-sm text-primary">Gestion Locative</span></div><div class="hidden md:flex items-center px-space-sm py-1 bg-surface-container-high text-on-surface-variant rounded-lg gap-space-sm w-64"><span class="material-symbols-outlined text-[16px]">search</span><span class="font-body-sm flex-1 truncate">Recherche tiers, acte...</span><kbd class="font-label-sm text-[10px] bg-surface px-1.5 py-0.5 rounded shadow-sm text-on-surface">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><div class="hidden lg:flex items-center gap-space-xs px-space-sm py-1 bg-surface-container rounded-lg font-label-sm text-secondary"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="">Gestion Locative</span></div><button class="relative p-1.5 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-space-sm pl-space-sm border-l border-surface-container-high"><div class="flex flex-col text-right hidden sm:flex"><span class="font-headline-sm text-on-surface text-[12px] leading-tight">Laurent D.</span><span class="font-label-sm text-on-surface-variant text-[10px]">AFLC / Entra ID</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-background min-h-screen px-margin-desktop py-space-lg"><div class="flex flex-col w-full">
+<!-- En-tête de page & Contexte de navigation -->
+<div class="flex flex-col gap-space-sm mb-space-lg">
+<!-- Fil d'Ariane -->
+<div class="flex items-center gap-space-xs font-body-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Accueil</a>
+<span class="text-outline-variant">/</span>
+<a class="hover:text-primary transition-colors" href="#">Pilotage, Documents &amp; Audit</a>
+<span class="text-outline-variant">/</span>
+<span class="font-headline-sm text-primary">Génération documentaire</span>
+</div>
+<!-- Titre et Actions principales -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<h1 class="font-headline-lg text-primary text-[24px] tracking-tight">Génération documentaire assistée</h1>
+<p class="font-body-md text-on-surface-variant mt-0.5">Production d'actes et de courriers officiels à partir des dossiers contractuels et d'occupation</p>
+</div>
+<div class="flex items-center gap-space-sm self-start lg:self-auto">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">history</span>
+<span class="">Historique des générations</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md shadow-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">settings_suggest</span>
+<span class="">Administrer les modèles de référence (Accès administrateur)</span>
+</button>
+</div>
+</div>
+<!-- Avertissement institutionnel d'encadrement -->
+<div class="bg-surface-container-low text-on-surface rounded-xl p-space-md flex items-start gap-space-md shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[22px] mt-0.5 shrink-0">gavel</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-secondary uppercase tracking-wider font-semibold">Séquence de production réglementaire</span>
+<p class="font-body-sm text-on-surface-variant">
+          Les modèles de documents administratifs sont administrés séparément par le service juridique/patrimoine et ne sont pas altérables dans ce flux. La signature électronique reste à l'arbitrage : <span class="font-label-md text-secondary font-semibold bg-surface-container px-1 py-0.5 rounded">« Signature électronique : à confirmer »</span>.
+        </p>
+</div>
+</div>
+</div>
+<!-- Stepper de progression horizontal -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md mb-space-lg shadow-sm">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-space-sm">
+<!-- Étape 1 -->
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-7 h-7 rounded-full bg-secondary-fixed text-primary flex items-center justify-center font-label-sm shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider text-[10px]">Étape 1</span>
+<span class="font-label-md text-on-surface truncate">Choisir le modèle</span>
+</div>
+</div>
+<!-- Étape 2 -->
+<div class="flex items-center gap-space-sm p-space-xs bg-surface-container-high rounded-lg">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm shrink-0 font-bold">
+          2
+        </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-secondary uppercase tracking-wider text-[10px]">En cours</span>
+<span class="font-label-md text-primary font-semibold truncate">Contrôler les données</span>
+</div>
+</div>
+<!-- Étape 3 -->
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-7 h-7 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm shrink-0">
+          3
+        </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider text-[10px]">Écran partagé</span>
+<span class="font-label-md text-on-surface truncate">Aperçu du document PDF</span>
+</div>
+</div>
+<!-- Étape 4 -->
+<div class="flex items-center gap-space-sm p-space-xs opacity-60">
+<div class="w-7 h-7 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm shrink-0">
+          4
+        </div>
+<div class="flex flex-col min-w-0"><span class="font-label-sm text-on-surface-variant uppercase tracking-wider text-[10px]">Génération</span>
+<span class="font-label-md text-on-surface truncate">Générer le document</span></div>
+</div>
+<!-- Étape 5 -->
+<div class="flex items-center gap-space-sm p-space-xs opacity-60">
+<div class="w-7 h-7 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm shrink-0">
+          5
+        </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider text-[10px]">Archivage</span>
+<span class="font-label-md text-on-surface truncate">Archiver au centre doc.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Grille de travail principale en deux colonnes (50% / 50%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- ========================================== -->
+<!-- COLONNE GAUCHE : Paramétrage & Contrôle    -->
+<!-- ========================================== -->
+<div class="lg:col-span-6 flex flex-col gap-space-lg">
+<!-- Bloc 1 : Dossier source & Contexte locatif -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-primary">1. Dossier source &amp; Contexte locatif</h2>
+</div>
+<span class="font-label-sm px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-mono">CTR-2021-084</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md bg-surface-container-low rounded-lg p-space-md">
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Type de contrat</span>
+<span class="font-headline-sm text-on-surface text-[14px]">Bail d'habitation Loi 89</span>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Résidence Saint-Clément — Apt T4</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Exercice budgétaire</span>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-on-surface text-[14px]">2025</span>
+<span class="font-label-sm px-space-xs py-0.2 bg-secondary text-on-secondary rounded text-[10px]">Exercice 2025</span>
+</div>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Suite financière — À spécifier avec DSF / FILIEN-SEDIT</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Preneurs / Contractants</span>
+<span class="font-headline-sm text-on-surface text-[14px]">M. Karim Benali &amp; Mme Sophie Benali</span>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Cotitulaires solidaires • Réf. T-004921</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Bien patrimonial rattaché</span>
+<span class="font-headline-sm text-on-surface text-[14px]">BIEN-2020-042 (82,50 m²)</span>
+<span class="font-body-sm text-on-surface-variant text-[11px]">12 Rue Clément Marot, 69002 Lyon</span>
+</div>
+</div>
+</div>
+<!-- Bloc 2 : Modèle de document & Usages -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-primary">2. Modèle de document &amp; Usages identifiés</h2>
+</div>
+<span class="font-label-sm px-space-xs py-0.5 rounded bg-surface-container-high text-secondary font-semibold">v3.2 DAJ Approuvée</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<label class="font-label-md text-on-surface" for="template-select">Modèle officiel sélectionné <span class="text-error">*</span></label>
+<div class="relative">
+<select class="w-full h-10 px-space-md pr-10 rounded-lg bg-surface-container-low text-on-surface font-body-md focus:outline-none appearance-none cursor-pointer" id="template-select">
+<option selected="">Notification de révision triennale de loyer (Indice IRL - Modèle standard M57 v3.2)</option>
+<option>Notification de révision indiciaire (IRL / ILC / ILAT)</option>
+<option>Décompte annuel de régularisation des charges locatives</option>
+<option>Notification d'échéance contractuelle triennale (Loi 89)</option>
+<option>Acte d'engagement et contrat de bail initial</option>
+<option>Avenant de mise à jour des coordonnées / cotitulaires</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none text-[20px]">unfold_more</span>
+</div>
+</div>
+<!-- Note de lecture seule -->
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center gap-space-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-outline">lock</span>
+<span class="font-body-sm text-[12px]">Modèle en lecture seule. L'agent renseigne les variables d'instruction.</span>
+</div>
+</div>
+<!-- Bloc 3 : Variables & Données injectées -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-primary">3. Variables &amp; Données injectées à vérifier</h2>
+</div>
+<span class="font-label-sm text-on-surface-variant font-mono">Calcul indiciaire</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Variable 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-on-surface-variant uppercase">Loyer de base actuel</span>
+<div class="flex items-baseline justify-between">
+<span class="font-display text-[20px] text-primary font-numeric-tabular font-bold">780,00</span>
+<span class="font-body-sm text-outline">€ / mois</span>
+</div>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Modèle en lecture seule. L'agent renseigne les variables d'instruction.</span>
+</div>
+<!-- Variable 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-on-surface-variant uppercase">Trimestre &amp; Indice de base</span>
+<div class="flex items-baseline justify-between">
+<span class="font-display text-[20px] text-on-surface font-numeric-tabular font-bold">141,03</span>
+<span class="font-body-sm text-outline">IRL T3 2024</span>
+</div>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Modèle en lecture seule. L'agent renseigne les variables d'instruction.</span>
+</div>
+<!-- Variable 3 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-on-surface-variant uppercase">Nouvel indice appliqué</span>
+<div class="flex items-baseline justify-between">
+<span class="font-display text-[20px] text-secondary font-numeric-tabular font-bold">144,51</span>
+<span class="font-body-sm text-secondary font-medium">IRL T3 2025</span>
+</div>
+<span class="font-body-sm text-on-surface-variant text-[11px]">Modèle en lecture seule. L'agent renseigne les variables d'instruction.</span>
+</div>
+<!-- Variable 4 -->
+<div class="p-space-sm bg-surface-container-high rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-secondary uppercase font-semibold">Montant révisé calculé</span>
+<div class="flex items-baseline justify-between">
+<span class="font-display text-[20px] text-primary font-numeric-tabular font-bold">799,25</span>
+<span class="font-label-md text-secondary font-semibold font-numeric-tabular">+19,25 €</span>
+</div>
+<span class="font-body-sm text-secondary text-[11px]">Hausse légale (+2,47 %)</span>
+</div>
+</div>
+<!-- Détails complémentaires -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-on-surface">Provisions sur charges</label>
+<div class="h-9 px-space-md rounded-lg bg-surface-container-low flex items-center justify-between">
+<span class="font-numeric-tabular text-on-surface font-semibold">95,00 € / mois</span>
+<span class="font-label-sm text-on-surface-variant">(Inchangées)</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-on-surface">Date d'effet applicable</label>
+<div class="h-9 px-space-md rounded-lg bg-surface-container-low flex items-center justify-between">
+<span class="font-numeric-tabular text-on-surface font-semibold">01/02/2025</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">calendar_today</span>
+</div>
+</div>
+</div>
+<!-- Champ mention libre / référence interne -->
+<div class="flex flex-col gap-1 pt-space-xs">
+<label class="font-label-md text-on-surface flex items-center justify-between" for="free-mention">
+<span class="">Mention personnalisée / Référence de bordereau interne</span>
+<span class="font-label-sm text-outline-variant font-normal">Optionnel</span>
+</label>
+<input class="h-9 px-space-md rounded-lg bg-surface-container-low text-on-surface font-body-sm focus:outline-none placeholder:text-outline" id="free-mention" placeholder="Ex. Visa DSF n° 2025-AFLC-8921 / Notification selon séance du CA" type="text" value="Visa administratif / Référence délibération DCM-2021-04">
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- COLONNE DROITE : Aperçu PDF & Validation   -->
+<!-- ========================================== -->
+<div class="lg:col-span-6 flex flex-col gap-space-md sticky top-20">
+<!-- Barre d'action de l'aperçu PDF -->
+<div class="bg-surface-container-lowest rounded-xl p-space-sm px-space-md shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-secondary text-[20px]">picture_as_pdf</span>
+<span class="font-label-md text-primary truncate">Notification_Revision_CTR-2021-084.pdf</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Zoom 100%" type="button">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Plein écran" type="button">
+<span class="material-symbols-outlined text-[18px]">fullscreen</span>
+</button>
+<button class="flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm transition-colors" title="Télécharger le projet PDF" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">download</span>
+<span class="hidden sm:inline">Projet PDF</span>
+</button>
+</div>
+</div>
+<!-- Rendu Document A4 Réaliste et Institutionnel -->
+<div class="bg-surface-container rounded-xl p-space-md shadow-sm overflow-hidden flex justify-center">
+<!-- Feuille A4 stylisée -->
+<div class="w-full max-w-[560px] bg-surface-container-lowest text-on-surface p-space-xl shadow-md rounded-lg flex flex-col justify-between font-body-sm min-h-[720px] select-text">
+<!-- Haut de page / En-tête officiel -->
+<div class="flex flex-col gap-space-md">
+<!-- Bandeau République / Collectivité -->
+<div class="flex items-start justify-between pb-space-sm border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<!-- Armoiries sobres SVG -->
+<div class="w-10 h-10 rounded bg-primary text-on-primary flex items-center justify-center font-bold">
+<svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+<path d="M12 2L3 7v9c0 5 9 8 9 8s9-3 9-8V7l-9-5zm0 2.2l7 3.9v7.9c0 3.7-6.2 6.2-7 6.6-.8-.4-7-2.9-7-6.6V8.1l7-3.9zM11 7h2v6h-2zm0 8h2v2h-2z"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm uppercase tracking-widest text-primary text-[10px] font-bold">Collectivité Territoriale</span>
+<span class="font-headline-sm text-primary text-[11px] leading-tight">Direction du Patrimoine &amp; de la Gestion Locative</span>
+<span class="font-body-sm text-[10px] text-outline">Service du Quittancement et des Baux</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-on-surface-variant text-[10px]">Date : 18/01/2025</span>
+<span class="font-label-sm text-secondary font-mono text-[10px] font-bold">Réf: PL-REV-2025-0142</span>
+</div>
+</div>
+<!-- Bloc Destinataire -->
+<div class="flex justify-end pt-space-xs">
+<div class="bg-surface-container-low rounded-lg p-space-sm w-64 text-[12px] flex flex-col gap-0.5">
+<span class="font-label-sm text-outline uppercase text-[10px]">Destinataires :</span>
+<span class="font-headline-sm text-primary font-semibold">M. Karim Benali</span>
+<span class="font-headline-sm text-primary font-semibold">Mme Sophie Benali</span>
+<span class="text-on-surface">12 Rue Clément Marot</span>
+<span class="font-numeric-tabular font-semibold">69002 LYON</span>
+</div>
+</div>
+<!-- Objet officiel -->
+<div class="bg-surface-container-high rounded p-space-xs px-space-sm text-[12px] flex flex-col gap-0.5">
+<span class="font-label-sm text-secondary uppercase text-[10px] font-bold">Objet :</span>
+<p class="font-body-sm text-primary font-medium text-[12px] leading-snug">
+                Notification officielle de révision de loyer en application de la clause contractuelle d'indexation (Bail n° CTR-2021-084)
+              </p>
+</div>
+<!-- Corps du texte -->
+<div class="flex flex-col gap-space-sm text-[12px] leading-relaxed text-on-surface">
+<p class="">Madame, Monsieur,</p>
+<p class="">
+                En vertu des stipulations du contrat de location susvisé pour le local d'habitation situé au <strong>12 Rue Clément Marot, 69002 Lyon</strong>, et conformément à l'article 17-1 de la Loi n° 89-462 du 6 juillet 1989, nous vous notifions la révision légale de votre indemnité locative.
+              </p>
+<!-- Tableau des calculs d'indices -->
+<div class="rounded-lg overflow-hidden bg-surface-container-low p-space-xs text-[11px]">
+<table class="w-full text-left font-numeric-tabular">
+<thead>
+<tr class="text-on-surface-variant font-label-sm uppercase border-b border-surface-container-highest">
+<th class="py-1 px-2">Élément de calcul</th>
+<th class="py-1 px-2 text-right">Valeur de réf.</th>
+<th class="py-1 px-2 text-right">Valeur révisée</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr>
+<td class="py-1 px-2 text-on-surface">Indice de Référence des Loyers (IRL)</td>
+<td class="py-1 px-2 text-right text-outline">141,03 (T3 2024)</td>
+<td class="py-1 px-2 text-right text-secondary font-semibold">144,51 (T3 2025)</td>
+</tr>
+<tr>
+<td class="py-1 px-2 text-on-surface">Loyer principal mensuel</td>
+<td class="py-1 px-2 text-right text-outline">780,00 €</td>
+<td class="py-1 px-2 text-right font-bold text-primary">799,25 €</td>
+</tr>
+<tr>
+<td class="py-1 px-2 text-on-surface">Provisions mensuelles sur charges</td>
+<td class="py-1 px-2 text-right text-outline">95,00 €</td>
+<td class="py-1 px-2 text-right font-bold text-primary">95,00 €</td>
+</tr>
+<tr class="bg-surface-container-high font-bold text-primary">
+<td class="py-1.5 px-2">Nouveau montant total exigible</td>
+<td class="py-1.5 px-2 text-right text-outline">875,00 €</td>
+<td class="py-1.5 px-2 text-right text-secondary text-[12px]">894,25 € / mois</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="text-[11px] text-on-surface-variant">
+                Cette indexation prendra effet à compter du <strong>1er février 2025</strong> et figurera sur votre prochain avis d'échéance.
+              </p>
+</div>
+</div>
+<!-- Bas de page & Signature -->
+<div class="flex flex-col gap-space-md pt-space-md border-t border-surface-container-high mt-space-md">
+<!-- Encadré Signature avec la mention stricte requise -->
+<div class="flex justify-between items-end">
+<div class="flex flex-col gap-0.5 text-[10px] text-outline max-w-[240px]">
+<span class="">Visa administratif</span>
+<span class="">Dispositions de l'art. 7-1 de la Loi du 6 juillet 1989.</span>
+</div>
+<!-- Bloc signature officiel avec la consigne spécifique -->
+<div class="w-60 bg-surface-container-low rounded-lg p-space-sm flex flex-col items-center justify-center text-center"><span class="font-label-sm text-primary uppercase text-[10px]">Pour le Gestionnaire Patrimonial</span><span class="font-body-sm text-[11px] font-medium text-on-surface">Modèle en lecture seule. L'agent renseigne les variables d'instruction.</span><div class="my-1.5 px-space-sm py-1 bg-surface-container rounded text-secondary font-label-sm text-[10px] flex items-center gap-1 font-semibold"><span class="material-symbols-outlined text-[14px]">lock_clock</span><span class="">Signature : Signature électronique — À confirmer</span></div></div>
+</div>
+<!-- Pied de page mentions légales micro -->
+<div class="text-center text-[9px] text-outline-variant tracking-wider uppercase">
+              Collectivité Territoriale • Hôtel de Ville • Gestion Locative &amp; Domaine Public M57
+            </div>
+</div>
+</div>
+</div>
+<!-- Actions de validation et archivage -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-space-md py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-label-md text-label-md" type="button">
+              Modifier les données
+            </button>
+<button class="flex-1 sm:flex-none px-space-md py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-label-md text-label-md" type="button">
+              Télécharger épreuve
+            </button>
+</div>
+<button class="w-full sm:w-auto flex items-center justify-center gap-space-xs px-space-lg py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary transition-colors font-label-md text-label-md shadow-md" type="button"><span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="">Générer le document &amp; Archiver</span></button>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant pt-space-xs">
+<span class="material-symbols-outlined text-[16px] text-secondary">info</span>
+<p class="font-body-sm text-[11px]">La génération produira un document officiel consigné dans le Centre documentaire (Réf. 17).</p>
+</div>
+</div>
+</div>
+</div>
+</div></main></div>
+
+
+
+
+
+</body></html>

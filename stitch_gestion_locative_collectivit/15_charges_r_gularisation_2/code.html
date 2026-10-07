@@ -1,0 +1,652 @@
+<!DOCTYPE html><html lang="fr" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"inverse-surface":"#213145","on-tertiary-fixed":"#0d1c2e","tertiary-fixed":"#d5e3fc","on-primary-fixed":"#00184a","on-tertiary-fixed-variant":"#3a485b","tertiary":"#0b1a2c","surface-container":"#e5eeff","on-surface-variant":"#444650","surface-dim":"#cbdbf5","inverse-primary":"#b3c5ff","secondary-container":"#316bf3","surface-bright":"#f8f9ff","outline-variant":"#c5c6d1","on-primary-container":"#7e93d5","on-primary":"#ffffff","tertiary-container":"#212f41","surface":"#f8f9ff","on-secondary-fixed-variant":"#003ea8","on-error-container":"#93000a","secondary":"#0051d5","surface-container-highest":"#d3e4fe","on-secondary-container":"#fefcff","surface-container-high":"#dce9ff","surface-container-low":"#eff4ff","surface-tint":"#465c9a","surface-variant":"#d3e4fe","secondary-fixed-dim":"#b4c5ff","outline":"#757681","error-container":"#ffdad6","on-surface":"#0b1c30","tertiary-fixed-dim":"#b9c7df","on-tertiary-container":"#8897ad","on-secondary-fixed":"#00174b","primary":"#001645","on-error":"#ffffff","on-background":"#0b1c30","primary-container":"#0f2a66","surface-container-lowest":"#ffffff","primary-fixed-dim":"#b3c5ff","background":"#f8f9ff","on-tertiary":"#ffffff","secondary-fixed":"#dbe1ff","on-secondary":"#ffffff","inverse-on-surface":"#eaf1ff","primary-fixed":"#dbe1ff","error":"#ba1a1a","on-primary-fixed-variant":"#2d4480"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"gutter-desktop":"1.5rem","space-lg":"1.25rem","gutter":"1rem","space-xs":"0.25rem","space-sm":"0.5rem","space-md":"0.75rem","margin-desktop":"2rem","margin":"1rem","space-xl":"2rem"},"fontFamily":{"body-lg":["Inter"],"display":["Inter"],"label-md":["Inter"],"headline-md":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"numeric-tabular":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"]},"fontSize":{"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"display":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["15px",{"lineHeight":"20px","fontWeight":"600"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}],"numeric-tabular":["13px",{"lineHeight":"18px","fontWeight":"500"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-md flex items-center gap-space-sm bg-surface-container-low"><div class="p-1 bg-surface-container-lowest rounded-lg shadow-sm flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary truncate leading-tight">PATRIMOINE</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Collectivité Territoriale</span></div></div><div class="px-space-md py-space-xs"><div class="bg-surface-container-high px-space-sm py-1 rounded-lg flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Exercice budgétaire</span><span class="font-numeric-tabular text-numeric-tabular text-primary font-bold">2025 (M57)</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-0.5 overflow-y-auto" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><div class="px-space-sm pt-space-xs pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Gestion opérationnelle</div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="tableau-de-bord" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="font-body-md text-body-md">Tableau de bord</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="biens" href="#"><span class="material-symbols-outlined text-[18px]">apartment</span><span class="font-body-md text-body-md">Biens &amp; Locaux</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="contractants" href="#"><span class="material-symbols-outlined text-[18px]">group</span><span class="font-body-md text-body-md">Contractants</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="contrats" href="#"><span class="material-symbols-outlined text-[18px]">history_edu</span><span class="font-body-md text-body-md">Contrats &amp; Baux</span></a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Finances &amp; Quittancement</div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="echeancier" href="#"><span class="material-symbols-outlined text-[18px]">event_upcoming</span><span class="font-body-md text-body-md">Échéancier</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="campagne-mensuelle" href="#"><span class="material-symbols-outlined text-[18px]">fact_check</span><span class="font-body-md text-body-md">Campagne mensuelle</span></a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Pilotage &amp; Contrôle</div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="documents" href="#"><span class="material-symbols-outlined text-[18px]">folder_shared</span><span class="font-body-md text-body-md">Documents</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="alertes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">notifications_active</span><span class="font-body-md text-body-md">Alertes</span></div><span class="bg-error text-on-error font-label-sm text-label-sm px-1.5 py-0.2 rounded-full">4</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="etats-et-statistiques" href="#"><span class="material-symbols-outlined text-[18px]">analytics</span><span class="font-body-md text-body-md">États &amp; Statistiques</span></a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Configuration</div><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="referentiels" href="#"><span class="material-symbols-outlined text-[18px]">rule</span><span class="font-body-md text-body-md">Référentiels</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="administration" href="#"><span class="material-symbols-outlined text-[18px]">shield</span><span class="font-body-md text-body-md">Administration</span></a></nav></div><div class="p-space-sm bg-surface-container-low"><div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Connexion sécurisée</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Entra ID</span></div><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Interface financière — À spécifier</span></div></div></aside><div class="pl-64 min-h-screen flex flex-col bg-background"><header class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md min-w-0 flex-1"><img alt="Logo Patrimoine &amp; Gestion Locative" class="h-8 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WJKHnStnPPGPPQL9lIow5Lpt7vBkhC7L_hsdzww11dvfRdxZ-bdMeUh41Nea5tdeNcgqrxr6y2itALDkh6un2SHFHRBSWz5VOtpNRiejHu7iDxbmdP98TnD7Z6JEJcnOcjVALlHIA2Hwx6-On1qUFfWY84S8Yna3jti01mu2cm07d0Xxro_A9zA3jhXqEkPf20VdcvFkkFoSN5GE5-jNVxCLvGx8XUGVU1abnm2-zhkQ"><div class="hidden xl:flex flex-col min-w-0 pr-space-md"><span class="font-headline-sm text-headline-sm text-primary truncate leading-tight">Collectivité Territoriale</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Direction du Patrimoine &amp; Gestion Locative</span></div><div class="relative max-w-lg w-full"><span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full h-8 pl-8 pr-12 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest shadow-inner" placeholder="Rechercher un contrat, un locataire, une référence cadastrale..." type="text"><span class="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] font-label-sm font-semibold bg-surface-container-highest text-on-surface-variant">⌘K</span></div></div><div class="flex items-center gap-space-md flex-shrink-0"><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-outline">history</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Récents :</span><a class="hover:text-primary transition-colors hover:underline" href="#">BAIL-2024-089</a><span class="text-outline-variant">•</span><a class="hover:text-primary transition-colors hover:underline" href="#">Plein Sud SAS</a></div><a class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#" title="Centre des alertes juridiques et financières"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></a><div class="flex items-center gap-space-sm pl-space-sm"><div class="flex flex-col items-end text-right hidden lg:flex"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">M. Laurent D.</span><span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative (Entra ID)</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 pt-14 bg-background w-full px-margin-desktop py-space-md"><div class="flex flex-col w-full space-y-space-md">
+<!-- Fil d'Ariane & Alerte institutionnelle de frontière comptable -->
+<div class="flex flex-col gap-space-xs">
+<nav aria-label="Fil d'Ariane" class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<a class="hover:text-primary transition-colors" href="#">Accueil</a>
+<span class="text-outline-variant">/</span>
+<a class="hover:text-primary transition-colors" href="#">Finances &amp; Quittancement</a>
+<span class="text-outline-variant">/</span>
+<span class="font-headline-sm text-primary font-semibold">Charges &amp; Régularisation</span>
+</nav>
+<!-- Bandeau institutionnel d'avertissement réglementaire & DSF -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm flex items-start gap-space-md">
+<span class="material-symbols-outlined text-[20px] text-secondary flex-shrink-0 mt-0.5">account_balance_wallet</span>
+<div class="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-space-sm min-w-0">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Frontière de responsabilité de gestion locative</span>
+<p class="font-body-md text-body-md text-on-surface mt-0.5">La présente régularisation constitue une opération stricte de <strong class="font-semibold text-primary">GESTION LOCATIVE</strong>. Suite financière — À spécifier avec DSF / FILIEN-SEDIT.</p>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0 self-start md:self-auto bg-surface-container-lowest px-space-sm py-1 rounded shadow-sm text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px] text-outline">verified_user</span>
+<span class="">Nomenclature M57 • Exercice 2024</span>
+</div>
+</div>
+</div>
+</div>
+<!-- En-tête de module & Actions principales -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Gestion des charges locatives &amp; Régularisation annuelle</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+        Exercice de clôture des charges 2024 • Rapprochement certifié des provisions appelées et dépenses réelles justifiées.
+      </p>
+</div>
+<!-- Boutons d'action métier -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<button class="h-9 px-space-md rounded bg-surface-container-lowest text-primary hover:bg-surface-container-low transition-colors shadow-sm font-label-md text-label-md flex items-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">cloud_download</span>
+<span class="">Importer dépenses réelles (Chorus/M57)</span>
+</button>
+<button class="h-9 px-space-md rounded bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors shadow-sm font-label-md text-label-md flex items-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[18px]">table_view</span>
+<span class="">Exporter état comparatif (Excel)</span>
+</button>
+<button class="h-9 px-space-md rounded bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-md text-label-md flex items-center gap-space-xs" id="btn-recalculer" type="button">
+<span class="material-symbols-outlined text-[18px]">calculate</span>
+<span class="">Lancer le calcul de régularisation</span>
+</button>
+</div>
+</div>
+<!-- Onglets de navigation dans le module -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm px-space-md pt-2 flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md overflow-x-auto">
+<button class="pb-2.5 px-1 font-headline-sm text-headline-sm text-primary font-semibold flex items-center gap-2 shadow-[0_2px_0_0_#001645] flex-shrink-0" type="button">
+<span class="">1. Régularisation par contrat / bien</span>
+<span class="bg-surface-container text-primary font-label-sm text-label-sm px-1.5 py-0.5 rounded-full">5 dossiers</span>
+</button>
+<button class="pb-2.5 px-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 flex-shrink-0" type="button">
+<span class="">2. Dépenses réelles par immeuble &amp; lot</span>
+<span class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm px-1.5 py-0.5 rounded-full">32 lignes</span>
+</button>
+<button class="pb-2.5 px-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 flex-shrink-0" type="button">
+<span class="">3. Clés de répartition &amp; Tantièmes</span>
+</button>
+<button class="pb-2.5 px-1 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 flex-shrink-0" type="button">
+<span class="">4. Historique des exercices</span>
+</button>
+</div>
+<div class="hidden xl:flex items-center gap-space-sm pb-2 text-on-surface-variant font-label-sm text-label-sm flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="">Base de calcul consolidée au 31/12/2024</span>
+</div>
+</div>
+<!-- SECTION 1 — PARAMÈTRES ET CLÉS DE RÉPARTITION (Synthèse de cadrage) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Carte 1 : Clés reconnues -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Référentiel Territorial</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">pie_chart</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mt-1">Clés de répartition</h2>
+<div class="mt- space-y-1 font-body-sm text-body-sm text-on-surface">
+<div class="flex justify-between items-center py-0.5">
+<span class="text-on-surface-variant">Surface habitable :</span>
+<span class="font-numeric-tabular font-medium">m² cadastrés / lot</span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-on-surface-variant">Tantièmes copropriété :</span>
+<span class="font-numeric-tabular font-medium">1 / 1 000es &amp; 10 000es</span>
+</div>
+<div class="flex justify-between items-center py-0.5">
+<span class="text-on-surface-variant">Affectation spécifique :</span>
+<span class="font-numeric-tabular font-medium">% d'occupation bail</span>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low px-2 py-1 rounded text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span class="">4 protocoles de calcul audités</span>
+</div>
+</div>
+<!-- Carte 2 : Périmètre d'imputation -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Imputation budgétaire</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">domain</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mt-1">Bâtiment vs Bien privatif</h2>
+<div class="mt- space-y-1 font-body-sm text-body-sm text-on-surface">
+<div class="flex items-start gap-1.5 py-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0"></span>
+<span class=""><strong class="font-medium text-primary">Charges globales Bâtiment :</strong> Chauffage urbain, ascenseur, entretien commun.</span>
+</div>
+<div class="flex items-start gap-1.5 py-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0"></span>
+<span class=""><strong class="font-medium text-secondary">Charges directes Bien :</strong> Télérelève eau, TEOM récupérable.</span>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low px-2 py-1 rounded text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">checklist</span>
+<span class="">Ventilation M57 chap. 011 / 703</span>
+</div>
+</div>
+<!-- Carte 3 : Prorata temporis -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Règle d'équité</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">date_range</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mt-1">Prorata temporis exact</h2>
+<p class="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          Calcul au jour près pour les entrées / départs en cours d'exercice. Prise en compte stricte des dates d'états des lieux contradictoires.
+        </p>
+<div class="mt-2 flex items-center gap-2">
+<div class="flex-1 bg-surface-container-high rounded h-1.5 overflow-hidden">
+<div class="bg-secondary h-full" style="width: 82%"></div>
+</div>
+<span class="font-numeric-tabular text-numeric-tabular font-bold text-primary">82%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">taux d'occupation</span>
+</div>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low px-2 py-1 rounded text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span class="">Base légale 365/366 jours civils</span>
+</div>
+</div>
+<!-- Carte 4 : Bilan financier d'exercice -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Bilan Régularisation</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">balance</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-primary mt-1">Synthèse de clôture 2024</h2>
+<div class="mt-2 grid grid-cols-2 gap-2">
+<div class="bg-surface-container-low p-1.5 rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Provisions</span>
+<span class="font-numeric-tabular text-headline-sm text-primary font-bold">14 260,00 €</span>
+</div>
+<div class="bg-surface-container-low p-1.5 rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Réel attribuable</span>
+<span class="font-numeric-tabular text-headline-sm text-primary font-bold">14 394,20 €</span>
+</div>
+</div>
+</div>
+<div class="mt-3 flex items-center justify-between pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Écart global constaté :</span>
+<span class="font-numeric-tabular text-body-md font-bold text-secondary bg-surface-container px-2 py-0.5 rounded">
+          + 134,20 € (Solde débiteur)
+        </span>
+</div>
+</div>
+</div>
+<!-- SECTION 2 & 3 — DISPOSITION PRINCIPALE BENTO (Tableau de travail + Panneau explicatif) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md items-start">
+<!-- Colonne Principale : Tableau de travail des régularisations par contrat (8 ou 9 colonnes sur 12) -->
+<div class="xl:col-span-8 bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden flex flex-col">
+<!-- En-tête du tableau avec filtres rapides -->
+<div class="p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-primary font-semibold">Dossiers de régularisation 2024</span>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded">5 contrats sous convention</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<!-- Filtre statut -->
+<div class="flex items-center bg-surface-container-lowest rounded px-2 py-1 shadow-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-outline mr-1">filter_alt</span>
+<select aria-label="Filtrer par statut de vérification" class="bg-transparent text-body-sm font-body-sm text-on-surface focus:outline-none cursor-pointer">
+<option>Tous les statuts (5)</option>
+<option>Calcul vérifié (3)</option>
+<option>Facture manquante (1)</option>
+<option>Attente syndic (1)</option>
+</select>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container-highest transition-colors" title="Rafraîchir les calculs" type="button">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Table des données denses -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-md text-body-md">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider h-9">
+<th class="px-space-md py-2" scope="col">Contrat &amp; Preneur</th>
+<th class="px-space-sm py-2" scope="col">Bien &amp; Lot</th>
+<th class="px-space-sm py-2" scope="col">Période / Prorata</th>
+<th class="px-space-sm py-2 text-right" scope="col">Provisions appelées</th>
+<th class="px-space-sm py-2 text-right" scope="col">Dépenses réelles</th>
+<th class="px-space-sm py-2 text-right" scope="col">Écart (Différence)</th>
+<th class="px-space-sm py-2" scope="col">Proposition</th>
+<th class="px-space-sm py-2" scope="col">Statut</th>
+<th class="px-space-md py-2 text-center" scope="col">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high/60">
+<!-- Ligne 1 : CTR-2021-084 (Cas détaillé sélectionné) -->
+<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-low/40 cursor-pointer" onclick="afficherDetail('CTR-2021-084')">
+<td class="px-space-md py-2.5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-secondary rounded-full flex-shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-numeric-tabular font-bold text-primary">CTR-2021-084</span>
+<span class="text-on-surface font-medium truncate">M. Karim Benali</span>
+</div>
+</div>
+</td>
+<td class="px-space-sm py-2.5 text-on-surface">
+<div class="flex flex-col min-w-0">
+<span class="truncate font-medium">Apt T4 - Résidence Saint-Clément</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">Bât. B • 82,5 m² (72/1000e)</span>
+</div>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="font-numeric-tabular text-body-sm text-on-surface">365 j / 365 j</span>
+<span class="block text-on-surface-variant font-label-sm text-label-sm">Année complète</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-primary">1 140,00 €</span>
+<span class="block text-on-surface-variant text-[11px]">(95,00 € × 12)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold">1 138,40 €</span>
+<span class="block text-on-surface-variant text-[11px]">Justifié (3 fact.)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-semibold bg-surface-container text-primary">
+                  - 1,60 €
+                </span>
+<span class="block text-on-surface-variant text-[10px]">Crédit preneur</span>
+</td>
+<td class="px-space-sm py-2.5">
+<span class="font-body-sm text-body-sm text-on-surface block font-medium">Report prochaine éch.</span>
+<span class="text-on-surface-variant text-[11px]">Avis échéance 02/2025</span>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-primary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Calcul vérifié
+                </span>
+</td>
+<td class="px-space-md py-2.5 text-center whitespace-nowrap">
+<button class="p-1 rounded text-primary hover:bg-surface-container-high transition-colors" title="Consulter la fiche explicative" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 2 : CTR-2022-110 (Cas Prorata & Trop-perçu notable) -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="afficherDetail('CTR-2022-110')">
+<td class="px-space-md py-2.5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-transparent rounded-full flex-shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-numeric-tabular font-bold text-primary">CTR-2022-110</span>
+<span class="text-on-surface font-medium truncate">SARL BuroServices</span>
+</div>
+</div>
+</td>
+<td class="px-space-sm py-2.5 text-on-surface">
+<div class="flex flex-col min-w-0">
+<span class="truncate font-medium">Local commercial RDC</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">14 rue République • 110 m²</span>
+</div>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="font-numeric-tabular text-body-sm text-on-surface">214 j / 365 j</span>
+<span class="block text-secondary font-label-sm text-label-sm font-semibold">Prorata entrée 01/06</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-primary">1 680,00 €</span>
+<span class="block text-on-surface-variant text-[11px]">(240,00 € × 7)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold">1 568,40 €</span>
+<span class="block text-on-surface-variant text-[11px]">Quote-part 58,6%</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-semibold bg-surface-container-high text-primary">
+                  - 111,60 €
+                </span>
+<span class="block text-on-surface-variant text-[10px]">Trop-perçu ville</span>
+</td>
+<td class="px-space-sm py-2.5">
+<span class="font-body-sm text-body-sm text-on-surface block font-medium">Report prochaine éch.</span>
+<span class="text-on-surface-variant text-[11px]">Déduction auto</span>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-primary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Calcul vérifié
+                </span>
+</td>
+<td class="px-space-md py-2.5 text-center whitespace-nowrap">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" title="Consulter le détail" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 3 : CTR-2018-019 (Cas Débit preneur / Complément dû important) -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="afficherDetail('CTR-2018-019')">
+<td class="px-space-md py-2.5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-transparent rounded-full flex-shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-numeric-tabular font-bold text-primary">CTR-2018-019</span>
+<span class="text-on-surface font-medium truncate">Assoc. Jeunesse &amp; Loisirs</span>
+</div>
+</div>
+</td>
+<td class="px-space-sm py-2.5 text-on-surface">
+<div class="flex flex-col min-w-0">
+<span class="truncate font-medium">Salle polyvalente Les Pins</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">Lot municipal B12 • 230 m²</span>
+</div>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="font-numeric-tabular text-body-sm text-on-surface">365 j / 365 j</span>
+<span class="block text-on-surface-variant font-label-sm text-label-sm">Année complète</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-primary">3 600,00 €</span>
+<span class="block text-on-surface-variant text-[11px]">(300,00 € × 12)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold">3 845,80 €</span>
+<span class="block text-on-surface-variant text-[11px]">Gaz + Réseau chaleur</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-semibold bg-surface-container text-secondary">
+                  + 245,80 €
+                </span>
+<span class="block text-on-surface-variant text-[10px]">Complément dû</span>
+</td>
+<td class="px-space-sm py-2.5">
+<span class="font-body-sm text-body-sm text-secondary block font-semibold">Étalement 3 échéances</span>
+<span class="text-on-surface-variant text-[11px]">81,93 € / mois</span>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-high text-primary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Calcul vérifié
+                </span>
+</td>
+<td class="px-space-md py-2.5 text-center whitespace-nowrap">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" title="Consulter le détail" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 4 : CTR-2023-014 (Cas Facture eau manquante) -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="afficherDetail('CTR-2023-014')">
+<td class="px-space-md py-2.5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-transparent rounded-full flex-shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-numeric-tabular font-bold text-primary">CTR-2023-014</span>
+<span class="text-on-surface font-medium truncate">M. Thomas Renaud</span>
+</div>
+</div>
+</td>
+<td class="px-space-sm py-2.5 text-on-surface">
+<div class="flex flex-col min-w-0">
+<span class="truncate font-medium">Pavillon municipal parc Est</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">Lot C01 • 98 m²</span>
+</div>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="font-numeric-tabular text-body-sm text-on-surface">365 j / 365 j</span>
+<span class="block text-on-surface-variant font-label-sm text-label-sm">Année complète</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-primary">1 440,00 €</span>
+<span class="block text-on-surface-variant text-[11px]">(120,00 € × 12)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-outline">En attente</span>
+<span class="block text-on-surface-variant text-[11px]">Partielle</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-medium bg-surface-container-high text-on-surface-variant">
+                  Indéterminé
+                </span>
+<span class="block text-on-surface-variant text-[10px]">Index 4T manquant</span>
+</td>
+<td class="px-space-sm py-2.5">
+<span class="font-body-sm text-body-sm text-on-surface-variant block">En suspend</span>
+<span class="text-on-surface-variant text-[11px]">Relance DSF Eau</span>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  Facture eau manquante
+                </span>
+</td>
+<td class="px-space-md py-2.5 text-center whitespace-nowrap">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" title="Consulter le détail" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 5 : CTR-2025-012 (Cas Attente quitus syndic copropriété) -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="afficherDetail('CTR-2025-012')">
+<td class="px-space-md py-2.5">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-transparent rounded-full flex-shrink-0"></span>
+<div class="flex flex-col min-w-0">
+<span class="font-numeric-tabular font-bold text-primary">CTR-2025-012</span>
+<span class="text-on-surface font-medium truncate">Cabinet Médical Pasteur</span>
+</div>
+</div>
+</td>
+<td class="px-space-sm py-2.5 text-on-surface">
+<div class="flex flex-col min-w-0">
+<span class="truncate font-medium">Bureau 102 - Centre Tertiaire</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm truncate">Copropriété Saint-Honoré • 64 m²</span>
+</div>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="font-numeric-tabular text-body-sm text-on-surface">365 j / 365 j</span>
+<span class="block text-on-surface-variant font-label-sm text-label-sm">Année complète</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-primary">2 100,00 €</span>
+<span class="block text-on-surface-variant text-[11px]">(175,00 € × 12)</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular text-on-surface whitespace-nowrap">
+<span class="font-semibold text-outline">En attente AG</span>
+<span class="block text-on-surface-variant text-[11px]">Arrêté fin mars</span>
+</td>
+<td class="px-space-sm py-2.5 text-right font-numeric-tabular whitespace-nowrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-medium bg-surface-container-high text-on-surface-variant">
+                  Provisoire
+                </span>
+<span class="block text-on-surface-variant text-[10px]">Appel fonds n°4</span>
+</td>
+<td class="px-space-sm py-2.5">
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Gel temporaire</span>
+<span class="text-on-surface-variant text-[11px]">En attente AG</span>
+</td>
+<td class="px-space-sm py-2.5 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  Attente quitus syndic
+                </span>
+</td>
+<td class="px-space-md py-2.5 text-center whitespace-nowrap">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" title="Consulter le détail" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Bas de tableau & Synthèse de pagination -->
+<div class="px-space-md py-2 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between text-on-surface-variant font-label-sm text-label-sm gap-2">
+<div class="flex items-center gap-2">
+<span class="">Affichage de 5 dossiers sur 5 éligibles à la régularisation annuelle 2024</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface font-medium">Total écarts nets :</span>
+<span class="font-numeric-tabular font-bold text-secondary bg-surface-container-lowest px-2 py-0.5 rounded shadow-sm">
+            + 132,60 € (sur dossiers vérifiés)
+          </span>
+</div>
+</div>
+</div>
+<!-- SECTION 3 — PANNEAU DÉTAIL D'UN CALCUL EXPLICABLE (Dossier CTR-2021-084) -->
+<div class="xl:col-span-4 bg-surface-container-lowest rounded-lg shadow-sm flex flex-col overflow-hidden">
+<!-- En-tête du volet explicatif -->
+<div class="p-space-md bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-secondary text-[20px]">description</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Fiche explicative usager</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold truncate">Dossier CTR-2021-084</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+          Conforme
+        </span>
+</div>
+<!-- Corps du panneau : Décomposition pédagogique des charges -->
+<div class="p-space-md space-y-space-md">
+<!-- Informations d'identité du bail -->
+<div class="bg-surface-container-low p-space-sm rounded text-on-surface font-body-sm text-body-sm space-y-1">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Preneur :</span>
+<span class="font-medium text-primary">M. Karim Benali</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Bien rattaché :</span>
+<span class="font-medium">Apt T4 • Rés. Saint-Clément Bât. B</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Période d'occupation :</span>
+<span class="font-numeric-tabular">01/01/2024 au 31/12/2024 (365 j)</span>
+</div>
+</div>
+<!-- Décomposition des postes de charges réelles -->
+<div>
+<div class="flex items-center justify-between pb-1 text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Postes de dépenses imputés</span>
+<span class="font-label-sm text-label-sm">Quote-part preneur</span>
+</div>
+<div class="space-y-2 mt-2">
+<!-- Poste 1 : Chauffage réseau biomasse -->
+<div class="p-2.5 rounded bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-semibold text-primary">Chauffage urbain biomasse</span>
+<span class="font-numeric-tabular font-bold text-primary">892,80 €</span>
+</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Dépense globale bât. : 12 400,00 €</span>
+<span class="bg-surface-container-high px-1.5 py-0.5 rounded font-mono">Clé : 72 / 1 000e</span>
+</div>
+<div class="mt-1 text-[11px] text-on-surface-variant">
+                12 400,00 € × (72 / 1000) × (365 / 365)
+              </div>
+</div>
+<!-- Poste 2 : Ascenseur & Parties communes -->
+<div class="p-2.5 rounded bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-semibold text-primary">Ascenseur &amp; Communs</span>
+<span class="font-numeric-tabular font-bold text-primary">135,60 €</span>
+</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Dépense globale bât. : 3 200,00 €</span>
+<span class="bg-surface-container-high px-1.5 py-0.5 rounded font-mono">Clé : 42 / 1 000e</span>
+</div>
+<div class="mt-1 text-[11px] text-on-surface-variant">
+                3 200,00 € × (42 / 1000) × (365 / 365)
+              </div>
+</div>
+<!-- Poste 3 : TEOM Récupérable -->
+<div class="p-2.5 rounded bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-semibold text-primary">TEOM récupérable</span>
+<span class="font-numeric-tabular font-bold text-primary">110,00 €</span>
+</div>
+<div class="flex items-center justify-between mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="">Avis taxe foncière 2024</span>
+<span class="bg-surface-container-high px-1.5 py-0.5 rounded font-mono">Imputation directe</span>
+</div>
+<div class="mt-1 text-[11px] text-on-surface-variant">
+                Quote-part ordures ménagères avis n°TF-2024-91
+              </div>
+</div>
+</div>
+</div>
+<!-- Rapprochement synthétique final -->
+<div class="bg-surface-container-high p-space-md rounded-lg space-y-2">
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Total dépenses imputables :</span>
+<span class="font-numeric-tabular font-semibold text-on-surface">1 138,40 €</span>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Total provisions versées (N) :</span>
+<span class="font-numeric-tabular font-semibold text-on-surface">1 140,00 €</span>
+</div>
+<div class="pt-2 flex items-center justify-between bg-surface-container-lowest p-2 rounded shadow-sm">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Solde de régularisation :</span>
+<span class="font-numeric-tabular text-headline-sm font-bold text-secondary">
+              - 1,60 €
+            </span>
+</div>
+<span class="block text-center font-label-sm text-label-sm text-on-surface-variant">
+            Trop-perçu en faveur du preneur • Proposition : Report sur quittance février 2025
+          </span>
+</div>
+<!-- Ajustement des provisions N+1 -->
+<div class="bg-surface-container-low p-space-sm rounded">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Ajustement provisions N+1 (2025)</span>
+<span class="font-numeric-tabular text-body-sm font-bold text-primary">94,87 € / mois</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Proposition de réajustement mensuel basé sur le réel 2024 (1 138,40 € ÷ 12) pour éviter tout écart futur.
+          </p>
+</div>
+<!-- Actions de validation du dossier -->
+<div class="flex items-center gap-space-sm pt-1">
+<button class="flex-1 h-8 rounded bg-primary text-on-primary hover:bg-primary-container transition-colors text-label-md font-label-md flex items-center justify-center gap-1 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span class="">Éditer note usager (PDF)</span>
+</button>
+<button class="h-8 px-2 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors text-label-md font-label-md flex items-center justify-center" title="Ajuster la proposition" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Note institutionnelle de fin d'écran -->
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm py-1 px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-outline">info</span>
+<span class="">Les états détaillés sont archivés au dossier technique du bâtiment conformément aux prescriptions de l'instruction comptable M57.</span>
+</div>
+<span class="font-numeric-tabular">Application Gestion Locative v4.12 • Régularisation locative conforme</span>
+</div>
+<!-- Micro-interactions JS légères pour la démonstration -->
+<script>
+    function afficherDetail(codeContrat) {
+      // Met en valeur la ligne sélectionnée
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        r.classList.remove('bg-surface-container-low/40');
+      });
+      event.currentTarget.classList.add('bg-surface-container-low/40');
+    }
+
+    document.getElementById('btn-recalculer')?.addEventListener('click', function() {
+      const btn = this;
+      const initialText = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span><span>Calcul des tantièmes en cours...</span>';
+      setTimeout(() => {
+        btn.innerHTML = initialText;
+      }, 700);
+    });
+  </script>
+</div></main></div>
+
+
+</body></html>

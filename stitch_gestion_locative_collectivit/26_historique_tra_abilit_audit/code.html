@@ -1,0 +1,668 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"inverse-surface":"#213145","on-tertiary-fixed":"#0d1c2e","tertiary-fixed":"#d5e3fc","on-primary-fixed":"#00184a","on-tertiary-fixed-variant":"#3a485b","tertiary":"#0b1a2c","surface-container":"#e5eeff","on-surface-variant":"#444650","surface-dim":"#cbdbf5","inverse-primary":"#b3c5ff","secondary-container":"#316bf3","surface-bright":"#f8f9ff","outline-variant":"#c5c6d1","on-primary-container":"#7e93d5","on-primary":"#ffffff","tertiary-container":"#212f41","surface":"#f8f9ff","on-secondary-fixed-variant":"#003ea8","on-error-container":"#93000a","secondary":"#0051d5","surface-container-highest":"#d3e4fe","on-secondary-container":"#fefcff","surface-container-high":"#dce9ff","surface-container-low":"#eff4ff","surface-tint":"#465c9a","surface-variant":"#d3e4fe","secondary-fixed-dim":"#b4c5ff","outline":"#757681","error-container":"#ffdad6","on-surface":"#0b1c30","tertiary-fixed-dim":"#b9c7df","on-tertiary-container":"#8897ad","on-secondary-fixed":"#00174b","primary":"#001645","on-error":"#ffffff","on-background":"#0b1c30","primary-container":"#0f2a66","surface-container-lowest":"#ffffff","primary-fixed-dim":"#b3c5ff","background":"#f8f9ff","on-tertiary":"#ffffff","secondary-fixed":"#dbe1ff","on-secondary":"#ffffff","inverse-on-surface":"#eaf1ff","primary-fixed":"#dbe1ff","error":"#ba1a1a","on-primary-fixed-variant":"#2d4480"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"gutter-desktop":"1.5rem","space-lg":"1.25rem","gutter":"1rem","space-xs":"0.25rem","space-sm":"0.5rem","space-md":"0.75rem","margin-desktop":"2rem","margin":"1rem","space-xl":"2rem"},"fontFamily":{"body-lg":["Inter"],"display":["Inter"],"label-md":["Inter"],"headline-md":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"numeric-tabular":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"]},"fontSize":{"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"display":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["15px",{"lineHeight":"20px","fontWeight":"600"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}],"numeric-tabular":["13px",{"lineHeight":"18px","fontWeight":"500"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-md flex items-center gap-space-sm bg-surface-container-low"><div class="p-1 bg-surface-container-lowest rounded-lg shadow-sm flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[20px]">account_balance</span></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary truncate leading-tight">PATRIMOINE</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Collectivité Territoriale</span></div></div><div class="px-space-md py-space-xs"><div class="bg-surface-container-high px-space-sm py-1 rounded-lg flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Exercice budgétaire</span><span class="font-numeric-tabular text-numeric-tabular text-primary font-bold">2025 (M57)</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-0.5 overflow-y-auto" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><div class="px-space-sm pt-space-xs pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Gestion opérationnelle</div><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="tableau-de-bord" href="#">Tableau de bord</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="biens" href="#">Biens &amp; Locaux</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="contractants" href="#">Contractants</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="contrats" href="#">Contrats &amp; Baux</a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Finances &amp; Quittancement</div><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="12-echeancier" href="#">Échéancier</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="15-charges-regularisation" href="#">Charges &amp; Régularisation</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="campagne-mensuelle" href="#">Campagne mensuelle</a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Pilotage, Documents &amp; Audit</div><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="17-centre-documentaire" href="#">Centre documentaire</a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="19-centre-des-alertes" href="#"><span class="">Centre des alertes</span><span class="bg-error text-on-error font-label-sm text-label-sm px-1.5 py-0.5 rounded-full font-bold">4</span></a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="22-recherche-globale" href="#">Recherche globale</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="26-historique-tracabilite-audit" href="#">Historique &amp; Traçabilité / Audit</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="etats-et-statistiques" href="#">États &amp; Statistiques</a><div class="px-space-sm pt-space-sm pb-0.5 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Configuration</div><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="referentiels" href="#">Référentiels</a><a class="flex items-center px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="administration" href="#">Administration</a></nav></div><div class="p-space-sm bg-surface-container-low"><div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Connexion sécurisée</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Entra ID</span></div><span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Sécurité &amp; Traçabilité : À spécifier avec DSI / RSSI</span></div></div></aside><div class="pl-64 min-h-screen flex flex-col bg-background"><header class="fixed top-0 left-64 right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md min-w-0 flex-1"><img alt="Logo Patrimoine &amp; Gestion Locative" class="h-8 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WJKHnStnPPGPPQL9lIow5Lpt7vBkhC7L_hsdzww11dvfRdxZ-bdMeUh41Nea5tdeNcgqrxr6y2itALDkh6un2SHFHRBSWz5VOtpNRiejHu7iDxbmdP98TnD7Z6JEJcnOcjVALlHIA2Hwx6-On1qUFfWY84S8Yna3jti01mu2cm07d0Xxro_A9zA3jhXqEkPf20VdcvFkkFoSN5GE5-jNVxCLvGx8XUGVU1abnm2-zhkQ"><div class="hidden xl:flex flex-col min-w-0 pr-space-md"><span class="font-headline-sm text-headline-sm text-primary truncate leading-tight">Collectivité Territoriale</span><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Direction du Patrimoine &amp; Gestion Locative</span></div><a class="relative max-w-lg w-full flex items-center" data-path="22-recherche-globale" href="#"><span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">search</span><input class="w-full h-8 pl-8 pr-12 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest shadow-inner cursor-pointer" placeholder="Rechercher un contrat, un locataire, une référence cadastrale..." readonly="readonly" type="text"><span class="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded text-[10px] font-label-sm font-semibold bg-surface-container-highest text-on-surface-variant pointer-events-none">⌘K</span></a></div><div class="flex items-center gap-space-md flex-shrink-0"><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-outline">history</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Récents :</span><a class="hover:text-primary transition-colors hover:underline" href="#">BAIL-2024-089</a><span class="text-outline-variant">•</span><a class="hover:text-primary transition-colors hover:underline" href="#">Plein Sud SAS</a></div><a class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors flex items-center justify-center" data-path="19-centre-des-alertes" href="#" title="Centre des alertes juridiques et financières"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></a><a class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors flex items-center justify-center" data-path="26-historique-tracabilite-audit" href="#" title="Journal d'audit &amp; Traçabilité"><span class="material-symbols-outlined text-[20px]">manage_history</span></a><div class="flex items-center gap-space-sm pl-space-sm"><div class="flex flex-col items-end text-right hidden lg:flex"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">M. Laurent D.</span><span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative (Entra ID)</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 pt-14 bg-background w-full px-margin-desktop py-space-md"><div class="flex flex-col w-full">
+<!-- EN-TÊTE PRINCIPAL -->
+<div class="flex flex-col gap-space-sm mb-space-lg">
+<!-- Fil d'Ariane institutionnel -->
+<nav class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Accueil</a>
+<span class="text-outline-variant">/</span>
+<span class="hover:text-primary transition-colors">Pilotage &amp; Contrôle</span>
+<span class="text-outline-variant">/</span>
+<span class="font-headline-sm text-headline-sm text-primary">Historique &amp; Traçabilité</span>
+</nav>
+<!-- Titre, sous-titre & boutons d'action supérieurs -->
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">policy</span>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Registre d'audit &amp; Traçabilité des actes</h1>
+<span class="px-space-sm py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold tracking-wider uppercase">Sécurité &amp; Traçabilité : À spécifier avec DSI / RSSI</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          Journal officiel horodaté des opérations de gestion locative, modifications contractuelles et arbitrages administratifs
+        </p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container-lowest text-primary shadow-sm hover:bg-surface-container-high transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
+<span class="">Exercice budgétaire 2025</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span class="">Export du journal d'audit (Format réglementaire CSV)</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BANDEAU GOUVERNANCE, RGPD & PROTOCOLE DPO -->
+<div class="mb-space-lg rounded-xl bg-surface-container-low p-space-md shadow-sm">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="p-2 rounded-lg bg-surface-container-high text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-primary">Intégrité de la piste d'audit certifiée</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-lg bg-surface-container-highest text-primary font-semibold">Sécurité &amp; Traçabilité : À spécifier avec DSI / RSSI</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Traçabilité des consultations : Conformément aux recommandations de sécurité, la journalisation de la simple CONSULTATION des documents sensibles (pièces d'identité, coordonnées bancaires) reste soumise au protocole de traçabilité : <span class="font-semibold text-primary">À spécifier DPO / DSI</span>.
+          </p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm pl-space-md flex-shrink-0">
+<div class="flex flex-col text-right"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Contrôle &amp; traçabilité</span><span class="font-body-sm text-body-sm text-primary font-semibold">À spécifier avec DSI / RSSI</span></div>
+<span class="material-symbols-outlined text-secondary text-[24px]">lock_clock</span>
+</div>
+</div>
+</div>
+<!-- PANNEAU DE FILTRAGE MULTI-CRITÈRES -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md mb-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-semibold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px] text-secondary">tune</span>
+<span class="">Filtrage multi-critères du registre</span>
+</div>
+<button class="font-label-sm text-label-sm text-secondary hover:underline flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+        Réinitialiser les filtres
+      </button>
+</div>
+<!-- Champs de filtres horizontaux -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Filtre Période -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant" for="filtre-periode">Période temporelle</label>
+<div class="relative">
+<select class="w-full h-9 pl-space-md pr-8 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-lowest shadow-inner cursor-pointer" id="filtre-periode">
+<option value="30j">30 derniers jours</option>
+<option selected="" value="2025">Exercice 2025 (M57)</option>
+<option value="2024">Année 2024</option>
+<option value="custom">Personnalisée...</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Filtre Objet concerné -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant" for="filtre-objet">Type d'objet concerné</label>
+<div class="relative">
+<select class="w-full h-9 pl-space-md pr-8 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-lowest shadow-inner cursor-pointer" id="filtre-objet">
+<option selected="" value="all">Tous les objets</option>
+<option value="baux">Contrats &amp; Avenants</option>
+<option value="biens">Biens &amp; Patrimoine</option>
+<option value="tiers">Contractants &amp; Tiers</option>
+<option value="campagne">Échéances &amp; Campagne</option>
+<option value="revisions">Révisions de loyer</option>
+<option value="documents">Documents archivés</option>
+<option value="alertes">Alertes</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Filtre Action métier -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant" for="filtre-action">Type d'action métier</label>
+<div class="relative">
+<select class="w-full h-9 pl-space-md pr-8 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-lowest shadow-inner cursor-pointer" id="filtre-action">
+<option selected="" value="all">Toutes les actions</option>
+<option value="modif_ctr">Modification contractuelle</option>
+<option value="revis_ind">Révision indiciaire</option>
+<option value="retrait_ech">Retrait / Réinsertion d'échéance</option>
+<option value="trait_alerte">Traitement d'alerte</option>
+<option value="maj_surf">Mise à jour d'annexe / surface</option>
+<option value="rempl_doc">Remplacement de version documentaire</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Filtre Utilisateur / Agent -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant" for="filtre-agent">Agent / Utilisateur</label>
+<div class="relative">
+<select class="w-full h-9 pl-space-md pr-8 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-lowest shadow-inner cursor-pointer" id="filtre-agent">
+<option selected="" value="all">Tous les utilisateurs</option>
+<option value="ldubois">M. Laurent Dubois (AFLC)</option>
+<option value="cvallet">Mme Carole Vallet (DSF)</option>
+<option value="sys">Système (Automate de calcul)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Puces d'indicateurs de filtres actifs et résultats -->
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Filtres actifs :</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm">
+          Période : Exercice 2025
+          <button class="material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm">
+          Statut : Tout afficher
+          <button class="material-symbols-outlined text-[14px] hover:text-error" type="button">close</button>
+</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-md text-label-md">
+<span class="font-numeric-tabular font-bold text-primary">6</span>
+<span class="">opérations consignées correspondantes</span>
+</div>
+</div>
+</section>
+<!-- TABLEAU DU REGISTRE D'AUDIT HORODATÉ -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-lg">
+<!-- Barre de titre du data grid -->
+<div class="px-space-lg py-space-md bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-primary">history_edu</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Journal officiel des écritures et modifications</h2>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span class="inline-flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Synchronisation continue
+        </span>
+</div>
+</div>
+<!-- Data grid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="py-space-md px-space-md whitespace-nowrap">Date &amp; Heure (CET)</th>
+<th class="py-space-md px-space-md whitespace-nowrap">Agent &amp; Service</th>
+<th class="py-space-md px-space-md whitespace-nowrap">Objet concerné</th>
+<th class="py-space-md px-space-md whitespace-nowrap">Action métier réalisée</th>
+<th class="py-space-md px-space-md min-w-[320px]">Ancienne valeur vs Nouvelle valeur</th>
+<th class="py-space-md px-space-md min-w-[280px]">Motif consigné &amp; Référence</th>
+<th class="py-space-md px-space-md text-right whitespace-nowrap">Détails / Acte</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container text-body-md font-body-md text-on-surface">
+<!-- LIGNE 1 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">14/05/2025</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">09:42:15 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Consigné</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">L. Dubois</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">id: ldubois-7492</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Campagne mensuelle
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  Mai 2025 • CTR-2022-098
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Loc. Commercial Les Arcades</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Retrait temporaire d'échéance de campagne</span>
+<span class="font-label-sm text-label-sm text-error font-semibold mt-0.5">Arbitrage d'émission</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular line-through text-error">Échéance active (1 450,00 €)</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">Échéance retirée du rôle</span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Retrait opéré de la campagne active de Mai pour avenant de régularisation contractuelle de bail. Consigné avec accord hiérarchique. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">approval</span>
+<span class="">Visa DSF-GL-2025/44</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" title="Consulter l'acte numérisé et la signature" type="button">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span class="">Fiche d'acte</span>
+</button>
+</td>
+</tr>
+<!-- LIGNE 2 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">01/02/2025</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">10:14:02 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Consigné</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">L. Dubois</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">id: ldubois-7492</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Contrat &amp; Bail
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  CTR-2021-084
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Karim Benali (Logement D12)</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Révision indiciaire annuelle appliquée</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold mt-0.5">Indice IRL (Loi 89)</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular">780,00 € / mois <span class="text-outline-variant">(IRL T3 2023 : 141,03)</span></span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">799,25 € / mois <span class="text-secondary">(IRL T3 2024 : 144,51)</span></span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Application de l'indexation légale IRL T3 2024 (+2,47 %) conforme à l'article 7-1 Loi 89. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">tag</span>
+<span class="">Notif. préavis émise le 05/01/2025</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span class="">Certificat IRL</span>
+</button>
+</td>
+</tr>
+<!-- LIGNE 3 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">18/11/2024</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">16:45:50 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Consigné</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">L. Dubois</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">id: ldubois-7492</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Fiche Patrimoine
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  BIEN-2020-042
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Apt T4 St-Clément (Réf Cad: BC-104)</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Contrôle effectué</span>
+<span class="font-label-sm text-label-sm text-outline font-semibold mt-0.5">Mise en conformité foncière</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular">81,90 m²</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">82,50 m² <span class="text-secondary">(+0,60 m²)</span></span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Mise à jour suite au plan de recollement géomètre-expert et mise en conformité du dossier cadastral. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">architecture</span>
+<span class="">Réf géomètre : GE-GEO-2024-88</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">draft</span><span class="">Document / plan archivé</span></button>
+</td>
+</tr>
+<!-- LIGNE 4 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">15/01/2025</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">11:30:18 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Consigné</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">L. Dubois</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">AFLC / Gestion Locative</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">id: ldubois-7492</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Centre des alertes
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  ALT-2025-089
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Date contractuelle à suivre</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Traitement de l'alerte</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold mt-0.5">Renouvellement exprès</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular text-on-surface-variant">À instruire</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">Traitée (Renouvellement exprès)</span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Contrôle triennal d'éligibilité effectué sans réserve. Notification archivée. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span>
+<span class="">Réf dossier : DOS-2021-084-TRI</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Fiche d'alerte</span>
+</button>
+</td>
+</tr>
+<!-- LIGNE 5 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">12/05/2025</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">14:20:00 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Consigné</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">Carole V.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">DSF / Finances &amp; Contrôle</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">id: cvallet-1092</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Centre des alertes
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  ALT-2025-092
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Attestation Assurance manquante</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Réaffectation d'alerte opérationnelle</span>
+<span class="font-label-sm text-label-sm text-outline font-semibold mt-0.5">Délégation de tâche</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular text-on-surface-variant">Non assigné</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">M. Laurent Dubois (AFLC)</span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Délégation de l'instruction du dossier d'assurance à l'agent de secteur. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">assignment_ind</span>
+<span class="">Instruction DSF prioritaire</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">person_search</span>
+<span class="">Fiche d'affectation</span>
+</button>
+</td>
+</tr>
+<!-- LIGNE 6 -->
+<tr class="hover:bg-surface transition-colors">
+<!-- Date & heure -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-numeric-tabular font-bold text-primary">03/03/2025</span>
+<span class="font-numeric-tabular text-body-sm text-on-surface-variant">08:30:00 CET</span>
+<span class="inline-flex items-center gap-0.5 font-label-sm text-label-sm text-secondary mt-0.5"><span class="material-symbols-outlined text-[13px]">smart_toy</span> Traitement automatisé</span>
+</div>
+</td>
+<!-- Agent & service -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">Système (Automate)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Flux National INSEE</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">job: insee-ilat-sync</span>
+</div>
+</td>
+<!-- Objet concerné -->
+<td class="py-space-md px-space-md align-top whitespace-nowrap">
+<div class="flex flex-col gap-1 items-start">
+<span class="px-2 py-0.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                  Référentiel Indices
+                </span>
+<a class="font-numeric-tabular text-secondary font-bold hover:underline flex items-center gap-0.5" href="#">
+                  ILAT T3 2024
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate max-w-[200px]">Indices Tertiaires &amp; Commerces</span>
+</div>
+</td>
+<!-- Action métier -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Publication automatique nouvel indice INSEE</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold mt-0.5">Mise à jour barème national</span>
+</div>
+</td>
+<!-- Avant vs Après -->
+<td class="py-space-md px-space-md align-top">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1.5 font-body-sm">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline w-12 flex-shrink-0">Avant :</span>
+<span class="font-numeric-tabular">ILAT T2 2024 = 132,10</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary font-semibold">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary w-12 flex-shrink-0">Après :</span>
+<span class="font-numeric-tabular bg-surface-container-highest px-1.5 py-0.5 rounded">ILAT T3 2024 = 134,12 <span class="text-secondary">(+1,53 %)</span></span>
+</div>
+</div>
+</td>
+<!-- Motif consigné -->
+<td class="py-space-md px-space-md align-top">
+<div class="flex flex-col gap-1">
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  « Parution officielle JORF n°0052 du 02/03/2025. »
+                </p>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[14px]">feed</span>
+<span class="">Source : API INSEE / DILA</span>
+</div>
+</div>
+</td>
+<!-- Détails / Acte archivé -->
+<td class="py-space-md px-space-md align-top text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">public</span>
+<span class="">Bordereau JORF</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination & métadonnées du journal -->
+<div class="px-space-lg py-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<span class="">Affichage de 1 à 6 sur 6 écritures certifiées</span>
+<span class="text-outline-variant">•</span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Sécurité &amp; Traçabilité : À spécifier avec DSI / RSSI</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded-lg bg-surface-container-high text-outline cursor-not-allowed flex items-center justify-center" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">first_page</span>
+</button>
+<button class="p-1 rounded-lg bg-surface-container-high text-outline cursor-not-allowed flex items-center justify-center" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-3 py-1 rounded-lg bg-primary text-on-primary font-numeric-tabular font-bold text-body-sm">1</span>
+<button class="p-1 rounded-lg bg-surface-container-high text-outline cursor-not-allowed flex items-center justify-center" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+<button class="p-1 rounded-lg bg-surface-container-high text-outline cursor-not-allowed flex items-center justify-center" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">last_page</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ENCART DE CONTRÔLE D'AUDIT COMPTABLE ET TRAÇABILITÉ RÈGLEMENTAIRE -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Statut d'intégrité -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-1"><div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm"><span class="material-symbols-outlined text-secondary text-[20px]">verified</span><span class="">Intégrité des écritures</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Chaque opération consignée au registre garantit l'historique fiable des décisions et modifications rattachées à l'exercice financier 2025.</p><div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="">Contrôle &amp; traçabilité</span><span class="font-semibold text-primary">À spécifier avec DSI / RSSI</span></div></div>
+<!-- Rétention légale -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+<div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">cloud_upload</span>
+<span class="">Rétention réglementaire</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+        Durée d'archivage des journaux d'audit fixée à 10 ans pour les baux administratifs et 30 ans pour les actes emphytéotiques.
+      </p>
+<div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="">Archivage &amp; conservation</span><span class="font-semibold text-primary">À spécifier avec DPO / RGPD</span></div>
+</div>
+<!-- Export & Contrôle Chambre Régionale des Comptes -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-1">
+<div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">account_balance</span>
+<span class="">Contrôle de légalité &amp; CRC</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+        Rapport annuel traçable téléchargeable directement pour l'inspection des commissaires aux comptes et préfecture.
+      </p>
+<div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="">Format de contrôle</span><span class="font-semibold text-secondary">Archivage &amp; conservation : À spécifier avec DPO / RGPD</span></div>
+</div>
+</div>
+</div></main></div>
+
+
+
+
+</body></html>

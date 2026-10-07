@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; font-size: 13px; line-height: 18px; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #c5c6d1; border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  h1, h2, h3 { margin: 0; }
+  a { color: inherit; }
+}

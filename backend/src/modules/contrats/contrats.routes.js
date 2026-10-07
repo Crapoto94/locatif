@@ -50,7 +50,7 @@ router.get('/:id', requirePerm('contrats.read'), async (req, res) => {
   delete c.astech_raw;
   const [biens, contractants, conditions, echeances, revisions, depot, avenants, actes, histo, alertes, nbDocs] = await Promise.all([
     db.all(`SELECT b.id, b.designation, b.adresse, b.code_postal, b.ville, b.surface, b.type_code, b.code FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = $1`, [id]),
-    db.all(`SELECT ct.id, ct.nom, ct.prenom, ct.type, ct.siren, ct.email, ct.telephone, ct.adresse, ct.code_postal, ct.ville, ct.tiers_sedit_id, cc.role_code
+    db.all(`SELECT ct.id, ct.nom, ct.prenom, ct.type, ct.siren, ct.email, ct.telephone, ct.adresse, ct.code_postal, ct.ville, ct.tiers_sedit_id, ct.tiers_sedit_roo, cc.role_code
             FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = $1`, [id]),
     db.all(`SELECT * FROM ${t('conditions_financieres')} WHERE contrat_id = $1 ORDER BY COALESCE(date_effet,'0001-01-01') DESC, id DESC`, [id]),
     db.all(`SELECT id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, prorata, prorata_jours, prorata_base, statut, anomalie, campagne_retiree
@@ -66,6 +66,8 @@ router.get('/:id', requirePerm('contrats.read'), async (req, res) => {
     db.get(`SELECT count(*)::int AS n FROM ${t('document_liens')} WHERE objet_type = 'contrat' AND objet_id = $1`, [id]),
   ]);
   const loyer = conditions.filter((x) => ['loyer', 'redevance'].includes(x.rubrique_code) && !x.date_fin).reduce((s, x) => s + Number(x.montant), 0);
+  const { config } = require('../../config');
+  for (const x of contractants) x.sedit_url = x.tiers_sedit_roo ? `${config.sedit.url}/${config.sedit.pageTiers}?${config.sedit.paramTiers}=${encodeURIComponent(x.tiers_sedit_roo)}` : null;
   res.json({ ...c, biens, contractants, conditions, echeances, revisions, depot, avenants, actes, historique: histo, alertes, nb_documents: nbDocs.n, loyer_actuel: loyer });
 });
 

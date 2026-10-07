@@ -5,6 +5,10 @@ const { requirePerm } = require('../../middleware/auth');
 const { pageParams, orderBy, whereBuilder, like, httpError } = require('../../shared/http');
 const { createRow, updateRow } = require('../../shared/crud');
 const audit = require('../../services/audit');
+const { config } = require('../../config');
+
+// Lien vers la fiche du tiers dans SEDIT (nécessite l'identifiant technique ROO_IMA_REF).
+const seditUrl = (roo) => (roo ? `${config.sedit.url}/${config.sedit.pageTiers}?${config.sedit.paramTiers}=${encodeURIComponent(roo)}` : null);
 
 const FIELDS = ['type', 'nom', 'prenom', 'forme_juridique', 'siren', 'email', 'telephone', 'adresse', 'code_postal', 'ville',
   'tiers_sedit_id', 'tiers_sedit_statut', 'tiers_sedit_note', 'commentaire', 'actif'];
@@ -20,12 +24,12 @@ router.get('/', requirePerm('contractants.read'), async (req, res) => {
   const base = `FROM ${t('contractants')} c ${w.clause()}`;
   const total = (await db.get(`SELECT count(*)::int AS n ${base}`, w.params)).n;
   const rows = await db.all(
-    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut,
+    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut, c.tiers_sedit_roo,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc JOIN ${t('contrats')} k ON k.id = cc.contrat_id WHERE cc.contractant_id = c.id AND k.statut_code = 'en_cours') AS contrats_actifs,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc WHERE cc.contractant_id = c.id) AS contrats_total,
             EXISTS (SELECT 1 FROM ${t('reprise_doublons')} d WHERE d.entite = 'contractant' AND d.statut = 'a_examiner' AND c.id IN (d.id_a, d.id_b)) AS doublon_possible
      ${base} ORDER BY ${orderBy(req.query, SORTS, 'c.nom')} LIMIT ${limit} OFFSET ${offset}`, w.params);
-  res.json({ total, rows });
+  res.json({ total, rows: rows.map((r) => ({ ...r, sedit_url: seditUrl(r.tiers_sedit_roo) })) });
 });
 
 router.get('/:id', requirePerm('contractants.read'), async (req, res) => {
@@ -48,7 +52,7 @@ router.get('/:id', requirePerm('contractants.read'), async (req, res) => {
        WHERE d.entite = 'contractant' AND $1 IN (d.id_a, d.id_b)`, [id]),
     db.get(`SELECT count(*)::int AS n FROM ${t('document_liens')} WHERE objet_type = 'contractant' AND objet_id = $1`, [id]),
   ]);
-  res.json({ ...c, contacts, contrats, biens, doublons, nb_documents: nbDocs.n });
+  res.json({ ...c, sedit_url: seditUrl(c.tiers_sedit_roo), contacts, contrats, biens, doublons, nb_documents: nbDocs.n });
 });
 
 router.post('/', requirePerm('contractants.write'), async (req, res) => {

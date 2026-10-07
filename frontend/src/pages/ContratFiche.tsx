@@ -10,6 +10,7 @@ import { dateFr, dateTimeFr, eur, moisLabel, num } from '../lib/format';
 import { Card, PageHeader, Tabs, DataTable, Badge, Btn, Loading, ErrorBox, Modal, MotifModal, Field, Input, Select, Textarea, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import EntityPicker, { type PickItem } from '../components/EntityPicker';
 import DocumentsPanel from '../components/DocumentsPanel';
+import SeditLink from '../components/SeditLink';
 
 const ECH_STATUT: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], mandatee: ['Mandatée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
 
@@ -93,7 +94,7 @@ export default function ContratFiche() {
             { key: 'type', label: 'Nature', render: (x: any) => (x.type === 'morale' ? 'Personne morale' : 'Personne physique') },
             { key: 'adresse', label: 'Adresse', render: (x: any) => [x.adresse, x.code_postal, x.ville].filter(Boolean).join(' ') || '—' },
             { key: 'contact', label: 'Contact', render: (x: any) => [x.email, x.telephone].filter(Boolean).join(' • ') || '—' },
-            { key: 'tiers', label: 'Tiers SEDIT', render: (x: any) => x.tiers_sedit_id || '—' },
+            { key: 'tiers', label: 'Tiers SEDIT', render: (x: any) => <SeditLink code={x.tiers_sedit_id} url={x.sedit_url} /> },
           ]} />
         </Card>
       )}

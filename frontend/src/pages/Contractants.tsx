@@ -9,6 +9,7 @@ import { trackRecent } from '../lib/recents';
 import { dateFr, eur } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Modal, Field, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import DocumentsPanel from '../components/DocumentsPanel';
+import SeditLink from '../components/SeditLink';
 
 export function ContractantsListe() {
   const nav = useNavigate(); const { can } = useAuth();
@@ -33,7 +34,7 @@ export function ContractantsListe() {
               { key: 'nom', label: 'Contractant', sort: 'nom', render: (c: any) => <div><Link className="font-semibold text-primary hover:underline" to={`/contractants/${c.id}`}>{c.nom}{c.prenom ? ` ${c.prenom}` : ''}</Link>{c.doublon_possible && <span title="Doublon possible à examiner" className="ml-1 inline-block text-[#8a5a00]"><AlertTriangle size={13} className="inline" /></span>}</div> },
               { key: 'type', label: 'Nature', sort: 'type', render: (c: any) => <Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge> },
               { key: 'adresse', label: 'Adresse', render: (c: any) => [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ') || '—' },
-              { key: 'siren', label: 'SIREN / tiers SEDIT', render: (c: any) => <span className="tabular-nums">{[c.siren, c.tiers_sedit_id].filter(Boolean).join(' • ') || '—'}{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
+              { key: 'siren', label: 'SIREN / tiers SEDIT', render: (c: any) => <span className="tabular-nums">{c.siren && <span>{c.siren} • </span>}<SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
               { key: 'ct', label: 'Contrats', align: 'right', render: (c: any) => `${c.contrats_actifs} actif${c.contrats_actifs > 1 ? 's' : ''} / ${c.contrats_total}` },
               { key: 'a', label: '', render: (c: any) => <Btn size="sm" variant="ghost" onClick={() => nav(`/contractants/${c.id}`)}>Ouvrir</Btn> },
             ]} />
@@ -88,7 +89,7 @@ export function ContractantFiche() {
   return (
     <>
       <PageHeader crumbs={['Contractants', c.nom]} title={`${c.nom}${c.prenom ? ` ${c.prenom}` : ''}`} actions={can('contractants.write') && <Btn icon={<Pencil size={16} />} onClick={() => setEdit(true)}>Modifier</Btn>}>
-        <div className="flex gap-2 mt-1"><Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge>{!c.actif && <Badge tone="muted">Inactif</Badge>}{c.tiers_sedit_id && <Badge tone="muted">Tiers SEDIT {c.tiers_sedit_id}</Badge>}{c.astech_tiers_cod && <Badge tone="muted">Tiers ASTECH {c.astech_tiers_cod}</Badge>}</div>
+        <div className="flex gap-2 mt-1"><Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge>{!c.actif && <Badge tone="muted">Inactif</Badge>}{c.tiers_sedit_id && <Badge tone="info">Tiers SEDIT <SeditLink code={c.tiers_sedit_id} url={c.sedit_url} /></Badge>}{c.astech_tiers_cod && <Badge tone="muted">Tiers ASTECH {c.astech_tiers_cod}</Badge>}</div>
         {c.tiers_sedit_note && <p className="text-body-sm text-on-surface-variant mt-1">Rapprochement SEDIT ({c.tiers_sedit_statut}) : {c.tiers_sedit_note}</p>}
       </PageHeader>
       {c.doublons?.length > 0 && <div className="mb-space-md"><Notice tone="warn">Doublon(s) possible(s) signalé(s) par la reprise (aucune fusion automatique) : {c.doublons.map((d: any, i: number) => <span key={d.id}>{i > 0 && ', '}<Link className="underline font-semibold" to={`/contractants/${d.id}`}>{d.nom}</Link></span>)}.</Notice></div>}

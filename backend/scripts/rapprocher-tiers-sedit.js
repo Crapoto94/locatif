@@ -20,12 +20,12 @@ async function connect() {
 
 async function run(conn, { appliquer = false, user = 'script' } = {}) {
   // POBJ_EXTRACT = « code | nom | … | SIRET | … » séparé par CHR(1)
-  const rows = await src.rows(conn, `SELECT TRIM(TIERS) AS TIERS, POBJ_EXTRACT AS EXT FROM FI.TIERS`);
+  const rows = await src.rows(conn, `SELECT TRIM(TIERS) AS TIERS, TRIM(ROO_IMA_REF) AS ROO, POBJ_EXTRACT AS EXT FROM FI.TIERS`);
   const parSiren = new Map(); const parNom = new Map(); const tiers = [];
   for (const r of rows) {
     const p = String(r.EXT || '').split('\u0001').map((x) => x.trim());
     const nom = p[1] || ''; const siret = (p[4] || '').replace(/\s/g, '');
-    const o = { code: r.TIERS, nom, siret, cle: cle([p[1], p[3]].filter(Boolean).join(' ')) };
+    const o = { code: r.TIERS, roo: r.ROO, nom, siret, cle: cle([p[1], p[3]].filter(Boolean).join(' ')) };
     tiers.push(o);
     if (/^\d{14}$/.test(siret)) (parSiren.get(siret.slice(0, 9)) || parSiren.set(siret.slice(0, 9), []).get(siret.slice(0, 9))).push(o);
     for (const k of new Set([cle(p[1]), o.cle])) if (k) (parNom.get(k) || parNom.set(k, []).get(k)).push(o);
@@ -39,8 +39,8 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
     if (c.siren && parSiren.has(c.siren)) { cands = parSiren.get(c.siren); via = 'SIRET'; }
     if (!cands.length) { cands = parNom.get(cle([c.nom, c.prenom].filter(Boolean).join(' '))) || parNom.get(cle(c.nom)) || []; via = 'nom exact'; }
     const uniques = [...new Map(cands.map((x) => [x.code, x])).values()];
-    let statut; let code = null; let note;
-    if (uniques.length === 1) { statut = 'rapproche'; code = uniques[0].code; note = `${via} → ${uniques[0].nom}`; }
+    let statut; let code = null; let roo = null; let note;
+    if (uniques.length === 1) { statut = 'rapproche'; code = uniques[0].code; roo = uniques[0].roo; note = `${via} → ${uniques[0].nom}`; }
     else if (uniques.length > 1) { statut = 'ambigu'; note = `${uniques.length} tiers (${via}) : ${uniques.slice(0, 5).map((x) => `${x.code} ${x.nom}`).join(' ; ')}`; }
     else {
       // Nom partiel : on le signale seulement, jamais d'écriture automatique.
@@ -50,8 +50,9 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
       note = proches.length ? `Nom partiel : ${proches.map((x) => `${x.code} ${x.nom}`).join(' ; ')}` : null;
     }
     stats[statut]++; detail.push({ id: c.id, nom: c.nom, statut, code, note });
+    const rooVal = roo;
     if (appliquer) {
-      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_statut = $3, tiers_sedit_note = $4, updated_at = now() WHERE id = $1`, [c.id, code, statut, note]);
+      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_roo = COALESCE($5, tiers_sedit_roo), tiers_sedit_statut = $3, tiers_sedit_note = $4, updated_at = now() WHERE id = $1`, [c.id, code, statut, note, rooVal]);
       if (code && code !== c.tiers_sedit_id) await audit.log(user, 'contractant.tiers_sedit_rapproche', 'contractant', c.id, { champ: 'tiers_sedit_id', ancienne: c.tiers_sedit_id, nouvelle: code, motif: note });
     }
   }

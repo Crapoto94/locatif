@@ -6,6 +6,14 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
+// Même format que astech-explorer/config.example.json : { host, port, service_name, username, password } (+ oracle_test).
+// Chemin par défaut : backend/config.json (ignoré par git) ; surcharge : ASTECH_CONFIG_JSON.
+function readAstechJson() {
+  try { return JSON.parse(require('fs').readFileSync(process.env.ASTECH_CONFIG_JSON || path.join(__dirname, '..', 'config.json'), 'utf8')); } catch { return {}; }
+}
+const aj = readAstechJson();
+const fromJson = (o) => (o ? { host: o.host, port: o.port || 1523, service: o.service_name || o.service, user: o.username || o.user, password: o.password } : {});
+
 const bool = (v, def = false) => (v === undefined || v === '' ? def : /^(1|true|yes|oui)$/i.test(String(v)));
 
 const config = {
@@ -53,16 +61,16 @@ const config = {
   astech: {
     env: (process.env.ASTECH_ENV || 'prod').toLowerCase(),
     clientLibDir: process.env.ORACLE_CLIENT_LIB_DIR || 'C:/dev/astech-explorer/instantclient/instantclient_21_23',
-    prod: {
+    prod: process.env.ORACLE_ASTECH_HOST ? {
       host: process.env.ORACLE_ASTECH_HOST, port: process.env.ORACLE_ASTECH_PORT || 1523,
       service: process.env.ORACLE_ASTECH_SERVICE, user: process.env.ORACLE_ASTECH_USER,
       password: process.env.ORACLE_ASTECH_PASSWORD,
-    },
-    test: {
+    } : fromJson(aj.host ? aj : aj._prod),
+    test: process.env.ORACLE_ASTECH_TEST_HOST ? {
       host: process.env.ORACLE_ASTECH_TEST_HOST, port: process.env.ORACLE_ASTECH_TEST_PORT || 1523,
       service: process.env.ORACLE_ASTECH_TEST_SERVICE, user: process.env.ORACLE_ASTECH_TEST_USER,
       password: process.env.ORACLE_ASTECH_TEST_PASSWORD,
-    },
+    } : fromJson(aj.oracle_test || aj.test || aj._test),
   },
 
   sofficePath: process.env.SOFFICE_PATH || '',

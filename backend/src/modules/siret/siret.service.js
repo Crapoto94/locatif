@@ -16,8 +16,11 @@ async function interroger(siret, essai = 0) {
     const e = (data.results || [])[0];
     if (!e) return { statut: 'introuvable' };
     const etab = (e.matching_etablissements || []).find((x) => x.siret === siret) || (e.siege?.siret === siret ? e.siege : null);
-    if (!etab) return { statut: 'introuvable', denomination: e.nom_complet };
-    return { statut: etab.etat_administratif === 'A' ? 'actif' : 'ferme', denomination: e.nom_complet, fermeture: etab.date_fermeture || null };
+    // État de l'unité légale : l'entreprise peut rester active alors que l'établissement a fermé (déménagement, fermeture d'agence).
+    const entreprise = { siren_etat: e.etat_administratif === 'A' ? 'active' : 'cessee', siren_cessation_le: e.date_fermeture || null, etablissements_ouverts: e.nombre_etablissements_ouverts ?? null,
+      siege_siret: e.siege?.siret || null, siege_adresse: e.siege?.adresse || null };
+    if (!etab) return { statut: 'introuvable', denomination: e.nom_complet, ...entreprise };
+    return { statut: etab.etat_administratif === 'A' ? 'actif' : 'ferme', denomination: e.nom_complet, fermeture: etab.date_fermeture || null, ...entreprise };
   } catch (err) {
     if (err.response?.status === 429 && essai < 3) { await pause(1500 * (essai + 1)); return interroger(siret, essai + 1); }
     return { statut: 'erreur', note: err.response?.status ? `HTTP ${err.response.status}` : err.message };
@@ -33,8 +36,9 @@ async function verifier(user, ids) {
   for (const c of cibles) {
     const r = await interroger(c.siret);
     await db.run(
-      `UPDATE ${t('contractants')} SET siret_statut = $2, siret_verifie_le = now(), siret_fermeture_le = $3, siret_denomination = $4 WHERE id = $1`,
-      [c.id, r.statut, r.fermeture, r.denomination || null]);
+      `UPDATE ${t('contractants')} SET siret_statut = $2, siret_verifie_le = now(), siret_fermeture_le = $3, siret_denomination = $4,
+       siren_etat = $5, siren_cessation_le = $6, etablissements_ouverts = $7, siege_siret = $8, siege_adresse = $9 WHERE id = $1`,
+      [c.id, r.statut, r.fermeture, r.denomination || null, r.siren_etat || null, r.siren_cessation_le || null, r.etablissements_ouverts ?? null, r.siege_siret || null, r.siege_adresse || null]);
     stats.verifies++; stats[r.statut]++;
     if (r.statut === 'ferme' && c.siret_statut !== 'ferme') nouveaux.push({ id: c.id, nom: c.nom, siret: c.siret, fermeture: r.fermeture });
     await pause(160);

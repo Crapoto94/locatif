@@ -24,3 +24,24 @@ export function SiretBadge({ siret, statut, fermeture }: { siret?: string | null
     </span>
   );
 }
+
+// Un SIRET fermé ne signifie pas que l'entreprise a disparu : on distingue la fermeture d'un établissement (l'entreprise continue,
+// souvent avec un nouveau siège) de la cessation de l'unité légale (SIREN), et le cas d'une entreprise sans plus aucun établissement ouvert.
+export function natureSiret(x: any): { texte: string; tone: 'error' | 'warn' | 'info' } | null {
+  if (!x?.siren_etat) return null;
+  if (x.siren_etat === 'cessee') return { tone: 'error', texte: `Entreprise cessée${x.siren_cessation_le ? ` le ${dateFr(x.siren_cessation_le)}` : ''} (SIREN fermé)` };
+  if (x.etablissements_ouverts === 0) return { tone: 'warn', texte: "Entreprise toujours active mais sans aucun établissement ouvert : cessation probable, à surveiller" };
+  return { tone: 'info', texte: `Seul l'établissement est fermé — l'entreprise reste active (${x.etablissements_ouverts ?? '?'} établissement(s) ouvert(s))` };
+}
+
+export function NatureSiret({ x }: { x: any }) {
+  const n = natureSiret(x); if (!n) return null;
+  return (
+    <div className="text-body-sm">
+      <Badge tone={n.tone}>{n.texte}</Badge>
+      {x.siege_siret && x.siege_siret !== x.siret && x.siren_etat === 'active' && (
+        <span className="ml-1 text-on-surface-variant">Siège actuel : <a className="text-secondary hover:underline" target="_blank" rel="noopener noreferrer" href={sireneUrl(x.siege_siret)}>{x.siege_siret}</a>{x.siege_adresse ? ` — ${x.siege_adresse}` : ''}</span>
+      )}
+    </div>
+  );
+}

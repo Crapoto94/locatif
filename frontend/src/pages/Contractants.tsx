@@ -10,7 +10,7 @@ import { dateFr, eur } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Modal, Field, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import DocumentsPanel from '../components/DocumentsPanel';
 import SeditLink from '../components/SeditLink';
-import { SiretBadge } from '../components/SiretBadge';
+import { SiretBadge, NatureSiret } from '../components/SiretBadge';
 
 export function ContractantsListe() {
   const nav = useNavigate(); const { can } = useAuth();
@@ -36,7 +36,7 @@ export function ContractantsListe() {
             <div className="flex gap-space-sm"><Btn size="sm" onClick={() => setSiret('ferme')}>Les afficher</Btn><a href={fileUrl('/contractants/siret/inactifs.xlsx')} className="h-8 px-space-sm rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest"><Download size={14} />Excel</a></div>
           </div>
           <ul className="mt-space-sm text-body-md divide-y divide-surface-container-low">
-            {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-1.5 flex justify-between gap-2"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant flex items-center gap-2 flex-wrap justify-end"><SiretBadge siret={x.siret} statut={x.siret_statut} fermeture={x.siret_fermeture_le} />{x.contrats_actifs > 0 && <span>• {x.contrats_actifs} contrat(s) en cours</span>}</span></li>)}
+            {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-2 flex flex-col gap-1"><div className="flex justify-between gap-2 flex-wrap"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant flex items-center gap-2 flex-wrap justify-end"><SiretBadge siret={x.siret} statut={x.siret_statut} fermeture={x.siret_fermeture_le} />{x.contrats_actifs > 0 && <span>• {x.contrats_actifs} contrat(s) en cours</span>}</span></div><NatureSiret x={x} /></li>)}
           </ul>
         </Card>
       )} 
@@ -117,7 +117,7 @@ export function ContractantFiche() {
         <div className="lg:col-span-2 flex flex-col gap-space-lg">
           <Card>
             <SectionTitle icon={<Users size={20} />} title="Coordonnées" />
-            <Dl items={[['Adresse', [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ')], ['Email', c.email], ['Téléphone', c.telephone], ['SIRET', <SiretBadge siret={c.siret} statut={c.siret_statut} fermeture={c.siret_fermeture_le} />], ['Dénomination Sirene', c.siret_denomination], ['Tiers SEDIT', <SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />], ['Forme juridique', c.forme_juridique], ['Libellé ASTECH', c.astech_nom]]} />
+            <Dl items={[['Adresse', [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ')], ['Email', c.email], ['Téléphone', c.telephone], ['SIRET', <SiretBadge siret={c.siret} statut={c.siret_statut} fermeture={c.siret_fermeture_le} />], ['Entreprise (SIREN)', c.siret_statut === 'ferme' || c.siret_statut === 'introuvable' ? <NatureSiret x={c} /> : (c.siren_etat === 'active' ? 'Active' : c.siren_etat === 'cessee' ? 'Cessée' : null)], ['Dénomination Sirene', c.siret_denomination], ['Tiers SEDIT', <SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />], ['Forme juridique', c.forme_juridique], ['Libellé ASTECH', c.astech_nom]]} />
           </Card>
           {c.type === 'morale' && (
             <Card>

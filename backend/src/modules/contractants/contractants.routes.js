@@ -25,7 +25,7 @@ router.get('/', requirePerm('contractants.read'), async (req, res) => {
   const base = `FROM ${t('contractants')} c ${w.clause()}`;
   const total = (await db.get(`SELECT count(*)::int AS n ${base}`, w.params)).n;
   const rows = await db.all(
-    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.siret, c.siret_statut, c.siret_fermeture_le, c.siret_verifie_le, c.siret_denomination, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut, c.tiers_sedit_roo,
+    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.siret, c.siret_statut, c.siret_fermeture_le, c.siret_verifie_le, c.siret_denomination, c.siren_etat, c.siren_cessation_le, c.etablissements_ouverts, c.siege_siret, c.siege_adresse, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut, c.tiers_sedit_roo,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc JOIN ${t('contrats')} k ON k.id = cc.contrat_id WHERE cc.contractant_id = c.id AND k.statut_code = 'en_cours') AS contrats_actifs,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc WHERE cc.contractant_id = c.id) AS contrats_total,
             EXISTS (SELECT 1 FROM ${t('reprise_doublons')} d WHERE d.entite = 'contractant' AND d.statut = 'a_examiner' AND c.id IN (d.id_a, d.id_b)) AS doublon_possible

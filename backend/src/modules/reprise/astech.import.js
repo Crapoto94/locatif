@@ -113,6 +113,8 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
     const cats = await lookupMap(conn, 'CATEGORIE', ['SCAT_COD', 'SCAT_ID', 'SCAT_CODE'], ['SCAT_DES']);
     const scats = await lookupMap(conn, 'SOUSCATEGORIE', ['SSCAT_COD', 'SSCAT_ID', 'SSCAT_CODE'], ['SSCAT_DES']);
 
+    const hier = new Map((await src.rows(conn, "SELECT ARB_ID, ARB_CODE, ARB_DES, ARB_NOMC, ARB_GENRE, ARB_SUP, ARB_CAT, ARB_SSERV FROM ARBO WHERE ARB_CODE LIKE 'S%'")).map((r) => [String(r.ARB_ID), r]));
+    const adrNoeuds = new Map((await src.rows(conn, "SELECT * FROM ARBO_ADR WHERE ARBA_ID IN (SELECT ARB_ID FROM ARBO WHERE ARB_GENRE IN ('SITE','BAT') AND ARB_CODE LIKE 'S%')")).map((r) => [String(r.ARBA_ID), r]));
     const result = await db.tx(async (tx) => {
       // ---------- 1. Indices ----------
       const indMap = new Map(); // INSEE_ID -> { id, type }
@@ -136,28 +138,20 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         }
       }
 
-      // ---------- 2. Biens (+ site / bâtiment déduits du code patrimoine S###B##…) ----------
+      // ---------- 2. Biens locatifs ----------
       const locByArb = new Map(arbLoc.map((r) => [String(r.ARBLOC_ID), r]));
       const adrByArb = new Map(adr.map((r) => [String(r.ARBA_ID), r]));
       const bienMap = new Map(); // ARB_ID -> id
-      const parentCache = new Map(); // code -> id
-      async function ensureParent(code, niveau, designation) {
-        if (parentCache.has(code)) return parentCache.get(code);
-        const a = await tx.get(`INSERT INTO ${t('biens')}(code, designation, niveau, astech_id) VALUES ($1,$2,$3,$4)
-                                ON CONFLICT (astech_id) DO UPDATE SET code = EXCLUDED.code RETURNING id`, [code, designation || code, niveau, `CODE:${code}`]);
-        parentCache.set(code, a.id); return a.id;
-      }
       const sample = arbo[0]; const locSample = arbLoc[0] || {}; const adrSample = adr[0] || {};
       stats.mapping.biens = { ARBO: sample ? Object.keys(sample) : [], ARBO_LOCATIF: Object.keys(locSample), ARBO_ADR: Object.keys(adrSample) };
       for (const r of arbo) {
         count('biens', 'lus');
         const loc = locByArb.get(String(r.ARB_ID)) || {}; const a = adrByArb.get(String(r.ARB_ID)) || {};
         const genre = genres.get(String(r.ARB_GENRE)); const cat = cats.get(String(r.ARB_CAT)); const scat = scats.get(String(r.ARB_SCAT));
-        const code = str(r.ARB_CODE); const m = /^(S\d+)(B\d+)?/i.exec(code || '');
-        const parent = m && code.length > (m[0].length) ? await ensureParent(m[0].toUpperCase(), m[2] ? 'batiment' : 'site', null) : null;
+        const code = str(r.ARB_CODE);
         const adresse = [pick(a, /^ARBA_(NUMVOIE|NUM|NUMERO)$/), pick(a, /^ARBA_(ADR1?|RUE|VOIE|LIB\w*|ADRESSE)$/)].filter(Boolean).join(' ') || null;
         const data = {
-          parent_id: parent, niveau: 'unite', code, designation: str(r.ARB_DES) || str(r.ARB_NOMC) || code || `Bien ${r.ARB_ID}`,
+          parent_id: null, niveau: 'unite', code, designation: str(r.ARB_DES) || str(r.ARB_NOMC) || code || `Bien ${r.ARB_ID}`,
           type_code: typeBien(`${genre || ''} ${cat || ''} ${scat || ''} ${r.ARB_DES || ''}`), categorie: [genre, cat, scat].filter(Boolean).join(' / ') || null,
           adresse: str(adresse), code_postal: str(pick(a, /^ARBA_(CP|CODPOST\w*|CODE_?POSTAL)$/)), ville: str(pick(a, /^ARBA_(VILLE|COMMUNE|LOCALITE)$/)),
           surface: num(pick(loc, /SURF/) ?? pick(r, /^ARB_(SURF\w*|SUP\w*)$/)), service_code: str(r.ARB_SSERV), astech_id: String(r.ARB_ID),
@@ -167,6 +161,46 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const x = await upsert(tx, 'biens', data, ['code', 'designation', 'type_code', 'categorie', 'adresse', 'code_postal', 'ville', 'surface', 'service_code', 'parent_id']);
         bienMap.set(String(r.ARB_ID), x.id); count('biens', x.created ? 'crees' : 'mis_a_jour');
       }
+
+
+      // ---------- 2b. Sites et bâtiments : référentiel patrimonial ASTECH (ARBO.ARB_GENRE = SITE / BAT, ARB_SUP = parent) ----------
+      // Remplace la déduction à partir du code (S003B01…) : désignation, adresse, catégorie et service viennent d'ASTECH.
+      const ancetres = (row) => {
+        let cur = row; let bat = null; let site = null;
+        for (let i = 0; i < 12 && cur; i++) {
+          cur = hier.get(String(cur.ARB_SUP)); if (!cur) break;
+          if (cur.ARB_GENRE === 'BAT' && !bat) bat = cur;
+          if (cur.ARB_GENRE === 'SITE') { site = cur; break; }
+        }
+        return { bat, site };
+      };
+      const noeuds = new Map(bienMap); // ARB_ID -> id en base (les biens locatifs qui sont eux-mêmes bâtiment/site sont déjà là)
+      async function ensureNoeud(row) {
+        const k = String(row.ARB_ID); if (noeuds.has(k)) return noeuds.get(k);
+        const niveau = row.ARB_GENRE === 'SITE' ? 'site' : 'batiment';
+        const { site } = niveau === 'batiment' ? ancetres(row) : { site: null };
+        const parentId = site ? await ensureNoeud(site) : null;
+        const a = adrNoeuds.get(k) || (site ? adrNoeuds.get(String(site.ARB_ID)) : null) || {}; // un bâtiment sans adresse hérite de celle du site
+        const adresse = [a.ARBA_NUMVOIE, a.ARBA_ADR1].map(str).filter(Boolean).join(' ') || null;
+        const x = await tx.get(
+          `INSERT INTO ${t('biens')}(code, designation, niveau, parent_id, categorie, adresse, code_postal, ville, service_code, astech_id, astech_raw)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+           ON CONFLICT (astech_id) DO UPDATE SET code = EXCLUDED.code, designation = EXCLUDED.designation, parent_id = EXCLUDED.parent_id,
+             adresse = COALESCE(${t('biens')}.adresse, EXCLUDED.adresse), code_postal = COALESCE(${t('biens')}.code_postal, EXCLUDED.code_postal),
+             ville = COALESCE(${t('biens')}.ville, EXCLUDED.ville), service_code = COALESCE(${t('biens')}.service_code, EXCLUDED.service_code), astech_raw = EXCLUDED.astech_raw
+           RETURNING id, (xmax = 0) AS created`,
+          [str(row.ARB_CODE), str(row.ARB_DES) || str(row.ARB_NOMC) || str(row.ARB_CODE), niveau, parentId, str(row.ARB_CAT), adresse, str(a.ARBA_CP), str(a.ARBA_VILLE), str(row.ARB_SSERV), k, JSON.stringify({ arbo: raw(row), adresse: raw(a) })]);
+        noeuds.set(k, x.id); count(niveau === 'site' ? 'sites' : 'batiments', x.created ? 'crees' : 'mis_a_jour');
+        return x.id;
+      }
+      for (const r of arbo) {
+        const { bat, site } = ancetres(r);
+        const parent = bat || site; const id = bienMap.get(String(r.ARB_ID));
+        const parentId = parent ? await ensureNoeud(parent) : null;
+        await tx.run(`UPDATE ${t('biens')} SET parent_id = $2, niveau = 'unite' WHERE id = $1`, [id, parentId]); // hiérarchie ASTECH : source de vérité
+      }
+      // Anciens sites / bâtiments déduits du code : supprimés dès qu'ils n'ont plus d'enfant.
+      await tx.run(`DELETE FROM ${t('biens')} WHERE astech_id LIKE 'CODE:%' AND NOT EXISTS (SELECT 1 FROM ${t('biens')} f WHERE f.parent_id = ${t('biens')}.id)`);
 
       // ---------- 3. Contrats + contractants + liens ----------
       const locByCont = new Map(contLoc.map((r) => [String(r.CONTL_ID), r]));

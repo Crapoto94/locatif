@@ -39,6 +39,7 @@ v1.use('/auth', require('./src/modules/auth/auth.routes'));
 v1.use(authenticate); // tout ce qui suit exige un jeton valide
 v1.use('/dashboard', require('./src/modules/dashboard/dashboard.routes'));
 v1.use('/biens', require('./src/modules/biens/biens.routes'));
+v1.use('/contractants/siret', require('./src/modules/siret/siret.routes'));
 v1.use('/contractants', require('./src/modules/contractants/contractants.routes'));
 v1.use('/contrats', require('./src/modules/contrats/contrats.routes'));
 v1.use('/echeancier', require('./src/modules/echeancier/echeancier.routes'));

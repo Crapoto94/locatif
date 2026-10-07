@@ -237,11 +237,11 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const adresse = [f.SFOU_ADR1, f.SFOU_ADR2, f.SFOU_ADR3].map(str).filter(Boolean).join(' ') || null;
         // Les IBAN / RIB (CONTAFL_IBAN, SREG_*) ne sont volontairement PAS repris : données sensibles.
         const r = await tx.run(
-          `UPDATE ${t('contractants')} SET astech_tiers_cod = COALESCE(astech_tiers_cod, $2), siren = COALESCE(siren, $3), email = COALESCE(email, $4),
+          `UPDATE ${t('contractants')} SET astech_tiers_cod = COALESCE(astech_tiers_cod, $2), siren = COALESCE(siren, $3), siret = COALESCE(siret, $9), email = COALESCE(email, $4),
              telephone = COALESCE(telephone, $5), adresse = COALESCE(adresse, $6), code_postal = COALESCE(code_postal, $7), ville = COALESCE(ville, $8),
              type = CASE WHEN $3 IS NOT NULL THEN 'morale' ELSE type END, updated_at = now()
            WHERE id IN (SELECT contractant_id FROM ${t('contrat_contractants')} WHERE contrat_id = $1)`,
-          [cid, String(f.SFOU_COD), siret && siret.length >= 9 ? siret.slice(0, 9) : null, str(f.SFOU_EMAIL1), str(f.SFOU_TEL1), adresse, str(f.SFOU_ADRFACTCP), str(f.SFOU_VILLE)]);
+          [cid, String(f.SFOU_COD), siret && siret.length >= 9 ? siret.slice(0, 9) : null, str(f.SFOU_EMAIL1), str(f.SFOU_TEL1), adresse, str(f.SFOU_ADRFACTCP), str(f.SFOU_VILLE), siret && /^[0-9]{14}$/.test(siret) ? siret : null]);
         tiersLies += r.changes;
       }
       stats.tiers_astech = { fournisseurs: fous.size, liens: tiersLies };

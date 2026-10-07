@@ -1281,6 +1281,13 @@ n'est **pas** le numéro de tiers SEDIT. Le rapprochement avec `FI.TIERS` (lectu
 correspondance unique renseigne l'identifiant tiers (85 sur 105), les cas multiples ou partiels restent « ambigus » (13) et les
 autres « introuvables » (7), à trancher à la main ; une saisie manuelle n'est jamais écrasée. Les RIB/IBAN d'ASTECH ne sont pas repris.
 
+**MIG-017 — DÉCISION DE CONCEPTION**
+Le SIRET (14 chiffres) est une donnée distincte du code tiers SEDIT, affichée dans sa propre colonne. Sa validité est vérifiée à la
+demande auprès de l'API publique Sirene (`recherche-entreprises.api.gouv.fr`, sans clé, paramétrable) : actif / fermé (date) /
+introuvable, avec liste et export Excel des SIRET inactifs. Les pièces SEDIT rattachées aux tiers rapprochés (`FIPES_OBJ_PJ`,
+`OBJECT_TYPE = 'TIERS'`) sont reprises dans la GED de l'application, liées au contractant ; les relevés d'identité bancaire (type 7)
+et toute pièce d'identité sont exclus de l'import (DOC-005).
+
 ## 33.4 Documents et stockage
 
 **DOC-016 — DÉCISION DE CONCEPTION**

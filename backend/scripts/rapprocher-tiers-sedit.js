@@ -30,17 +30,18 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
     if (/^\d{14}$/.test(siret)) (parSiren.get(siret.slice(0, 9)) || parSiren.set(siret.slice(0, 9), []).get(siret.slice(0, 9))).push(o);
     for (const k of new Set([cle(p[1]), o.cle])) if (k) (parNom.get(k) || parNom.set(k, []).get(k)).push(o);
   }
-  const contractants = await db.all(`SELECT id, nom, prenom, siren, tiers_sedit_id, tiers_sedit_statut FROM ${t('contractants')}`);
+  const contractants = await db.all(`SELECT id, nom, prenom, siren, siret, tiers_sedit_id, tiers_sedit_statut FROM ${t('contractants')}`);
   const stats = { rapproche: 0, ambigu: 0, introuvable: 0, deja: 0, manuel: 0 }; const detail = [];
 
   for (const c of contractants) {
     if (c.tiers_sedit_statut === 'manuel') { stats.manuel++; continue; }
     let cands = []; let via = '';
-    if (c.siren && parSiren.has(c.siren)) { cands = parSiren.get(c.siren); via = 'SIRET'; }
+    const sirenC = c.siren || (c.siret ? c.siret.slice(0, 9) : null);
+    if (sirenC && parSiren.has(sirenC)) { cands = parSiren.get(sirenC); via = 'SIRET'; }
     if (!cands.length) { cands = parNom.get(cle([c.nom, c.prenom].filter(Boolean).join(' '))) || parNom.get(cle(c.nom)) || []; via = 'nom exact'; }
     const uniques = [...new Map(cands.map((x) => [x.code, x])).values()];
-    let statut; let code = null; let roo = null; let note;
-    if (uniques.length === 1) { statut = 'rapproche'; code = uniques[0].code; roo = uniques[0].roo; note = `${via} → ${uniques[0].nom}`; }
+    let statut; let code = null; let roo = null; let note; let siretSedit = null;
+    if (uniques.length === 1) { statut = 'rapproche'; code = uniques[0].code; roo = uniques[0].roo; siretSedit = /^\d{14}$/.test(uniques[0].siret) ? uniques[0].siret : null; note = `${via} → ${uniques[0].nom}`; }
     else if (uniques.length > 1) { statut = 'ambigu'; note = `${uniques.length} tiers (${via}) : ${uniques.slice(0, 5).map((x) => `${x.code} ${x.nom}`).join(' ; ')}`; }
     else {
       // Nom partiel : on le signale seulement, jamais d'écriture automatique.
@@ -52,7 +53,7 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
     stats[statut]++; detail.push({ id: c.id, nom: c.nom, statut, code, note });
     const rooVal = roo;
     if (appliquer) {
-      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_roo = COALESCE($5, tiers_sedit_roo), tiers_sedit_statut = $3, tiers_sedit_note = $4, updated_at = now() WHERE id = $1`, [c.id, code, statut, note, rooVal]);
+      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_roo = COALESCE($5, tiers_sedit_roo), siret = COALESCE(siret, $6), tiers_sedit_statut = $3, tiers_sedit_note = $4, updated_at = now() WHERE id = $1`, [c.id, code, statut, note, rooVal, siretSedit]);
       if (code && code !== c.tiers_sedit_id) await audit.log(user, 'contractant.tiers_sedit_rapproche', 'contractant', c.id, { champ: 'tiers_sedit_id', ancienne: c.tiers_sedit_id, nouvelle: code, motif: note });
     }
   }

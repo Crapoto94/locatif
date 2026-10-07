@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Plus, Search, Pencil, Users, Trash2, AlertTriangle } from 'lucide-react';
-import { api, errMsg } from '../lib/api';
+import { Plus, Search, Pencil, Users, Trash2, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
+import { api, errMsg, fileUrl } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
 import { useLabel, useRefList } from '../lib/refs';
@@ -10,23 +10,42 @@ import { dateFr, eur } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Modal, Field, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import DocumentsPanel from '../components/DocumentsPanel';
 import SeditLink from '../components/SeditLink';
+import { SiretBadge } from '../components/SiretBadge';
 
 export function ContractantsListe() {
   const nav = useNavigate(); const { can } = useAuth();
-  const [q, setQ] = useState(''); const [type, setType] = useState(''); const [tiers, setTiers] = useState(''); const [offset, setOffset] = useState(0);
+  const [q, setQ] = useState(''); const [type, setType] = useState(''); const [tiers, setTiers] = useState(''); const [siret, setSiret] = useState(''); const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState('nom'); const [dir, setDir] = useState('asc'); const dq = useDebounced(q);
-  const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, tiers, offset, limit: 25, sort, dir });
-  useEffect(() => setOffset(0), [dq, type, tiers]);
+  const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, tiers, siret, offset, limit: 25, sort, dir });
+  useEffect(() => setOffset(0), [dq, type, tiers, siret]);
+  const { data: inactifs, reload: reloadInactifs } = useFetch<any[]>('/contractants/siret/inactifs');
+  const [verif, setVerif] = useState(false);
+  const verifier = async () => {
+    setVerif(true);
+    try { const r = await api.post('/contractants/siret/verifier', {}); toast(`${r.data.verifies} SIRET vérifiés : ${r.data.actif} actifs, ${r.data.ferme} fermés, ${r.data.introuvable} introuvables`); reload(); reloadInactifs(); } catch (e) { toast(errMsg(e), 'error'); } finally { setVerif(false); }
+  };
   const [creer, setCreer] = useState(false);
   const onSort = (k: string) => { if (k === sort) setDir(dir === 'asc' ? 'desc' : 'asc'); else { setSort(k); setDir('asc'); } };
   return (
     <>
-      <PageHeader crumbs={['Gestion opérationnelle', 'Contractants']} title="Contractants" actions={can('contractants.write') && <Btn variant="primary" icon={<Plus size={16} />} onClick={() => setCreer(true)}>Nouveau contractant</Btn>} />
+      <PageHeader crumbs={['Gestion opérationnelle', 'Contractants']} title="Contractants" actions={<>{can('contractants.write') && <Btn icon={<ShieldCheck size={16} />} disabled={verif} onClick={verifier}>{verif ? 'Vérification…' : 'Vérifier les SIRET'}</Btn>}{can('contractants.write') && <Btn variant="primary" icon={<Plus size={16} />} onClick={() => setCreer(true)}>Nouveau contractant</Btn>}</>} />
+      {inactifs && inactifs.length > 0 && (
+        <Card className="mb-space-md">
+          <div className="flex items-center justify-between gap-space-sm flex-wrap">
+            <div className="flex items-center gap-2"><AlertTriangle size={18} className="text-error" /><strong className="text-primary">{inactifs.filter((x) => x.siret_statut === 'ferme').length} SIRET fermé(s)</strong>{inactifs.some((x) => x.siret_statut === 'introuvable') && <Badge tone="warn">{inactifs.filter((x) => x.siret_statut === 'introuvable').length} introuvable(s)</Badge>}</div>
+            <div className="flex gap-space-sm"><Btn size="sm" onClick={() => setSiret('ferme')}>Les afficher</Btn><a href={fileUrl('/contractants/siret/inactifs.xlsx')} className="h-8 px-space-sm rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest"><Download size={14} />Excel</a></div>
+          </div>
+          <ul className="mt-space-sm text-body-md divide-y divide-surface-container-low">
+            {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-1.5 flex justify-between gap-2"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant tabular-nums">{x.siret} — {x.siret_statut === 'ferme' ? `fermé le ${dateFr(x.siret_fermeture_le)}` : 'introuvable'}{x.contrats_actifs > 0 ? ` • ${x.contrats_actifs} contrat(s) en cours` : ''}</span></li>)}
+          </ul>
+        </Card>
+      )} 
       <Card>
         <div className="flex flex-wrap gap-space-sm mb-space-md">
           <div className="relative flex-1 min-w-[240px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="Nom, raison sociale, SIREN, adresse, identifiant tiers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           <Select className="w-48" value={type} onChange={(e) => setType(e.target.value)}><option value="">Tous</option><option value="physique">Personnes physiques</option><option value="morale">Personnes morales</option></Select>
           <Select className="w-56" value={tiers} onChange={(e) => setTiers(e.target.value)}><option value="">Tiers SEDIT : tous</option><option value="rapproche">Rapprochés</option><option value="ambigu">À trancher (ambigus)</option><option value="introuvable">Introuvables</option><option value="manuel">Saisis à la main</option></Select>
+          <Select className="w-52" value={siret} onChange={(e) => setSiret(e.target.value)}><option value="">SIRET : tous</option><option value="actif">Actifs</option><option value="ferme">Fermés</option><option value="introuvable">Introuvables</option><option value="non_verifie">Non vérifiés</option><option value="sans">Sans SIRET</option></Select>
         </div>
         {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !data ? <Loading /> : (
           <>
@@ -34,7 +53,8 @@ export function ContractantsListe() {
               { key: 'nom', label: 'Contractant', sort: 'nom', render: (c: any) => <div><Link className="font-semibold text-primary hover:underline" to={`/contractants/${c.id}`}>{c.nom}{c.prenom ? ` ${c.prenom}` : ''}</Link>{c.doublon_possible && <span title="Doublon possible à examiner" className="ml-1 inline-block text-[#8a5a00]"><AlertTriangle size={13} className="inline" /></span>}</div> },
               { key: 'type', label: 'Nature', sort: 'type', render: (c: any) => <Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge> },
               { key: 'adresse', label: 'Adresse', render: (c: any) => [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ') || '—' },
-              { key: 'siren', label: 'SIREN / tiers SEDIT', render: (c: any) => <span className="tabular-nums">{c.siren && <span>{c.siren} • </span>}<SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
+              { key: 'siret', label: 'SIRET', render: (c: any) => <SiretBadge siret={c.siret} statut={c.siret_statut} fermeture={c.siret_fermeture_le} /> },
+              { key: 'sedit', label: 'Tiers SEDIT', render: (c: any) => <span><SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
               { key: 'ct', label: 'Contrats', align: 'right', render: (c: any) => `${c.contrats_actifs} actif${c.contrats_actifs > 1 ? 's' : ''} / ${c.contrats_total}` },
               { key: 'a', label: '', render: (c: any) => <Btn size="sm" variant="ghost" onClick={() => nav(`/contractants/${c.id}`)}>Ouvrir</Btn> },
             ]} />
@@ -63,7 +83,7 @@ export function ContractantForm({ contractant, onClose, onSaved }: { contractant
         <Field label="Nature"><Select value={f.type} onChange={(e) => set('type', e.target.value)}><option value="physique">Personne physique</option><option value="morale">Personne morale</option></Select></Field>
         {morale ? <Field label="Forme juridique"><Input value={f.forme_juridique || ''} onChange={(e) => set('forme_juridique', e.target.value)} /></Field> : <Field label="Prénom"><Input value={f.prenom || ''} onChange={(e) => set('prenom', e.target.value)} /></Field>}
         <Field label={morale ? 'Raison sociale *' : 'Nom *'} className="sm:col-span-2"><Input value={f.nom || ''} onChange={(e) => set('nom', e.target.value)} /></Field>
-        {morale && <Field label="SIREN"><Input value={f.siren || ''} onChange={(e) => set('siren', e.target.value)} /></Field>}
+        {morale && <Field label="SIRET (14 chiffres)"><Input value={f.siret || ''} maxLength={14} onChange={(e) => set('siret', e.target.value.replace(/\D/g, ''))} /></Field>}
         <Field label="Identifiant tiers SEDIT" hint="Si le tiers n'existe pas, il doit d'abord être créé dans le système financier"><Input value={f.tiers_sedit_id || ''} onChange={(e) => set('tiers_sedit_id', e.target.value)} /></Field>
         <Field label="Email"><Input type="email" value={f.email || ''} onChange={(e) => set('email', e.target.value)} /></Field>
         <Field label="Téléphone"><Input value={f.telephone || ''} onChange={(e) => set('telephone', e.target.value)} /></Field>
@@ -97,7 +117,7 @@ export function ContractantFiche() {
         <div className="lg:col-span-2 flex flex-col gap-space-lg">
           <Card>
             <SectionTitle icon={<Users size={20} />} title="Coordonnées" />
-            <Dl items={[['Adresse', [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ')], ['Email', c.email], ['Téléphone', c.telephone], ['SIREN', c.siren], ['Forme juridique', c.forme_juridique], ['Libellé ASTECH', c.astech_nom]]} />
+            <Dl items={[['Adresse', [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ')], ['Email', c.email], ['Téléphone', c.telephone], ['SIRET', <SiretBadge siret={c.siret} statut={c.siret_statut} fermeture={c.siret_fermeture_le} />], ['Dénomination Sirene', c.siret_denomination], ['Tiers SEDIT', <SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />], ['Forme juridique', c.forme_juridique], ['Libellé ASTECH', c.astech_nom]]} />
           </Card>
           {c.type === 'morale' && (
             <Card>

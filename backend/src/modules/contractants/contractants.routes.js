@@ -10,21 +10,22 @@ const { config } = require('../../config');
 // Lien vers la fiche du tiers dans SEDIT (nécessite l'identifiant technique ROO_IMA_REF).
 const seditUrl = (roo) => (roo ? `${config.sedit.url}/${config.sedit.pageTiers}?${config.sedit.paramTiers}=${encodeURIComponent(roo)}` : null);
 
-const FIELDS = ['type', 'nom', 'prenom', 'forme_juridique', 'siren', 'email', 'telephone', 'adresse', 'code_postal', 'ville',
+const FIELDS = ['type', 'nom', 'prenom', 'forme_juridique', 'siret', 'email', 'telephone', 'adresse', 'code_postal', 'ville',
   'tiers_sedit_id', 'tiers_sedit_statut', 'tiers_sedit_note', 'commentaire', 'actif'];
 const SORTS = { nom: 'c.nom', ville: 'c.ville', type: 'c.type' };
 
 router.get('/', requirePerm('contractants.read'), async (req, res) => {
   const { limit, offset } = pageParams(req.query);
   const w = whereBuilder();
-  if (req.query.q) w.add(`(c.nom ILIKE ? OR c.prenom ILIKE ? OR c.siren ILIKE ? OR c.adresse ILIKE ? OR c.tiers_sedit_id ILIKE ?)`, like(req.query.q));
+  if (req.query.q) w.add(`(c.nom ILIKE ? OR c.prenom ILIKE ? OR c.siret ILIKE ? OR c.siren ILIKE ? OR c.adresse ILIKE ? OR c.tiers_sedit_id ILIKE ?)`, like(req.query.q));
   if (req.query.type) w.add('c.type = ?', req.query.type);
+  if (req.query.siret) { if (req.query.siret === 'non_verifie') w.addRaw('c.siret IS NOT NULL AND c.siret_statut IS NULL'); else if (req.query.siret === 'sans') w.addRaw('c.siret IS NULL'); else w.add('c.siret_statut = ?', req.query.siret); }
   if (req.query.tiers) w.add('c.tiers_sedit_statut = ?', req.query.tiers);
   if (req.query.actif !== 'tous') w.addRaw('c.actif');
   const base = `FROM ${t('contractants')} c ${w.clause()}`;
   const total = (await db.get(`SELECT count(*)::int AS n ${base}`, w.params)).n;
   const rows = await db.all(
-    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut, c.tiers_sedit_roo,
+    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.siret, c.siret_statut, c.siret_fermeture_le, c.siret_verifie_le, c.siret_denomination, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut, c.tiers_sedit_roo,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc JOIN ${t('contrats')} k ON k.id = cc.contrat_id WHERE cc.contractant_id = c.id AND k.statut_code = 'en_cours') AS contrats_actifs,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc WHERE cc.contractant_id = c.id) AS contrats_total,
             EXISTS (SELECT 1 FROM ${t('reprise_doublons')} d WHERE d.entite = 'contractant' AND d.statut = 'a_examiner' AND c.id IN (d.id_a, d.id_b)) AS doublon_possible

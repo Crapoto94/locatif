@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, Lock } from 'lucide-react';
+import { Download, Eye, Lock } from 'lucide-react';
 import { fileUrl } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useLabel, useRefList } from '../lib/refs';
@@ -37,7 +37,7 @@ export default function Documents() {
                 { key: 'l', label: 'Rattaché à', render: liens },
                 { key: 'v', label: 'Version', render: (d: any) => `v${d.version}` }, { key: 's', label: 'Taille', render: (d: any) => bytes(d.taille) },
                 { key: 'u', label: 'Mis à jour', render: (d: any) => dateTimeFr(d.updated_at) },
-                { key: 'a', label: '', render: (d: any) => !d.verrouille && <a href={fileUrl(`/documents/${d.id}/download`)} className="p-1 rounded hover:bg-surface-container-high text-secondary inline-block" title="Télécharger"><Download size={16} /></a> },
+                { key: 'a', label: '', render: (d: any) => !d.verrouille && <span className="flex gap-1"><button className="p-1 rounded bg-secondary-fixed hover:bg-secondary-fixed-dim text-secondary" title="Afficher dans la visionneuse" onClick={() => setVue(d.id)}><Eye size={16} /></button><a href={fileUrl(`/documents/${d.id}/download`)} className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant inline-block" title="Télécharger"><Download size={16} /></a></span> },
               ]} />
               <Pagination total={data?.total || 0} limit={30} offset={offset} onChange={setOffset} />
             </>

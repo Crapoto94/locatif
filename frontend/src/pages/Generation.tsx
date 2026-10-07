@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { FileText, Upload, Download } from 'lucide-react';
+import { FileText, Upload, Download, Eye } from 'lucide-react';
+import DocumentViewer from '../components/DocumentViewer';
 import { api, errMsg, fileUrl } from '../lib/api';
 import { useFetch } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
@@ -11,7 +12,7 @@ export default function Generation() {
   const { data: vars } = useFetch<any>('/generation/variables');
   const [code, setCode] = useState('revision_loyer'); const [q, setQ] = useState(''); const { data: cs } = useFetch<any>(q.length >= 2 ? '/contrats' : null, { q, limit: 8 });
   const [contrat, setContrat] = useState<any | null>(null); const [annee, setAnnee] = useState(new Date().getFullYear() - 1);
-  const [res, setRes] = useState<any | null>(null); const [busy, setBusy] = useState(false);
+  const [res, setRes] = useState<any | null>(null); const [busy, setBusy] = useState(false); const [vue, setVue] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const generer = async () => {
@@ -45,8 +46,8 @@ export default function Generation() {
               <Notice tone="success">
                 Documents créés :
                 <div className="flex flex-wrap gap-2 mt-1">
-                  <a className="inline-flex items-center gap-1 text-secondary font-semibold hover:underline" href={fileUrl(`/documents/${res.docx.id}/download`)}><Download size={14} />Word</a>
-                  {res.pdf && <a className="inline-flex items-center gap-1 text-secondary font-semibold hover:underline" href={fileUrl(`/documents/${res.pdf.id}/download`)}><Download size={14} />PDF</a>}
+                  {res.pdf && <button className="inline-flex items-center gap-1 text-secondary font-semibold hover:underline" onClick={() => setVue(res.pdf.id)}><Eye size={14} />Afficher le PDF</button>}
+                  <a className="inline-flex items-center gap-1 text-on-surface-variant hover:underline" href={fileUrl(`/documents/${res.docx.id}/download`)}><Download size={14} />Télécharger le Word</a>
                 </div>
                 {res.avertissement && <div className="mt-1 text-[#6b4300]">{res.avertissement}</div>}
               </Notice>
@@ -68,6 +69,7 @@ export default function Generation() {
             <p className="text-on-surface-variant mt-2">Les utilisateurs ne modifient pas le modèle : toute évolution passe par l'administration. Un modèle personnalisé nécessite LibreOffice côté serveur pour produire le PDF.</p></div>}
         </Card>
       </div>
+      {vue && <DocumentViewer documentId={vue} onClose={() => setVue(null)} />}
     </>
   );
 }

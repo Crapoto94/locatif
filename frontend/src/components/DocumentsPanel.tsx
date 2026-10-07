@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Upload, Download, Lock, FileText, History, Trash2, Link2Off } from 'lucide-react';
+import { Upload, Download, Lock, FileText, History, Trash2, Link2Off, Eye } from 'lucide-react';
 import { api, errMsg, fileUrl } from '../lib/api';
 import { useFetch } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
@@ -59,14 +59,15 @@ export default function DocumentsPanel({ objetType, objetId, title = 'Documents 
                         {d.verrouille ? <Lock size={14} className="text-error" /> : <FileText size={14} className="text-primary" />}
                         {d.verrouille
                           ? <span className="font-semibold text-primary">Pièce sensible</span>
-                          : <button onClick={() => setVue(d.id)} className="font-semibold text-primary hover:underline text-left truncate max-w-[230px]" title={`Afficher ${d.nom}`}>{d.nom}</button>}
+                          : <button onClick={() => setVue(d.id)} className="font-semibold text-secondary underline-offset-2 hover:underline text-left truncate max-w-[230px]" title={`Afficher ${d.nom}`}>{d.nom}</button>}
                         {d.sensible && <Badge tone="error">Sensible</Badge>}
                         {d.en_ged && <Badge tone="info">GED</Badge>}
                       </div>
                       <div className="text-[11px] text-on-surface-variant">v{d.version} • {bytes(d.taille)} • {dateTimeFr(d.updated_at)}{d.date_expiration ? ` • expire le ${dateFr(d.date_expiration)}` : ''}</div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      {!d.verrouille && <a href={fileUrl(`/documents/${d.id}/download`)} className="p-1 rounded hover:bg-surface-container-high text-secondary" title="Télécharger"><Download size={16} /></a>}
+                      {!d.verrouille && <button className="p-1 rounded bg-secondary-fixed hover:bg-secondary-fixed-dim text-secondary" title="Afficher dans la visionneuse" onClick={() => setVue(d.id)}><Eye size={16} /></button>}
+                      {!d.verrouille && <a href={fileUrl(`/documents/${d.id}/download`)} className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title="Télécharger"><Download size={16} /></a>}
                       {!d.verrouille && <button className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title="Versions" onClick={async () => setVersions({ doc: d, rows: (await api.get(`/documents/${d.id}/versions`)).data })}><History size={16} /></button>}
                       {can('documents.write') && !d.verrouille && (
                         <>

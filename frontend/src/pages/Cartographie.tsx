@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet';
+import { CircleMarker, GeoJSON, MapContainer, TileLayer, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
 import { api, errMsg } from '../lib/api';
@@ -32,6 +32,9 @@ export default function Cartographie() {
   const nav = useNavigate(); const { can } = useAuth(); const label = useLabel(); const types = useRefList('type_bien');
   const { data, loading, error, reload } = useFetch<any>('/biens/carte');
   const [type, setType] = useState(''); const [cat, setCat] = useState(''); const [busy, setBusy] = useState(false);
+  // Contour officiel de la commune (API Géo, INSEE 94041), embarqué dans l'application.
+  const [contour, setContour] = useState<any | null>(null);
+  useEffect(() => { fetch('/ivry-contour.geojson').then((r) => (r.ok ? r.json() : null)).then(setContour).catch(() => {}); }, []);
   const dans3Mois = useMemo(() => new Date(Date.now() + 92 * 86400000).toISOString().slice(0, 10), []);
 
   const biens = useMemo(() => (data?.biens || []).map((b: any) => ({ ...b, cat: categorie(b, dans3Mois) }))
@@ -52,6 +55,7 @@ export default function Cartographie() {
           <Card className="xl:col-span-3 !p-0 overflow-hidden">
             <MapContainer center={IVRY} zoom={14} scrollWheelZoom style={{ height: 'calc(100vh - 210px)', minHeight: 460 }}>
               <TileLayer url={TILES} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' maxZoom={19} />
+              {contour && <GeoJSON data={contour} interactive={false} style={{ color: '#001645', weight: 3, dashArray: '8 6', fillColor: '#316bf3', fillOpacity: 0.05 }} />}
               {biens.map((b: any) => (
                 <CircleMarker key={b.id} center={[b.latitude, b.longitude]} radius={9}
                   pathOptions={{ color: '#ffffff', weight: 2, fillColor: COULEURS[b.cat as Cat].fill, fillOpacity: 0.95 }}

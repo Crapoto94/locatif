@@ -36,7 +36,7 @@ export function ContractantsListe() {
             <div className="flex gap-space-sm"><Btn size="sm" onClick={() => setSiret('ferme')}>Les afficher</Btn><a href={fileUrl('/contractants/siret/inactifs.xlsx')} className="h-8 px-space-sm rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest"><Download size={14} />Excel</a></div>
           </div>
           <ul className="mt-space-sm text-body-md divide-y divide-surface-container-low">
-            {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-1.5 flex justify-between gap-2"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant tabular-nums">{x.siret} — {x.siret_statut === 'ferme' ? `fermé le ${dateFr(x.siret_fermeture_le)}` : 'introuvable'}{x.contrats_actifs > 0 ? ` • ${x.contrats_actifs} contrat(s) en cours` : ''}</span></li>)}
+            {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-1.5 flex justify-between gap-2"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant flex items-center gap-2 flex-wrap justify-end"><SiretBadge siret={x.siret} statut={x.siret_statut} fermeture={x.siret_fermeture_le} />{x.contrats_actifs > 0 && <span>• {x.contrats_actifs} contrat(s) en cours</span>}</span></li>)}
           </ul>
         </Card>
       )} 

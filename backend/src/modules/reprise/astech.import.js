@@ -7,6 +7,7 @@ const path = require('path');
 const { db, t } = require('../../db');
 const src = require('./astech.source');
 const docs = require('../documents/documents.service');
+const { config } = require('../../config');
 
 const { fmtDate, num, str, pick, pickKey, raw } = src;
 const TYPES_INDICE = { 1: 'IRL', 2: 'ICC', 5: 'ILC', 6: 'ILAT' };
@@ -61,7 +62,7 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
       stats.source[tb] = (await src.rows(conn, `SELECT COUNT(*) AS N FROM ${tb}`))[0].N;
     }
     log('Lecture des tables sources…');
-    const [indRows, arbLoc, arbo, adr, contrat, contLoc, aff, rub, ech, echHist, revs] = await Promise.all([
+    let [indRows, arbLoc, arbo, adr, contrat, contLoc, aff, affl, rub, ech, echHist, revs] = await Promise.all([
       src.rows(conn, 'SELECT * FROM INDICEINSEE'),
       src.rows(conn, 'SELECT * FROM ARBO_LOCATIF'),
       src.rows(conn, 'SELECT * FROM ARBO WHERE ARB_ID IN (SELECT ARBLOC_ID FROM ARBO_LOCATIF)'),
@@ -69,11 +70,45 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
       src.rows(conn, 'SELECT * FROM CONTRAT WHERE CONT_ID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
       src.rows(conn, 'SELECT * FROM CONTRAT_LOCATIF'),
       src.rows(conn, 'SELECT * FROM CONTRAT_AFF WHERE CONTAF_ID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
+      src.rows(conn, 'SELECT * FROM CONTRAT_AFFL WHERE CONTAFL_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
       (await src.tableExists(conn, 'CONTRAT_RUB')) ? src.rows(conn, 'SELECT * FROM CONTRAT_RUB') : [],
       src.rows(conn, 'SELECT * FROM CONTRAT_ECH WHERE CONTEC_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
       src.rows(conn, 'SELECT * FROM CONTRAT_ECHTERMINEE WHERE CONTEC_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
       src.rows(conn, 'SELECT * FROM CONTRAT_REVISION WHERE CONTRV_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)'),
     ]);
+    // ---------- Filtre de date (LOCATIF_REPRISE_DEPUIS, défaut 2022-01-01) ----------
+    const CUT = config.repriseDepuis; const CUT_AN = Number(CUT.slice(0, 4));
+    const locByContId = new Map(contLoc.map((r) => [String(r.CONTL_ID), r]));
+    const derniereEch = new Map();
+    // Activité réelle : seules les échéances ÉMISES (historique) comptent ; le prévisionnel et les dates de clôture administrative
+    // (reprise 2024) ne prouvent aucune activité.
+    for (const r of echHist) {
+      const k = String(r.CONTEC_CONTID); const d = fmtDate(r.CONTEC_DATEDEB) || fmtDate(r.CONTEC_DATE);
+      if (d && (!derniereEch.get(k) || d > derniereEch.get(k))) derniereEch.set(k, d);
+    }
+    // Un contrat est conservé s'il est en cours, ou si sa dernière date connue (fin, sortie, clôture, dernière échéance) est >= CUT ; sans aucune date, on le garde.
+    const gardes = new Set();
+    for (const r of contrat) {
+      const l = locByContId.get(String(r.CONT_ID)) || {};
+      const dates = [fmtDate(r.CONT_DATFIN), fmtDate(l.CONTL_DATSORTIE), derniereEch.get(String(r.CONT_ID))].filter(Boolean).sort();
+      if (String(r.CONT_ACTIF || '').toUpperCase() === 'O' || (dates.length && dates[dates.length - 1] >= CUT)) gardes.add(String(r.CONT_ID));
+    }
+    stats.filtre = { depuis: CUT, contrats_ecartes: contrat.length - gardes.size };
+    contrat = contrat.filter((r) => gardes.has(String(r.CONT_ID)));
+    contLoc = contLoc.filter((r) => gardes.has(String(r.CONTL_ID)));
+    aff = aff.filter((r) => gardes.has(String(r.CONTAF_ID)));
+    affl = affl.filter((r) => gardes.has(String(r.CONTAFL_CONTID)));
+    // Récursif : un bien n'est repris que s'il est rattaché à un contrat conservé.
+    const biensGardes = new Set(aff.map((r) => String(r.CONTAF_ARBID)));
+    stats.filtre.biens_ecartes = arbo.length - arbo.filter((r) => biensGardes.has(String(r.ARB_ID))).length;
+    arbo = arbo.filter((r) => biensGardes.has(String(r.ARB_ID)));
+    ech = ech.filter((r) => gardes.has(String(r.CONTEC_CONTID)) && (fmtDate(r.CONTEC_DATEDEB) || fmtDate(r.CONTEC_DATE) || '') >= CUT);
+    echHist = echHist.filter((r) => gardes.has(String(r.CONTEC_CONTID)) && (fmtDate(r.CONTEC_DATEDEB) || fmtDate(r.CONTEC_DATE) || '') >= CUT);
+    revs = revs.filter((r) => gardes.has(String(r.CONTRV_CONTID)) && (fmtDate(r.CONTRV_DATAPPLI) || fmtDate(r.CONTRV_DAT) || '') >= CUT);
+    // Indices : ceux de l'année de coupure et après, plus ceux encore référencés (indice de référence d'un contrat conservé).
+    const refs = new Set([...revs.flatMap((r) => [r.CONTRV_INSEE, r.CONTRV_INSEEP]), ...contLoc.flatMap((l) => [l.CONTL_INSEE, l.CONTL_INSEEDEP])].filter((x) => x !== null && x !== undefined).map(String));
+    indRows = indRows.filter((r) => num(r.INSEE_AN) >= CUT_AN || refs.has(String(r.INSEE_ID)));
+
     const genres = await lookupMap(conn, 'PATRIGENE', ['SGEN_COD'], ['SGEN_DES']);
     const cats = await lookupMap(conn, 'CATEGORIE', ['SCAT_COD', 'SCAT_ID', 'SCAT_CODE'], ['SCAT_DES']);
     const scats = await lookupMap(conn, 'SOUSCATEGORIE', ['SSCAT_COD', 'SSCAT_ID', 'SSCAT_CODE'], ['SSCAT_DES']);
@@ -190,6 +225,26 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         if (!b) { warn('contrat_bien', r.CONTAF_ID, `Bien ${r.CONTAF_ARBID} absent du périmètre locatif`); continue; }
         await tx.run(`INSERT INTO ${t('contrat_biens')}(contrat_id, bien_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [c, b]);
       }
+
+      // ---------- 3b. Tiers ASTECH (CONTRAT_AFFL → FOURNISSEUR) : code tiers, SIRET, coordonnées ----------
+      const fous = new Map((await src.rows(conn, 'SELECT * FROM FOURNISSEUR WHERE SFOU_COD IN (SELECT CONTAFL_FOURN FROM CONTRAT_AFFL WHERE CONTAFL_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF))'))
+        .map((f) => [`${f.SFOU_SOC}|${f.SFOU_COD}`, f]));
+      let tiersLies = 0;
+      for (const a of affl) {
+        const f = fous.get(`${a.CONTAFL_SOCFOURN}|${a.CONTAFL_FOURN}`); const cid = contrMap.get(String(a.CONTAFL_CONTID));
+        if (!f || !cid) { if (!f) warn('tiers', a.CONTAFL_CONTID, `Fournisseur ${a.CONTAFL_FOURN} introuvable`); continue; }
+        const siret = str(f.SFOU_SIRET)?.replace(/\s/g, '') || null;
+        const adresse = [f.SFOU_ADR1, f.SFOU_ADR2, f.SFOU_ADR3].map(str).filter(Boolean).join(' ') || null;
+        // Les IBAN / RIB (CONTAFL_IBAN, SREG_*) ne sont volontairement PAS repris : données sensibles.
+        const r = await tx.run(
+          `UPDATE ${t('contractants')} SET astech_tiers_cod = COALESCE(astech_tiers_cod, $2), siren = COALESCE(siren, $3), email = COALESCE(email, $4),
+             telephone = COALESCE(telephone, $5), adresse = COALESCE(adresse, $6), code_postal = COALESCE(code_postal, $7), ville = COALESCE(ville, $8),
+             type = CASE WHEN $3 IS NOT NULL THEN 'morale' ELSE type END, updated_at = now()
+           WHERE id IN (SELECT contractant_id FROM ${t('contrat_contractants')} WHERE contrat_id = $1)`,
+          [cid, String(f.SFOU_COD), siret && siret.length >= 9 ? siret.slice(0, 9) : null, str(f.SFOU_EMAIL1), str(f.SFOU_TEL1), adresse, str(f.SFOU_ADRFACTCP), str(f.SFOU_VILLE)]);
+        tiersLies += r.changes;
+      }
+      stats.tiers_astech = { fournisseurs: fous.size, liens: tiersLies };
 
       // ---------- 4. Conditions financières ----------
       stats.mapping.conditions = { CONTRAT_RUB: rub[0] ? Object.keys(rub[0]) : '(table absente ou vide)' };
@@ -316,6 +371,7 @@ async function importerDocuments({ conn, user, result, warn, log }) {
     try {
       if (await db.get(`SELECT 1 AS x FROM ${t('documents')} WHERE astech_id = $1`, [docId])) { out.deja_repris++; continue; }
       const d = (await src.rows(conn, `SELECT * FROM DOC WHERE DOC_ID = :i`, [docId]))[0]; if (!d) continue;
+      if ((fmtDate(d.DOC_CDATE) || '') < config.repriseDepuis) { out.ecartes_avant_coupure = (out.ecartes_avant_coupure || 0) + 1; continue; }
       const nom = str(d.DOC_FILE) || str(d.DOC_TITRE) || `document-${docId}`;
       let buffer = null;
       if (d.DOC_RESID) {

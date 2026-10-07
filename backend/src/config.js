@@ -73,6 +73,9 @@ const config = {
     } : fromJson(aj.oracle_test || aj.test || aj._test),
   },
 
+  // Reprise : on ne garde que les données datées de cette date (incluse) ou postérieures.
+  repriseDepuis: process.env.LOCATIF_REPRISE_DEPUIS || '2022-01-01',
+
   sofficePath: process.env.SOFFICE_PATH || '',
   mailFooter: {
     footer1: process.env.MAIL_FOOTER1 || "Ville d'Ivry-sur-Seine",

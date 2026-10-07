@@ -8,3 +8,5 @@ backend/storage/
 backend/config.json
 .DS_Store
 exports/
+backend/sedit_tmp.js
+backend/q_tmp.js

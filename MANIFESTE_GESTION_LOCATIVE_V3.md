@@ -1301,6 +1301,14 @@ L'état de paiement du titre est lu dans SEDIT : payé (date de paiement renseig
 pris en charge, rejeté, suspendu. SEDIT ne fournit que la **date** de paiement, pas le montant encaissé : un paiement partiel n'est pas
 visible (INT-PAY-004 reste à spécifier). L'état se rafraîchit à chaque passage de `scripts/rapprocher-titres-sedit.js`.
 
+**MIG-020 — DÉCISION DE CONCEPTION (correction de la reprise)**
+Loyer et charges : la première reprise portait le total des échéances en « loyer » (charges à 0) et rattachait par erreur les rubriques de
+`CONTRAT_RUB` à un mauvais contrat (identifiant de rubrique pris pour celui du contrat). Corrigé : chaque échéance est ventilée à partir des
+lignes d'échéance ASTECH (`CONTRAT_ECHLIGNE` : somme des lignes = total ASTECH pour 100 % des échéances, jours de prorata compris) ; les
+conditions financières viennent des rubriques du contrat avec le montant courant de la dernière échéance (révisions comprises). Les charges
+mensuelles ASTECH sont reprises comme provisions sur charges. Une relance de la reprise recrée les conditions issues d'ASTECH et ne touche pas
+une échéance dont le total a été ajusté à la main.
+
 ## 33.4 Documents et stockage
 
 **DOC-016 — DÉCISION DE CONCEPTION**

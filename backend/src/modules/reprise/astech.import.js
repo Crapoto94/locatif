@@ -115,6 +115,7 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
 
     const hier = new Map((await src.rows(conn, "SELECT ARB_ID, ARB_CODE, ARB_DES, ARB_NOMC, ARB_GENRE, ARB_SUP, ARB_CAT, ARB_SSERV FROM ARBO WHERE ARB_CODE LIKE 'S%'")).map((r) => [String(r.ARB_ID), r]));
     const adrNoeuds = new Map((await src.rows(conn, "SELECT * FROM ARBO_ADR WHERE ARBA_ID IN (SELECT ARB_ID FROM ARBO WHERE ARB_GENRE IN ('SITE','BAT') AND ARB_CODE LIKE 'S%')")).map((r) => [String(r.ARBA_ID), r]));
+    const ligEch = await src.rows(conn, "SELECT CONTEL_ECHID, CONTEL_CONTID, CONTEL_DES, CONTEL_RUBID, CONTEL_MTTC, CONTEL_MTHT_NOPRORATA, CONTEL_NBJ_EFF, CONTEL_NBJ_PER, CONTEL_CHARGEAV, CONTEL_CHARGE, CONTEL_CHARGEREGUL FROM CONTRAT_ECHLIGNE WHERE CONTEL_CONTID IN (SELECT CONTL_ID FROM CONTRAT_LOCATIF)");
     const result = await db.tx(async (tx) => {
       // ---------- 1. Indices ----------
       const indMap = new Map(); // INSEE_ID -> { id, type }
@@ -280,37 +281,66 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
       }
       stats.tiers_astech = { fournisseurs: fous.size, liens: tiersLies };
 
-      // ---------- 4. Conditions financières ----------
-      stats.mapping.conditions = { CONTRAT_RUB: rub[0] ? Object.keys(rub[0]) : '(table absente ou vide)' };
+      // ---------- 4. Conditions financières : rubriques du contrat (CONTRAT_RUB.CONTRU_CONTID), montant COURANT lu sur la dernière échéance ----------
+      // Les lignes d'échéance (CONTRAT_ECHLIGNE) distinguent loyer et charges et portent le montant réellement appelé, révisions comprises.
+      stats.mapping.conditions = { CONTRAT_RUB: rub[0] ? Object.keys(rub[0]) : '(table absente ou vide)', CONTRAT_ECHLIGNE: ligEch[0] ? Object.keys(ligEch[0]) : '(vide)' };
+      const rubParId = new Map(rub.map((r) => [String(r.CONTRU_ID), r]));
+      const classeTexte = (txt) => (/CHARGE|PROVISION/i.test(txt || '') ? 'provision_charges' : /TAXE/i.test(txt || '') ? 'taxe_fonciere' : 'loyer');
+      const classeLigne = (l) => {
+        if (['CONTEL_CHARGEAV', 'CONTEL_CHARGE', 'CONTEL_CHARGEREGUL'].some((k) => String(l[k] || '').toUpperCase() === 'O')) return 'provision_charges';
+        const rb = rubParId.get(String(l.CONTEL_RUBID));
+        return classeTexte(rb?.CONTRU_DES || l.CONTEL_DES);
+      };
+      const lignesParEch = new Map();
+      for (const l of ligEch) { const k = String(l.CONTEL_ECHID); if (!lignesParEch.has(k)) lignesParEch.set(k, []); lignesParEch.get(k).push(l); }
+      const derniereParContrat = new Map(); // CONT_ID -> dernière échéance (<= aujourd'hui, sinon la plus récente)
+      const aujourdhui = new Date().toISOString().slice(0, 10);
+      for (const r of [...echHist, ...ech]) {
+        const k = String(r.CONTEC_CONTID); const d = fmtDate(r.CONTEC_DATEDEB) || fmtDate(r.CONTEC_DATE) || '';
+        const cur = derniereParContrat.get(k); const ok = d <= aujourdhui;
+        if (!cur || (ok && (!cur.ok || d > cur.d)) || (!ok && !cur.ok && d < cur.d)) derniereParContrat.set(k, { d, ok, id: String(r.CONTEC_ID) });
+      }
+      // Reprise précédente : rubriques mal rattachées (identifiant de rubrique pris pour celui du contrat) -> on repart des rubriques ASTECH.
+      // 1) conditions « historiques » sans marqueur ASTECH, uniquement pour les contrats qui n'ont pas encore été repris proprement (une saisie manuelle ultérieure est préservée) ;
+      // 2) conditions déjà marquées RUB: (issues d'ASTECH) : recréées à chaque reprise.
+      await tx.run(`DELETE FROM ${t('conditions_financieres')} cf WHERE cf.astech_id IS NULL AND COALESCE(cf.libelle,'') <> 'Loyer révisé'
+                      AND cf.contrat_id IN (SELECT id FROM ${t('contrats')} WHERE astech_id IS NOT NULL)
+                      AND NOT EXISTS (SELECT 1 FROM ${t('conditions_financieres')} c2 WHERE c2.contrat_id = cf.contrat_id AND c2.astech_id LIKE 'RUB:%')`);
+      await tx.run(`DELETE FROM ${t('conditions_financieres')} WHERE astech_id LIKE 'RUB:%'`);
       const rubParContrat = new Map();
       for (const r of rub) {
-        const kc = pickKey(r, /^CONTRU_(CONTID|CONT_ID|ID)$/, /^CONTRU_CONT\w*$/);
-        const cid = kc ? contrMap.get(String(r[kc])) : null;
-        if (!cid) continue;
-        const libelle = str(pick(r, /^CONTRU_(DES|LIB)\w*$/));
-        const montant = num(pick(r, /^CONTRU_(MT|MONT)\w*$/, /MT/));
-        if (!montant) continue;
-        const code = /PROVISION/i.test(libelle || '') ? 'provision_charges' : (String(r.CONTRU_CHARGE || '').toUpperCase() === 'O' || /CHARGE/i.test(libelle || '')) ? 'charges' : /TAXE/i.test(libelle || '') ? 'taxe_fonciere' : 'loyer';
-        const de = fmtDate(pick(r, /^CONTRU_(DATDEB|DATEFF\w*|DATD\w*)$/)); const df = fmtDate(pick(r, /^CONTRU_(DATFIN|DATF\w*)$/));
-        (rubParContrat.get(cid) || rubParContrat.set(cid, []).get(cid)).push({ code, libelle, montant, de, df, id: pick(r, /^CONTRU_ID$/) });
+        const cid = contrMap.get(String(r.CONTRU_CONTID)); if (!cid) continue;
+        if (String(r.CONTRU_UNEFOIS || '').toUpperCase() === 'O') continue; // rubrique ponctuelle : pas une condition récurrente
+        (rubParContrat.get(cid) || rubParContrat.set(cid, []).get(cid)).push(r);
       }
       for (const r of contrat) {
         const cid = contrMap.get(String(r.CONT_ID)); const l = locByCont.get(String(r.CONT_ID)) || {};
-        if ((await tx.get(`SELECT 1 AS x FROM ${t('conditions_financieres')} WHERE contrat_id = $1 LIMIT 1`, [cid]))) continue; // déjà repris : on ne réécrit pas
-        const rubs = rubParContrat.get(cid) || [];
-        const loyerAstech = num(l.CONTL_MTACT) && !rubs.some((x) => ['loyer', 'taxe_fonciere'].includes(x.code)) ? [{ code: 'loyer', libelle: 'Loyer (ASTECH CONTL_MTACT)', montant: num(l.CONTL_MTACT), de: fmtDate(l.CONTL_DATDEBQUIT) || fmtDate(l.CONTL_DATENTREE) || fmtDate(r.CONT_DATDEB), df: null }] : [];
-        const lignes = [...loyerAstech, ...rubs];
+        const de = fmtDate(l.CONTL_DATDEBQUIT) || fmtDate(l.CONTL_DATENTREE) || fmtDate(r.CONT_DATDEB);
+        const der = derniereParContrat.get(String(r.CONT_ID)); const lignesDer = der ? lignesParEch.get(der.id) || [] : [];
+        const lignes = [];
+        for (const rb of rubParContrat.get(cid) || []) {
+          const courant = lignesDer.find((x) => String(x.CONTEL_RUBID) === String(rb.CONTRU_ID));
+          // montant courant : ligne de la dernière échéance (hors prorata), à défaut montant révisé de la rubrique, à défaut montant de base
+          const montant = num(courant?.CONTEL_MTHT_NOPRORATA) ?? num(courant?.CONTEL_MTTC) ?? (String(rb.CONTRU_R_ACT || '').toUpperCase() === 'O' ? num(rb.CONTRU_R_MTTTC) : null) ?? num(rb.CONTRU_MTTC) ?? num(rb.CONTRU_MTHT);
+          if (!montant) continue;
+          lignes.push({ code: classeTexte(rb.CONTRU_DES), libelle: str(rb.CONTRU_DES), montant, de, id: `RUB:${rb.CONTRU_ID}` });
+        }
+        if (!lignes.length) { // contrat sans rubrique exploitable : loyer et charges d'avance portés par le bail (CONTL_MTACT / CONTL_MTADD)
+          if (num(l.CONTL_MTACT)) lignes.push({ code: 'loyer', libelle: 'Loyer (ASTECH CONTL_MTACT)', montant: num(l.CONTL_MTACT), de, id: `RUB:BAIL-${r.CONT_ID}-L` });
+          if (num(l.CONTL_MTADD)) lignes.push({ code: 'provision_charges', libelle: 'Charges (ASTECH CONTL_MTADD)', montant: num(l.CONTL_MTADD), de, id: `RUB:BAIL-${r.CONT_ID}-C` });
+        }
         for (const x of lignes) {
           await ensureRef(tx, 'rubrique', x.code, x.code);
-          await tx.run(`INSERT INTO ${t('conditions_financieres')}(contrat_id, rubrique_code, libelle, montant, date_effet, date_fin) VALUES ($1,$2,$3,$4,$5,$6)`, [cid, x.code, x.libelle, x.montant, x.de, x.df]);
+          await tx.run(`INSERT INTO ${t('conditions_financieres')}(contrat_id, rubrique_code, libelle, montant, date_effet, astech_id) VALUES ($1,$2,$3,$4,$5,$6)`, [cid, x.code, x.libelle, x.montant, x.de, x.id]);
           count('conditions', 'crees');
         }
       }
 
       // ---------- 5. Échéances (historique émis d'abord, puis prévisionnel sans doublon de période) ----------
+      // Loyer et charges viennent des lignes d'échéance (somme des lignes = total ASTECH) ; les jours de prorata aussi.
       stats.mapping.echeances = { CONTRAT_ECH: ech[0] ? Object.keys(ech[0]) : [] };
       const today = new Date().toISOString().slice(0, 10);
-      const vues = new Set((await tx.all(`SELECT contrat_id || '|' || periode_debut AS k FROM ${t('echeances')}`)).map((x) => x.k));
+      const vues = new Set((await tx.all(`SELECT contrat_id || '|' || periode_debut AS k FROM ${t('echeances')} WHERE source = 'app'`)).map((x) => x.k)); // échéances générées par l'application : pas de doublon
       for (const [liste, source, pref] of [[echHist, 'astech_hist', 'H'], [ech, 'astech_prev', 'P']]) {
         for (const r of liste) {
           count('echeances', 'lus');
@@ -320,16 +350,27 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
           const k = `${cid}|${dd}`; if (vues.has(k)) continue; vues.add(k);
           const total = num(r.CONTEC_MTTC) ?? num(r.CONTEC_MTHT) ?? 0;
           const statut = fmtDate(r.CONTEC_DATGF) ? 'titree' : (r.CONTEC_NUMQUIT || r.CONTEC_DATQUIT) ? 'emise' : (fmtDate(r.CONTEC_DATE) || dd) < today ? 'echue_non_emise' : 'planifiee';
-          // Le détail loyer / charges n'est pas reconstructible depuis CONTRAT_ECH : le total est porté en loyer (voir rapport).
-          await tx.run(
-            `INSERT INTO ${t('echeances')}(contrat_id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, statut, numero_quittance, date_quittance, date_titrage, source, astech_key)
-             VALUES ($1,$2,$3,$4,$5,$6,0,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (astech_key) DO NOTHING`,
-            [cid, str(r.CONTEC_DES), dd, fmtDate(r.CONTEC_DATEFIN), fmtDate(r.CONTEC_DATE) || dd, total, statut, str(r.CONTEC_NUMQUIT), fmtDate(r.CONTEC_DATQUIT), fmtDate(r.CONTEC_DATGF), source,
+          const lg = lignesParEch.get(String(r.CONTEC_ID)) || [];
+          let loyer = total; let charges = 0; let prorata = false; let jEff = null; let jPer = null;
+          if (lg.length) {
+            charges = Math.round(lg.filter((x) => classeLigne(x) === 'provision_charges').reduce((s, x) => s + (num(x.CONTEL_MTTC) || 0), 0) * 100) / 100;
+            loyer = Math.round((total - charges) * 100) / 100;
+            const p = lg.find((x) => num(x.CONTEL_NBJ_EFF) !== null && num(x.CONTEL_NBJ_PER) && num(x.CONTEL_NBJ_EFF) < num(x.CONTEL_NBJ_PER));
+            if (p) { prorata = true; jEff = num(p.CONTEL_NBJ_EFF); jPer = num(p.CONTEL_NBJ_PER); }
+          } else warn('echeance', r.CONTEC_ID, 'Aucune ligne d\'échéance : le total est porté en loyer', 'info');
+          const x = await tx.get(
+            `INSERT INTO ${t('echeances')}(contrat_id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, prorata, prorata_jours, prorata_base,
+                statut, numero_quittance, date_quittance, date_titrage, source, astech_key)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+             ON CONFLICT (astech_key) DO UPDATE SET montant_loyer = EXCLUDED.montant_loyer, montant_charges = EXCLUDED.montant_charges, prorata = EXCLUDED.prorata,
+               prorata_jours = EXCLUDED.prorata_jours, prorata_base = EXCLUDED.prorata_base
+               WHERE ${t('echeances')}.montant_total = EXCLUDED.montant_total  -- une échéance ajustée à la main (total modifié) n'est pas touchée
+             RETURNING (xmax = 0) AS created`,
+            [cid, str(r.CONTEC_DES), dd, fmtDate(r.CONTEC_DATEFIN), fmtDate(r.CONTEC_DATE) || dd, loyer, charges, total, prorata, jEff, jPer, statut, str(r.CONTEC_NUMQUIT), fmtDate(r.CONTEC_DATQUIT), fmtDate(r.CONTEC_DATGF), source,
               `${pref}:${r.CONTEC_CONTID}:${dd}`]);
-          count('echeances', 'crees');
+          if (x) count('echeances', x.created ? 'crees' : 'mis_a_jour');
         }
       }
-      if (stats.objets.echeances?.crees) warn('echeance', null, 'Montants d\'échéances repris en total (MTTC) : la ventilation loyer / charges n\'existe pas dans CONTRAT_ECH ; à recomposer via les conditions financières.', 'info');
 
       // ---------- 6. Révisions ----------
       for (const r of revs) {

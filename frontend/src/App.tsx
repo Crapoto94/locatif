@@ -15,15 +15,11 @@ import Documents from './pages/Documents';
 import Generation from './pages/Generation';
 import Alertes from './pages/Alertes';
 import Recherche from './pages/Recherche';
-import { Loading, PageHeader, Card } from './components/ui';
-
-// Écrans pas encore livrés (états, audit, référentiels, administration).
-const ARealiser = ({ titre }: { titre: string }) => (
-  <>
-    <PageHeader title={titre} />
-    <Card><div className="py-space-xl text-center text-on-surface-variant">Écran en cours de développement (l'API correspondante est déjà disponible).</div></Card>
-  </>
-);
+import Etats from './pages/Etats';
+import Audit from './pages/Audit';
+import Referentiels from './pages/Referentiels';
+import { AdminDroits, AdminGed, AdminReprise } from './pages/Admin';
+import { Loading } from './components/ui';
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -48,12 +44,12 @@ export default function App() {
         <Route path="generation" element={<Generation />} />
         <Route path="alertes" element={<Alertes />} />
         <Route path="recherche" element={<Recherche />} />
-        <Route path="etats" element={<ARealiser titre="États & statistiques" />} />
-        <Route path="audit" element={<ARealiser titre="Historique & audit" />} />
-        <Route path="referentiels" element={<ARealiser titre="Référentiels" />} />
-        <Route path="admin/droits" element={<ARealiser titre="Comptes & droits" />} />
-        <Route path="admin/ged" element={<ARealiser titre="Stockage / GED" />} />
-        <Route path="admin/reprise" element={<ARealiser titre="Reprise ASTECH" />} />
+        <Route path="etats" element={<Etats />} />
+        <Route path="audit" element={<Audit />} />
+        <Route path="referentiels" element={<Referentiels />} />
+        <Route path="admin/droits" element={<AdminDroits />} />
+        <Route path="admin/ged" element={<AdminGed />} />
+        <Route path="admin/reprise" element={<AdminReprise />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

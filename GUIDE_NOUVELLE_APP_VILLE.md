@@ -541,3 +541,57 @@ Points transverses à cadrer dès le début du projet :
 - [ ] Envoi de mail via `POST /api/v1/mail/send`, SMS via `POST /api/v1/sms/send`
 - [ ] Données Ville (élus, sites, écoles, organisation) lues via l'API Hub DSI
 - [ ] Endpoints documentés (Swagger), code court et modulaire
+
+---
+
+## 8. Retours d'expérience — interopérabilité (application Gestion Locative)
+
+Ajouts issus de la réalisation de l'application *Gestion Locative* (schéma `locatif`, ports 3320/3321).
+
+### 8.1 Hériter d'un `.env` : variables à ne PAS reprendre
+Copier le `.env` d'une autre application est une source d'accidents. Constatés :
+- **`PGC_SCHEMA`** pointait vers le schéma d'une autre application (`pgc`). Une migration lancée avec cette valeur aurait écrit dans ses tables. → Utiliser une variable **propre à l'application** (`LOCATIF_SCHEMA`) et **refuser au démarrage** tout schéma qui ne porte pas le préfixe de l'app (`checkConfig()`).
+- **`SCHEDULER_ENABLED=true`** aurait activé nos envois de mails planifiés. → Variables de planification propres (`LOCATIF_SCHEDULER_ENABLED`).
+- **`JWT_SECRET` partagé** : un jeton émis par une autre application serait accepté. → Un secret propre, **et** une audience (`aud`) spécifique vérifiée à chaque requête.
+- Toujours livrer un `.env.example` complet et partir de celui-ci, pas d'un `.env` voisin.
+
+### 8.2 Comptes : AD via l'APM + compte local de secours
+- Les agents s'authentifient par `POST /api/v1/ad/authenticate` (APM) ; l'application émet ensuite **son propre JWT**. Aucun mot de passe d'agent n'est stocké.
+- Un **compte administrateur local** peut exister en complément (`LOCAL_ADMIN_USERNAME` / `LOCAL_ADMIN_PASSWORD` dans le `.env`, comparaison à temps constant, désactivable par `LOCAL_ADMIN_ENABLED=false`). C'est une dérogation à documenter et à faire arbitrer (RSSI) avant la production.
+- Premier passage d'un agent AD : compte créé avec le profil de consultation seul ; les droits sont accordés par un administrateur. Les **droits sont portés par des profils × permissions modifiables** (jamais figés dans le code), les comptes sont désactivés, jamais supprimés.
+- Le frontend ne voit jamais la clé APM : tout passe par le backend.
+
+### 8.3 Stockage de fichiers : il n'existe PAS d'API centrale
+Ni l'APM ni le Hub DSI n'exposent d'API de dépôt de fichiers utilisable par une application tierce (les routes `/ged` du Hub sont réservées à son interface d'administration). Pattern retenu, repris de VibeDélib :
+- Un **port** `DocumentStorePort` (`put / get / remove / test / browse`) et trois adaptateurs : **filer** (dossier local ou partage UNC), **Alfresco** (API REST v1), **simulateur** (tests).
+- Le mode se choisit dans un **écran d'administration** (table de config à une ligne) : mode, racine du filer, URL, compte technique, mot de passe **chiffré au repos et jamais renvoyé** par l'API, dossier racine, **bouton de test** (écriture + relecture, diagnostic lisible), **explorateur**, **migration** vers le stockage actif.
+- Clé de stockage préfixée par l'adaptateur (`fs:`, `alf:`, `sim:`) : plusieurs stockages **coexistent** ; la migration filer → GED se fait sans rupture.
+- **Aucun repli silencieux** : si le stockage actif est injoignable, l'envoi est refusé avec un message clair (HTTP 502).
+- Un document = une ligne + des **versions** + des **liens** vers N objets (pas de copie physique multiple) ; un fichier inchangé (même SHA-256) n'est pas redéposé ; suppression logique uniquement.
+- Alfresco : `GET /alfresco/api/discovery` pour le test, `POST …/nodes/{id}/children` (multipart `filedata`) pour déposer, `PUT …/nodes/{id}/content` pour une **nouvelle version du même nœud**. Passer le dossier racine par chemin relatif ou identifiant de nœud.
+- Sous Windows l'OS gère l'UNC ; sous Linux/Docker, **monter le partage (CIFS)** sur un chemin local et pointer la racine dessus.
+
+### 8.4 Lire ASTECH (Oracle 19c, schéma `ASTECHIVR`)
+- **Mode *thick* obligatoire** (`oracledb.initOracleClient({ libDir })` avec Instant Client) : le mode *thin* échoue en `NJS-116` (vérificateur de mot de passe 10G).
+- Paramètres : hôte `10.103.130.25:1523`, service `PIVRY01` (PROD) ; `10.103.130.20:1523`, `TIVRY01` (TEST). Les fournir par `ORACLE_ASTECH_*` / `ORACLE_ASTECH_TEST_*` **ou** par un `config.json` au format de `astech-explorer/config.example.json` (ignoré par git). **Lecture seule** : n'utiliser que le compte applicatif, jamais `system`/`sysdba`.
+- L'API APM `POST /api/v1/oracle/query` est en **SELECT seul** et ne renvoie pas les BLOB : insuffisante pour reprendre des documents ; pour une reprise complète, accès direct.
+- Les `DATE` Oracle arrivent en objets `Date` du fuseau **local** du processus : lire les composantes locales (`getFullYear()`…) et non `toISOString()`, sinon décalage d'un jour.
+- Ne pas deviner les colonnes : `node scripts/import-astech.js --discover` liste les colonnes réelles. Constats : le type de contrat est `CONTRAT_LOCATIF.CONTL_TYPCO` (AOT, COP, BAIL89, BAILCC, ZZZ…) — `CONTRAT.CONT_TYP` vaut 6 pour tous ; le loyer courant est `CONTL_MTACT` même quand `CONTRAT_RUB` ne contient que des charges ; le locataire n'est qu'une chaîne (`CONTL_CONTRACTANT`), sans identifiant tiers ; aucune table de libellés n'existe pour les types.
+- Volumes constatés (octobre 2026) : 249 biens, 265 contrats, 163 contractants distincts, 2 942 échéances prévisionnelles + 2 095 historiques, 316 révisions.
+
+### 8.5 Écrire un import fiable
+- **Idempotent** : clé = identifiant historique (`astech_id`) ; `INSERT … ON CONFLICT DO UPDATE` qui **complète les champs vides** et rafraîchit la copie brute, sans écraser les corrections saisies.
+- Un mode **simulation** (`--dry-run`) : tout le chargement dans une transaction annulée.
+- Un **rapport de reprise** persistant (volumes, anomalies, mapping utilisé) et un écran de **contrôle des écarts** source / application.
+- **Doublons signalés, jamais fusionnés** automatiquement ; l'utilisateur tranche.
+- Chaque ligne conserve sa copie brute (`astech_raw`, JSONB) pour pouvoir re-mapper sans relire la source.
+
+### 8.6 Autres services de la Ville
+- **Mail** : `POST /api/v1/mail/send` de l'APM ; seul le corps est fourni (template institutionnel appliqué), le pied de page passe en paramètres. **Teams n'est pas exposé** par l'APM : ne pas promettre cette notification.
+- **Hub DSI** (`dsk_…`) : `GET /api/ville/sites`, `/api/directions-services` ; mettre en cache mémoire (10 min), dégrader sans erreur si la clé est absente.
+- **`/api/status`** : agréger base, APM, Hub et stockage ; HTTP 503 si la base ou le stockage tombe ; sert de `HEALTHCHECK` Docker.
+
+### 8.7 Docker
+- `docker-compose.yml` à la racine : `backend` (Node 22, `env_file: .env`, volume `/app/storage`), `frontend` (build Vite puis **nginx** qui relaie `/api` vers `backend:3320` → même origine, pas de CORS à ouvrir). `VITE_API_URL` vide = même origine.
+- `oracledb` en `optionalDependencies` et `npm ci --omit=optional` : l'image API n'embarque pas Instant Client ; la **reprise se lance depuis un poste** qui l'a.
+- Prévoir `client_max_body_size` (nginx) cohérent avec `MAX_UPLOAD_MB`.

@@ -11,6 +11,9 @@ const docs = require('../documents/documents.service');
 const { fmtDate, num, str, pick, pickKey, raw } = src;
 const TYPES_INDICE = { 1: 'IRL', 2: 'ICC', 5: 'ILC', 6: 'ILAT' };
 const FORMES = /\b(SARL|SAS|SASU|SCI|SCM|SA|EURL|SNC|ASSOC\w*|SOCIETE|SOCIÉTÉ|CABINET|COMITE|COMITÉ|CENTRE|UNION|FEDERATION|FÉDÉRATION|CLUB|ECOLE|ÉCOLE|MUTUELLE|FONDATION|SYNDICAT|COOPERATIVE|COOPÉRATIVE|GROUPE|ETS|ETABLISSEMENTS)\b/i;
+// Codes ASTECH connus ; les autres restent sous leur code (aucun libellé n'existe dans ASTECH — à valider par AFLC).
+const TYPES_CONTRAT = { BAIL89: ['bail_habitation_89', "Bail d'habitation (loi 89)"], BAILCC: ['bailcc', 'Bail commercial (BAILCC — à valider)'],
+  AOT: ['aot', "Autorisation d'occupation temporaire (AOT — à valider)"], COP: ['cop', "Convention d'occupation précaire (COP — à valider)"], ZZZ: ['zzz', 'Non qualifié (ZZZ)'] };
 const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 function typeBien(libelle) {
@@ -142,11 +145,13 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
         const statut = { O: 'en_cours', C: 'clos', N: 'divers' }[String(r.CONT_ACTIF || '').toUpperCase()] || 'divers';
         const rev = lastRev.get(String(r.CONT_ID));
         const refInd = (rev && indMap.get(String(rev.CONTRV_INSEE))) || indMap.get(String(l.CONTL_INSEEDEP)) || indMap.get(String(l.CONTL_INSEE)) || null;
-        const typeRaw = str(pick(r, /^CONT_(TYP|TYPE|NAT|CAT)\w*$/));
-        if (typeRaw) await ensureRef(tx, 'type_contrat', norm(typeRaw).toLowerCase().replace(/ /g, '_').slice(0, 50), typeRaw);
+        // Le type métier est CONTL_TYPCO (AOT, COP, BAIL89…) ; CONT_TYP vaut 6 pour tous les contrats locatifs.
+        const typeRaw = str(l.CONTL_TYPCO);
+        const typeCode = typeRaw ? (TYPES_CONTRAT[typeRaw.toUpperCase()]?.[0] || typeRaw.toLowerCase()) : null;
+        if (typeCode) await ensureRef(tx, 'type_contrat', typeCode, TYPES_CONTRAT[typeRaw.toUpperCase()]?.[1] || `${typeRaw} (code ASTECH, à libeller)`);
         const mtact = num(l.CONTL_MTACT);
         const data = {
-          numero: str(r.CONT_COD) || `ASTECH-${r.CONT_ID}`, position: 'bailleur', type_code: typeRaw ? norm(typeRaw).toLowerCase().replace(/ /g, '_').slice(0, 50) : null,
+          numero: str(r.CONT_COD) || `ASTECH-${r.CONT_ID}`, position: 'bailleur', type_code: typeCode,
           statut_code: statut, objet: str(r.CONT_DES), gratuit: !mtact || String(r.CONT_GRATUIT || l.CONTL_GRATUIT || '').toUpperCase() === 'O',
           date_signature: fmtDate(pick(l, /^CONTL_DAT(SIGN|SIG)\w*$/)), date_debut: fmtDate(r.CONT_DATDEB), date_fin: fmtDate(r.CONT_DATFIN),
           date_entree: fmtDate(l.CONTL_DATENTREE), date_sortie: fmtDate(l.CONTL_DATSORTIE), date_debut_quittancement: fmtDate(l.CONTL_DATDEBQUIT), date_cloture: fmtDate(l.CONTL_DATCLO),
@@ -203,7 +208,9 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
       for (const r of contrat) {
         const cid = contrMap.get(String(r.CONT_ID)); const l = locByCont.get(String(r.CONT_ID)) || {};
         if ((await tx.get(`SELECT 1 AS x FROM ${t('conditions_financieres')} WHERE contrat_id = $1 LIMIT 1`, [cid]))) continue; // déjà repris : on ne réécrit pas
-        const lignes = rubParContrat.get(cid) || (num(l.CONTL_MTACT) ? [{ code: 'loyer', libelle: 'Loyer (ASTECH CONTL_MTACT)', montant: num(l.CONTL_MTACT), de: fmtDate(l.CONTL_DATDEBQUIT) || fmtDate(l.CONTL_DATENTREE) || fmtDate(r.CONT_DATDEB), df: null }] : []);
+        const rubs = rubParContrat.get(cid) || [];
+        const loyerAstech = num(l.CONTL_MTACT) && !rubs.some((x) => ['loyer', 'taxe_fonciere'].includes(x.code)) ? [{ code: 'loyer', libelle: 'Loyer (ASTECH CONTL_MTACT)', montant: num(l.CONTL_MTACT), de: fmtDate(l.CONTL_DATDEBQUIT) || fmtDate(l.CONTL_DATENTREE) || fmtDate(r.CONT_DATDEB), df: null }] : [];
+        const lignes = [...loyerAstech, ...rubs];
         for (const x of lignes) {
           await ensureRef(tx, 'rubrique', x.code, x.code);
           await tx.run(`INSERT INTO ${t('conditions_financieres')}(contrat_id, rubrique_code, libelle, montant, date_effet, date_fin) VALUES ($1,$2,$3,$4,$5,$6)`, [cid, x.code, x.libelle, x.montant, x.de, x.df]);

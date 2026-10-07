@@ -109,7 +109,7 @@ async function notifier() {
   for (const [to, list] of groupes) {
     const li = list.map((a) => `<li><strong>${a.titre}</strong>${a.date_cible ? ` — ${a.date_cible}` : ''}<br/>${a.message || ''}</li>`).join('');
     try {
-      await apm.mailSend({ to, subject: `Gestion locative — ${list.length} alerte(s) à traiter`,
+      await apm.mailSend({ to, subject: `VibeLocatif — ${list.length} alerte(s) à traiter`,
         content: `<p>Bonjour,</p><p>${list.length} alerte(s) nécessitent votre attention :</p><ul>${li}</ul>${base ? `<p><a href="${base}/alertes">Ouvrir le centre des alertes</a></p>` : ''}` });
       await db.run(`UPDATE ${t('alertes')} SET notifie_le = now() WHERE id = ANY($1)`, [list.map((a) => a.id)]);
       envoyees += list.length;

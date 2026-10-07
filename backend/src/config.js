@@ -85,7 +85,7 @@ const config = {
   sofficePath: process.env.SOFFICE_PATH || '',
   mailFooter: {
     footer1: process.env.MAIL_FOOTER1 || "Ville d'Ivry-sur-Seine",
-    footer2: process.env.MAIL_FOOTER2 || 'Gestion locative',
+    footer2: process.env.MAIL_FOOTER2 || 'VibeLocatif',
     footer3: process.env.MAIL_FOOTER3 || '',
     footerColor: process.env.MAIL_FOOTER_COLOR || '#0f2a66',
   },

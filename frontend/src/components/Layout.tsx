@@ -65,7 +65,7 @@ export default function Layout() {
           <div className="h-14 px-space-md flex items-center gap-space-sm">
             <Link to="/" title="Ville d'Ivry-sur-Seine" className="flex-shrink-0"><img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-10 w-auto rounded shadow-sm bg-white" /></Link>
             <div className="flex flex-col min-w-0">
-              <span className="text-headline-sm text-primary truncate leading-tight">PATRIMOINE</span>
+              <span className="text-headline-sm text-primary truncate leading-tight">VibeLocatif</span>
               <span className="text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Ville d'Ivry-sur-Seine</span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-// Gestion Locative — API (Express 5). Routes versionnées /api/v1, JWT applicatif, schéma PostgreSQL dédié.
+// VibeLocatif — API (Express 5). Routes versionnées /api/v1, JWT applicatif, schéma PostgreSQL dédié.
 const express = require('express');
 const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -29,7 +29,7 @@ app.get('/api/status', async (req, res) => {
 });
 
 const spec = swaggerJsdoc({
-  definition: { openapi: '3.0.0', info: { title: 'Gestion Locative API', version: '1.0.0' },
+  definition: { openapi: '3.0.0', info: { title: 'VibeLocatif API', version: '1.0.0' },
     components: { securitySchemes: { bearer: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } }, security: [{ bearer: [] }] },
   apis: ['./src/modules/**/*.js'],
 });
@@ -90,7 +90,7 @@ async function start() {
   checkConfig();
   await migrate();
   await seedAll();
-  app.listen(config.port, () => console.log(`[API] Gestion Locative — http://localhost:${config.port} (schéma ${SCHEMA})`));
+  app.listen(config.port, () => console.log(`[API] VibeLocatif — http://localhost:${config.port} (schéma ${SCHEMA})`));
   planifier();
 }
 

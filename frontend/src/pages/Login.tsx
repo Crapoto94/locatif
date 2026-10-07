@@ -22,7 +22,7 @@ export default function Login() {
         <div className="flex items-center gap-space-sm">
           <img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-14 w-auto rounded flex-shrink-0" />
           <div>
-            <h1 className="text-headline-md text-primary font-bold leading-tight">Patrimoine & Gestion Locative</h1>
+            <h1 className="text-headline-md text-primary font-bold leading-tight">VibeLocatif</h1>
             <p className="text-body-sm text-on-surface-variant">Ville d'Ivry-sur-Seine</p>
           </div>
         </div>

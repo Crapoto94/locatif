@@ -1,4 +1,4 @@
-# Gestion Locative — déploiement : copier .env.example en .env, le renseigner, puis :
+# VibeLocatif — déploiement : copier .env.example en .env, le renseigner, puis :
 #   docker compose up -d --build
 # Application : http://<serveur>:${FRONT_PORT:-3321}   (API relayée par nginx sur /api)
 services:

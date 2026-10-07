@@ -30,7 +30,7 @@ export default function Dashboard() {
         Les montants affichés sont les montants locatifs <strong>attendus et échéancés</strong> — aucun encaissement n'est enregistré dans l'application. Suite financière : à spécifier avec la DSF / FILIEN-SEDIT.
       </Notice>
       <div className="h-space-md" />
-      <PageHeader crumbs={['Gestion opérationnelle', 'Tableau de bord de synthèse']} title="Pilotage du Patrimoine & Gestion Locative"
+      <PageHeader crumbs={['Gestion opérationnelle', 'Tableau de bord de synthèse']} title="Pilotage VibeLocatif"
         actions={<>{can('contrats.write') && <LinkBtn primary to="/contrats/nouveau" icon={<Plus size={16} />}>Nouveau contrat</LinkBtn>}</>}>
         <span className="inline-flex items-center gap-1 text-secondary text-label-sm"><span className="w-2 h-2 rounded-full bg-secondary animate-pulse" /> Données à jour — {moisLabel(d.periode)}</span>
       </PageHeader>

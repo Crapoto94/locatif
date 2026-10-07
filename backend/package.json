@@ -1,8 +1,8 @@
 {
-  "name": "gestion-locative-backend",
+  "name": "vibelocatif-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "API Gestion Locative — Ville d'Ivry-sur-Seine",
+  "description": "API VibeLocatif — Ville d'Ivry-sur-Seine",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

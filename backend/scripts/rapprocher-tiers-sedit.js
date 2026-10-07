@@ -40,20 +40,21 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
     if (sirenC && parSiren.has(sirenC)) { cands = parSiren.get(sirenC); via = 'SIRET'; }
     if (!cands.length) { cands = parNom.get(cle([c.nom, c.prenom].filter(Boolean).join(' '))) || parNom.get(cle(c.nom)) || []; via = 'nom exact'; }
     const uniques = [...new Map(cands.map((x) => [x.code, x])).values()];
-    let statut; let code = null; let roo = null; let note; let siretSedit = null;
+    let statut; let code = null; let roo = null; let note; let siretSedit = null; let candidats = null;
+    const fiche = (x) => ({ code: x.code, roo: x.roo, nom: x.nom, siret: x.siret || null });
     if (uniques.length === 1) { statut = 'rapproche'; code = uniques[0].code; roo = uniques[0].roo; siretSedit = /^\d{14}$/.test(uniques[0].siret) ? uniques[0].siret : null; note = `${via} → ${uniques[0].nom}`; }
-    else if (uniques.length > 1) { statut = 'ambigu'; note = `${uniques.length} tiers (${via}) : ${uniques.slice(0, 5).map((x) => `${x.code} ${x.nom}`).join(' ; ')}`; }
+    else if (uniques.length > 1) { statut = 'ambigu'; candidats = uniques.slice(0, 10).map(fiche); note = `${uniques.length} tiers (${via}) : ${uniques.slice(0, 5).map((x) => `${x.code} ${x.nom}`).join(' ; ')}`; }
     else {
       // Nom partiel : on le signale seulement, jamais d'écriture automatique.
       const mots = new Set(cle(c.nom).split(' ').filter((w) => w.length > 2));
       const proches = mots.size >= 2 ? tiers.filter((x) => { const m = new Set(x.cle.split(' ')); return [...mots].every((w) => m.has(w)); }).slice(0, 5) : [];
-      statut = proches.length ? 'ambigu' : 'introuvable';
+      statut = proches.length ? 'ambigu' : 'introuvable'; if (proches.length) candidats = proches.map(fiche);
       note = proches.length ? `Nom partiel : ${proches.map((x) => `${x.code} ${x.nom}`).join(' ; ')}` : null;
     }
     stats[statut]++; detail.push({ id: c.id, nom: c.nom, statut, code, note });
     const rooVal = roo;
     if (appliquer) {
-      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_roo = COALESCE($5, tiers_sedit_roo), siret = COALESCE(siret, $6), tiers_sedit_statut = $3, tiers_sedit_note = $4, updated_at = now() WHERE id = $1`, [c.id, code, statut, note, rooVal, siretSedit]);
+      await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = COALESCE($2, tiers_sedit_id), tiers_sedit_roo = COALESCE($5, tiers_sedit_roo), siret = COALESCE(siret, $6), tiers_sedit_statut = $3, tiers_sedit_note = $4, tiers_sedit_candidats = $7, updated_at = now() WHERE id = $1`, [c.id, code, statut, note, rooVal, siretSedit, candidats ? JSON.stringify(candidats) : null]);
       if (code && code !== c.tiers_sedit_id) await audit.log(user, 'contractant.tiers_sedit_rapproche', 'contractant', c.id, { champ: 'tiers_sedit_id', ancienne: c.tiers_sedit_id, nouvelle: code, motif: note });
     }
   }

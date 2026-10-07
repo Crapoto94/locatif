@@ -53,7 +53,8 @@ router.get('/:id', requirePerm('contractants.read'), async (req, res) => {
        WHERE d.entite = 'contractant' AND $1 IN (d.id_a, d.id_b)`, [id]),
     db.get(`SELECT count(*)::int AS n FROM ${t('document_liens')} WHERE objet_type = 'contractant' AND objet_id = $1`, [id]),
   ]);
-  res.json({ ...c, sedit_url: seditUrl(c.tiers_sedit_roo), contacts, contrats, biens, doublons, nb_documents: nbDocs.n });
+  const candidats = (c.tiers_sedit_candidats || []).map((x) => ({ ...x, sedit_url: seditUrl(x.roo) }));
+  res.json({ ...c, tiers_sedit_candidats: candidats, sedit_url: seditUrl(c.tiers_sedit_roo), contacts, contrats, biens, doublons, nb_documents: nbDocs.n });
 });
 
 router.post('/', requirePerm('contractants.write'), async (req, res) => {
@@ -65,6 +66,27 @@ router.put('/:id', requirePerm('contractants.write'), async (req, res) => {
   // Une saisie manuelle de l'identifiant tiers fait foi : le rapprochement automatique ne l'écrasera plus.
   if (req.body.tiers_sedit_id !== undefined) { const cur = await db.get(`SELECT tiers_sedit_id FROM ${t('contractants')} WHERE id = $1`, [req.params.id]); if (String(cur?.tiers_sedit_id ?? '') !== String(req.body.tiers_sedit_id ?? '')) { req.body.tiers_sedit_statut = 'manuel'; req.body.tiers_sedit_note = null; } }
   res.json(await updateRow({ table: 'contractants', entite: 'contractant', id: parseInt(req.params.id, 10), allowed: FIELDS, body: req.body, user: req.user, motif: req.body.motif }));
+});
+
+// Décision sur un rapprochement SEDIT ambigu : choisir un des candidats, ou indiquer qu'aucun ne correspond.
+router.post('/:id/tiers-sedit', requirePerm('contractants.write'), async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const c = await db.get(`SELECT id, tiers_sedit_id, tiers_sedit_candidats, siret FROM ${t('contractants')} WHERE id = $1`, [id]);
+  if (!c) throw httpError(404, 'Contractant introuvable');
+  const { code, aucun } = req.body || {};
+  if (aucun) {
+    await db.run(`UPDATE ${t('contractants')} SET tiers_sedit_id = NULL, tiers_sedit_roo = NULL, tiers_sedit_statut = 'manuel', tiers_sedit_note = 'Aucun tiers SEDIT ne correspond (décision manuelle)', tiers_sedit_candidats = NULL, updated_at = now() WHERE id = $1`, [id]);
+    await audit.log(req.user, 'contractant.tiers_sedit_tranche', 'contractant', id, { champ: 'tiers_sedit_id', ancienne: c.tiers_sedit_id, nouvelle: null, motif: 'Aucun candidat ne correspond' });
+    return res.json({ ok: true });
+  }
+  const choisi = (c.tiers_sedit_candidats || []).find((x) => x.code === code);
+  if (!choisi) throw httpError(400, "Ce tiers ne fait pas partie des candidats proposés");
+  await db.run(
+    `UPDATE ${t('contractants')} SET tiers_sedit_id = $2, tiers_sedit_roo = $3, siret = COALESCE(siret, $4), tiers_sedit_statut = 'manuel',
+       tiers_sedit_note = $5, tiers_sedit_candidats = NULL, updated_at = now() WHERE id = $1`,
+    [id, choisi.code, choisi.roo, /^\d{14}$/.test(choisi.siret || '') ? choisi.siret : null, `Choisi manuellement : ${choisi.code} ${choisi.nom}`]);
+  await audit.log(req.user, 'contractant.tiers_sedit_tranche', 'contractant', id, { champ: 'tiers_sedit_id', ancienne: c.tiers_sedit_id, nouvelle: choisi.code, motif: `Choisi parmi ${c.tiers_sedit_candidats.length} candidats : ${choisi.nom}` });
+  res.json({ ok: true });
 });
 
 // Interlocuteurs / signataires / représentants légaux (CTN-004 à CTN-006)

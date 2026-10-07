@@ -10,6 +10,7 @@ import { dateFr, eur } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Modal, Field, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import DocumentsPanel from '../components/DocumentsPanel';
 import SeditLink from '../components/SeditLink';
+import TiersSeditModal from '../components/TiersSeditModal';
 import { SiretBadge, NatureSiret } from '../components/SiretBadge';
 
 export function ContractantsListe() {
@@ -19,7 +20,7 @@ export function ContractantsListe() {
   const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, tiers, siret, offset, limit: 25, sort, dir });
   useEffect(() => setOffset(0), [dq, type, tiers, siret]);
   const { data: inactifs, reload: reloadInactifs } = useFetch<any[]>('/contractants/siret/inactifs');
-  const [verif, setVerif] = useState(false); const [inactifsOuverts, setInactifsOuverts] = useState(false);
+  const [trancher, setTrancher] = useState<number | null>(null); const [verif, setVerif] = useState(false); const [inactifsOuverts, setInactifsOuverts] = useState(false);
   const verifier = async () => {
     setVerif(true);
     try { const r = await api.post('/contractants/siret/verifier', {}); toast(`${r.data.verifies} SIRET vérifiés : ${r.data.actif} actifs, ${r.data.ferme} fermés, ${r.data.introuvable} introuvables`); reload(); reloadInactifs(); } catch (e) { toast(errMsg(e), 'error'); } finally { setVerif(false); }
@@ -61,7 +62,7 @@ export function ContractantsListe() {
               { key: 'type', label: 'Nature', sort: 'type', render: (c: any) => <Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge> },
               { key: 'adresse', label: 'Adresse', render: (c: any) => [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ') || '—' },
               { key: 'siret', label: 'SIRET', render: (c: any) => <SiretBadge siret={c.siret} statut={c.siret_statut} fermeture={c.siret_fermeture_le} /> },
-              { key: 'sedit', label: 'Tiers SEDIT', render: (c: any) => <span><SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
+              { key: 'sedit', label: 'Tiers SEDIT', render: (c: any) => <span><SeditLink code={c.tiers_sedit_id} url={c.sedit_url} />{c.tiers_sedit_statut === 'ambigu' && <button onClick={() => setTrancher(c.id)} title="Voir les tiers SEDIT candidats et trancher"><Badge tone="warn" className="ml-1 hover:underline cursor-pointer">à trancher ▸</Badge></button>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
               { key: 'ct', label: 'Contrats', align: 'right', render: (c: any) => `${c.contrats_actifs} actif${c.contrats_actifs > 1 ? 's' : ''} / ${c.contrats_total}` },
               { key: 'a', label: '', render: (c: any) => <Btn size="sm" variant="ghost" onClick={() => nav(`/contractants/${c.id}`)}>Ouvrir</Btn> },
             ]} />
@@ -70,6 +71,7 @@ export function ContractantsListe() {
         )}
       </Card>
       {creer && <ContractantForm onClose={() => setCreer(false)} onSaved={(c) => { setCreer(false); nav(`/contractants/${c.id}`); }} />}
+      {trancher && <TiersSeditModal contractantId={trancher} onClose={() => setTrancher(null)} onDone={() => { setTrancher(null); reload(); }} />}
     </>
   );
 }
@@ -105,7 +107,7 @@ export function ContractantForm({ contractant, onClose, onSaved }: { contractant
 export function ContractantFiche() {
   const { id } = useParams(); const { can } = useAuth(); const label = useLabel();
   const { data: c, loading, error, reload } = useFetch<any>(`/contractants/${id}`);
-  const [edit, setEdit] = useState(false); const [contact, setContact] = useState(false);
+  const [edit, setEdit] = useState(false); const [contact, setContact] = useState(false); const [trancher, setTrancher] = useState(false);
   const [cf, setCf] = useState<any>({});
   useEffect(() => { if (c) trackRecent({ to: `/contractants/${c.id}`, label: c.nom }); }, [c]);
   if (loading && !c) return <Loading />;
@@ -118,6 +120,7 @@ export function ContractantFiche() {
       <PageHeader crumbs={['Contractants', c.nom]} title={`${c.nom}${c.prenom ? ` ${c.prenom}` : ''}`} actions={can('contractants.write') && <Btn icon={<Pencil size={16} />} onClick={() => setEdit(true)}>Modifier</Btn>}>
         <div className="flex gap-2 mt-1"><Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge>{!c.actif && <Badge tone="muted">Inactif</Badge>}{c.tiers_sedit_id && <Badge tone="info">Tiers SEDIT <SeditLink code={c.tiers_sedit_id} url={c.sedit_url} /></Badge>}{c.astech_tiers_cod && <Badge tone="muted">Tiers ASTECH {c.astech_tiers_cod}</Badge>}</div>
         {c.tiers_sedit_note && <p className="text-body-sm text-on-surface-variant mt-1">Rapprochement SEDIT ({c.tiers_sedit_statut}) : {c.tiers_sedit_note}</p>}
+        {c.tiers_sedit_statut === 'ambigu' && <div className="mt-1"><Btn size="sm" variant="primary" onClick={() => setTrancher(true)}>Trancher : {c.tiers_sedit_candidats?.length || 0} tiers SEDIT possible(s)</Btn></div>}
       </PageHeader>
       {c.doublons?.length > 0 && <div className="mb-space-md"><Notice tone="warn">Doublon(s) possible(s) signalé(s) par la reprise (aucune fusion automatique) : {c.doublons.map((d: any, i: number) => <span key={d.id}>{i > 0 && ', '}<Link className="underline font-semibold" to={`/contractants/${d.id}`}>{d.nom}</Link></span>)}.</Notice></div>}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
@@ -160,6 +163,7 @@ export function ContractantFiche() {
         <div><DocumentsPanel objetType="contractant" objetId={c.id} /></div>
       </div>
       {edit && <ContractantForm contractant={c} onClose={() => setEdit(false)} onSaved={() => { setEdit(false); reload(); }} />}
+      {trancher && <TiersSeditModal contractantId={c.id} onClose={() => setTrancher(false)} onDone={() => { setTrancher(false); reload(); }} />}
       {contact && (
         <Modal title="Ajouter un interlocuteur" onClose={() => setContact(false)} footer={<><Btn onClick={() => setContact(false)}>Annuler</Btn><Btn variant="primary" disabled={!cf.nom} onClick={addContact}>Ajouter</Btn></>}>
           <Field label="Nom *"><Input value={cf.nom || ''} onChange={(e) => setCf({ ...cf, nom: e.target.value })} /></Field>

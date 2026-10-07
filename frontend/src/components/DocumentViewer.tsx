@@ -14,7 +14,7 @@ const kindOf = (mime?: string | null, nom?: string | null): Kind => {
   return 'none';
 };
 
-export default function DocumentViewer({ documentId, onClose }: { documentId: number; onClose: () => void }) {
+export default function DocumentViewer({ documentId, onClose, documents, onSelect }: { documentId: number; onClose: () => void; documents?: any[]; onSelect?: (id: number) => void }) {
   const label = useLabel();
   const [doc, setDoc] = useState<any | null>(null); const [versions, setVersions] = useState<any[]>([]);
   const [active, setActive] = useState<number | null>(null); const [error, setError] = useState<string | null>(null);
@@ -56,6 +56,20 @@ export default function DocumentViewer({ documentId, onClose }: { documentId: nu
         {error ? <div className="p-10 text-center text-error">{error}</div> : !doc ? <div className="p-10 text-center text-on-surface-variant">Chargement…</div> : (
           <div className="flex flex-1 min-h-0">
             <aside className="w-[260px] border-r border-surface-container-high bg-surface-container-low flex flex-col flex-shrink-0">
+              {documents && documents.length > 1 && onSelect && (
+                <>
+                  <div className="px-3 py-2.5 text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant border-b border-surface-container-high">Documents ({documents.length})</div>
+                  <div className="overflow-y-auto max-h-[45%] border-b border-surface-container-high">
+                    {documents.map((d) => (
+                      <button key={d.id} onClick={() => onSelect(d.id)} title={d.nom}
+                        className={`w-full text-left px-3 py-2 border-b border-surface-container-low text-body-md ${d.id === documentId ? 'bg-secondary-fixed border-l-[3px] border-l-secondary' : 'hover:bg-surface-container'}`}>
+                        <div className="truncate font-medium">{d.nom}</div>
+                        <div className="text-[11px] text-on-surface-variant truncate">{label('type_document', d.type_code || 'autre')}</div>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               <div className="px-3 py-2.5 text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant border-b border-surface-container-high">Versions</div>
               <div className="overflow-y-auto flex-1">
                 {versions.map((v) => (

@@ -62,6 +62,7 @@ export default function DocumentsPanel({ objetType, objetId, title = 'Documents 
                           : <button onClick={() => setVue(d.id)} className="font-semibold text-secondary underline-offset-2 hover:underline text-left truncate max-w-[230px]" title={`Afficher ${d.nom}`}>{d.nom}</button>}
                         {d.sensible && <Badge tone="error">Sensible</Badge>}
                         {d.en_ged && <Badge tone="info">GED</Badge>}
+                        {d.via_contrats?.length > 0 && <Badge tone="info">Contrat {d.via_contrats.join(', ')}</Badge>}
                       </div>
                       <div className="text-[11px] text-on-surface-variant">v{d.version} • {bytes(d.taille)} • {dateTimeFr(d.updated_at)}{d.date_expiration ? ` • expire le ${dateFr(d.date_expiration)}` : ''}</div>
                     </div>
@@ -72,7 +73,7 @@ export default function DocumentsPanel({ objetType, objetId, title = 'Documents 
                       {can('documents.write') && !d.verrouille && (
                         <>
                           <label className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant cursor-pointer" title="Nouvelle version"><Upload size={16} /><input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && newVersion(d.id, e.target.files[0])} /></label>
-                          <button className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title="Retirer de cette fiche" onClick={() => detach(d.id)}>{d.liens?.length > 1 ? <Link2Off size={16} /> : <Trash2 size={16} />}</button>
+                          {!(objetType === 'contractant' && d.via_contrats?.length && !d.liens?.some((l: any) => l.objet_type === 'contractant' && l.objet_id === objetId)) && <button className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title="Retirer de cette fiche" onClick={() => detach(d.id)}>{d.liens?.length > 1 ? <Link2Off size={16} /> : <Trash2 size={16} />}</button>}
                         </>
                       )}
                     </div>
@@ -83,7 +84,7 @@ export default function DocumentsPanel({ objetType, objetId, title = 'Documents 
           ))}
         </div>
       )}
-      {vue && <DocumentViewer documentId={vue} onClose={() => setVue(null)} />}
+      {vue && <DocumentViewer documentId={vue} onClose={() => setVue(null)} documents={rows.filter((d) => !d.verrouille)} onSelect={setVue} />}
       {up && (
         <Modal title="Ajouter un document" onClose={() => setUp(false)} footer={<><Btn onClick={() => setUp(false)}>Annuler</Btn><Btn variant="primary" disabled={busy} onClick={upload}>Déposer</Btn></>}>
           {err && <div className="text-error text-body-sm">{err}</div>}

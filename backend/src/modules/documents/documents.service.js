@@ -64,7 +64,16 @@ async function list({ objet_type, objet_id, type_code, q, sensibleOk, limit, off
   const params = []; const conds = ['d.actif'];
   const p = (v) => { params.push(v); return `$${params.length}`; };
   let join = '';
-  if (objet_type && objet_id) {
+  let via = 'NULL::text[]';
+  if (objet_type === 'contractant' && objet_id) {
+    // Vue dynamique d'un tiers : ses documents propres + ceux de ses contrats (EXISTS : jamais de doublon).
+    const id = p(Number(objet_id));
+    const contrats = `SELECT cc.contrat_id FROM ${t('contrat_contractants')} cc WHERE cc.contractant_id = ${id}`;
+    conds.push(`EXISTS (SELECT 1 FROM ${t('document_liens')} l WHERE l.document_id = d.id AND
+      ((l.objet_type = 'contractant' AND l.objet_id = ${id}) OR (l.objet_type = 'contrat' AND l.objet_id IN (${contrats}))))`);
+    via = `(SELECT array_agg(DISTINCT c.numero ORDER BY c.numero) FROM ${t('document_liens')} l JOIN ${t('contrats')} c ON c.id = l.objet_id
+            WHERE l.document_id = d.id AND l.objet_type = 'contrat' AND l.objet_id IN (${contrats}))`;
+  } else if (objet_type && objet_id) {
     join = `JOIN ${t('document_liens')} l ON l.document_id = d.id AND l.objet_type = ${p(objet_type)} AND l.objet_id = ${p(Number(objet_id))}`;
   }
   if (type_code) conds.push(`d.type_code = ${p(type_code)}`);
@@ -73,7 +82,7 @@ async function list({ objet_type, objet_id, type_code, q, sensibleOk, limit, off
   const total = (await db.get(`SELECT count(*)::int AS n ${sql}`, params)).n;
   const rows = await db.all(
     `SELECT d.id, d.nom, d.type_code, d.mime, d.taille, d.version, d.sensible, d.date_attendue, d.date_expiration, d.commentaire,
-            d.auteur, d.created_at, d.updated_at, d.storage_key LIKE 'alf:%' AS en_ged,
+            d.auteur, d.created_at, d.updated_at, d.storage_key LIKE 'alf:%' AS en_ged, ${via} AS via_contrats,
             (SELECT json_agg(json_build_object('objet_type', objet_type, 'objet_id', objet_id)) FROM ${t('document_liens')} WHERE document_id = d.id) AS liens
      ${sql} ORDER BY d.updated_at DESC LIMIT ${p(limit)} OFFSET ${p(offset)}`, params);
   return { total, rows: rows.map((r) => ({ ...r, verrouille: r.sensible && !sensibleOk })) };

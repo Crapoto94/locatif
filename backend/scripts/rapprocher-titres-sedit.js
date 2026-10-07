@@ -4,6 +4,7 @@
 // ASTECH ne garde que des dates (CONTEC_NUMMAN est vide) ; SEDIT porte le numéro. Rapprochement par :
 //   tiers rapproché du contractant  +  mois indiqué dans le libellé (« REDEVANCE AOUT 2026 »)  +  montant TTC en EUROS (MONTANTTC_E ;
 //   MONTANTTC est en francs), les lignes d'un même titre étant additionnées (redevance + charges).
+// - Un titre rejeté puis réémis (même mois, même montant) : le titre rejeté est écarté au profit de la réémission.
 // - « exact » : un seul titre correspond au mois et au montant ; « probable » : à défaut, un seul titre de même montant dont la date
 //   est proche (45 jours) de la date de titrage ASTECH. Rien n'est écrit en cas de doute (plusieurs titres possibles).
 // - Paiement : lu sur le titre (DATE_PAIEMENT, DATE_PRISE_EN_CHARGE, REJET, SUSPENSION). SEDIT ne donne que la DATE de paiement, pas le
@@ -53,16 +54,23 @@ async function run(conn, { appliquer = false } = {}) {
       if (!groupes.has(k)) groupes.set(k, { tiers: l.TIERS, mandat: l.MANDAT, dm: l.DM, bord: l.BORDEREAU, total: 0, libs: [] });
       const g = groupes.get(k); g.total += Number(l.MT || 0); g.libs.push(norm(l.LIBELLE));
     }
-    const gl = [...groupes.values()];
+    // Candidats : le TITRE entier (lignes additionnées : redevance + charges) ET chaque LIGNE seule — un même titre peut regrouper
+    // plusieurs contrats d'un même tiers, auquel cas seule la ligne correspond au montant d'une échéance.
+    const lignesObj = lignes.map((l) => ({ tiers: l.TIERS, mandat: l.MANDAT, dm: l.DM, bord: l.BORDEREAU, total: Number(l.MT || 0), libs: [norm(l.LIBELLE)] }));
+    const gl = [...groupes.values(), ...lignesObj];
+    const unique = (liste) => [...new Map(liste.map((g) => [`${g.tiers}|${g.mandat}|${g.dm}`, g])).values()]; // un même titre peut ressortir deux fois (ligne et total)
     // Identifiants techniques (lien vers la fiche SEDIT) : un seul ROO par (n°, date), sinon pas de lien.
-    const roosTitre = new Map();
-    for (const m of await src.rows(conn, `SELECT TRIM(ROO_IMA_REF) AS ROO, MANDAT, TO_CHAR(DATMANDAT,'YYYY-MM-DD') AS DM FROM FI.MANDAT WHERE SENSMVT = 'R' AND DATMANDAT >= DATE '${depuis}'`)) {
+    const roosTitre = new Map(); const rejetes = new Set(); // titres rejetés : réémis ensuite sous un autre numéro
+    for (const m of await src.rows(conn, `SELECT TRIM(ROO_IMA_REF) AS ROO, MANDAT, TO_CHAR(DATMANDAT,'YYYY-MM-DD') AS DM, REJET, MANDREJETE FROM FI.MANDAT WHERE SENSMVT = 'R' AND DATMANDAT >= DATE '${depuis}'`)) {
       const k = `${m.MANDAT}|${m.DM}`; roosTitre.set(k, roosTitre.has(k) ? null : m.ROO);
+      if (m.REJET === 'O' || m.MANDREJETE === 'O') rejetes.add(k);
     }
+    // Quand plusieurs titres correspondent (titre rejeté puis réémis), on retient ceux qui n'ont pas été rejetés.
+    const nonRejetes = (liste) => { const v = liste.filter((g) => !rejetes.has(`${g.mandat}|${g.dm}`)); return v.length ? v : liste; };
     for (const e of cibles) {
       const d = new Date(`${e.periode_debut}T00:00:00Z`); const mot = `${MOIS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-      const memeMontant = gl.filter((g) => e.roos.includes(g.tiers) && Math.abs(g.total - Number(e.montant_total)) < 0.011);
-      const memeMois = memeMontant.filter((g) => g.libs.some((l) => l.includes(mot)));
+      const memeMontant = nonRejetes(unique(gl.filter((g) => e.roos.includes(g.tiers) && Math.abs(g.total - Number(e.montant_total)) < 0.011)));
+      const memeMois = nonRejetes(memeMontant.filter((g) => g.libs.some((l) => l.includes(mot))));
       let choix = null; let confiance = null;
       if (memeMois.length === 1) { choix = memeMois[0]; confiance = 'exact'; }
       else {

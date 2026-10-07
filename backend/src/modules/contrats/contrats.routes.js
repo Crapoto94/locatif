@@ -22,7 +22,8 @@ router.get('/', requirePerm('contrats.read'), async (req, res) => {
   const q = req.query; const w = whereBuilder();
   if (q.q) w.add(`(c.numero ILIKE ? OR c.objet ILIKE ? OR EXISTS (SELECT 1 FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = c.id AND ct.nom ILIKE ?)
      OR EXISTS (SELECT 1 FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = c.id AND (b.designation ILIKE ? OR b.adresse ILIKE ?)))`, like(q.q));
-  if (q.statut) w.add('c.statut_code = ?', q.statut);
+  if (q.statut === 'actifs') w.addRaw("c.statut_code NOT IN ('clos','resilie')"); // défaut de l'écran : les contrats clos sont masqués
+  else if (q.statut) w.add('c.statut_code = ?', q.statut);
   if (q.type) w.add('c.type_code = ?', q.type);
   if (q.position) w.add('c.position = ?', q.position);
   if (q.service) w.add('c.service_code = ?', q.service);

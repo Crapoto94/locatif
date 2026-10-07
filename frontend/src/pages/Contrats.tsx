@@ -14,7 +14,7 @@ export function ContratsListe() {
   const nav = useNavigate(); const { can } = useAuth(); const label = useLabel();
   const [sp, setSp] = useSearchParams();
   const types = useRefList('type_contrat'); const statuts = useRefList('statut_contrat');
-  const [q, setQ] = useState(sp.get('q') || ''); const [type, setType] = useState(''); const [statut, setStatut] = useState(sp.get('statut') || ''); const [position, setPosition] = useState('');
+  const [q, setQ] = useState(sp.get('q') || ''); const [type, setType] = useState(''); const [statut, setStatut] = useState(sp.get('statut') ?? 'actifs'); const [position, setPosition] = useState('');
   const [finAvant, setFinAvant] = useState(sp.get('fin_avant') || ''); const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState('numero'); const [dir, setDir] = useState('asc'); const dq = useDebounced(q);
   const { data, loading, error, reload } = useFetch<any>('/contrats', { q: dq, type, statut, position, fin_avant: finAvant, offset, limit: 25, sort, dir });
@@ -27,7 +27,7 @@ export function ContratsListe() {
         <div className="flex flex-wrap gap-space-sm mb-space-md">
           <div className="relative flex-1 min-w-[240px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="N° de contrat, objet, locataire, bien, adresse…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           <Select className="w-52" value={type} onChange={(e) => setType(e.target.value)}><option value="">Tous les types</option>{types.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}</Select>
-          <Select className="w-40" value={statut} onChange={(e) => setStatut(e.target.value)}><option value="">Tous statuts</option>{statuts.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}</Select>
+          <Select className="w-56" value={statut} onChange={(e) => setStatut(e.target.value)}><option value="actifs">Hors clos (par défaut)</option><option value="">Tous, y compris clos</option>{statuts.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}</Select>
           <Select className="w-40" value={position} onChange={(e) => setPosition(e.target.value)}><option value="">Bailleur & preneur</option><option value="bailleur">Bailleur</option><option value="preneur">Preneur</option></Select>
         </div>
         {finAvant && <div className="mb-space-sm"><Badge tone="warn">Fin de contrat avant le {dateFr(finAvant)}</Badge> <button className="text-secondary text-body-sm underline ml-2" onClick={() => { setFinAvant(''); setSp({}); }}>retirer le filtre</button></div>}

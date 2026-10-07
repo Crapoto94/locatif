@@ -10,6 +10,7 @@ import { dateFr, dateTimeFr, eur, moisLabel, num } from '../lib/format';
 import { Card, PageHeader, Tabs, DataTable, Badge, Btn, Loading, ErrorBox, Modal, MotifModal, Field, Input, Select, Textarea, Dl, SectionTitle, Notice, toast, statutTone } from '../components/ui';
 import EntityPicker, { type PickItem } from '../components/EntityPicker';
 import DocumentsPanel from '../components/DocumentsPanel';
+import StreetViewLink from '../components/StreetViewLink';
 import SeditLink from '../components/SeditLink';
 
 const ECH_STATUT: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], mandatee: ['Mandatée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
@@ -103,7 +104,7 @@ export default function ContratFiche() {
         <Card>
           <SectionTitle title="Biens du contrat" action={w && <Btn size="sm" icon={<Pencil size={14} />} onClick={() => setModal('biens')}>Modifier la liste</Btn>} />
           <DataTable rows={c.biens} cols={[
-            { key: 'designation', label: 'Bien', render: (b: any) => <Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link> },
+            { key: 'designation', label: 'Bien', render: (b: any) => <span className="inline-flex items-center gap-1"><StreetViewLink bien={b} /><Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link></span> },
             { key: 'type', label: 'Type', render: (b: any) => label('type_bien', b.type_code) },
             { key: 'adresse', label: 'Adresse', render: (b: any) => [b.adresse, b.code_postal, b.ville].filter(Boolean).join(' ') || '—' },
             { key: 'surface', label: 'Surface', align: 'right', render: (b: any) => (b.surface ? `${num(b.surface, 2)} m²` : '—') },

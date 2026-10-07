@@ -24,7 +24,7 @@ router.get('/', requirePerm('biens.read'), async (req, res) => {
   const total = (await db.get(`SELECT count(*)::int AS n ${base}`, w.params)).n;
   const rows = await db.all(
     `SELECT b.id, b.code, b.designation, b.niveau, b.type_code, b.categorie, b.adresse, b.code_postal, b.ville, b.surface,
-            b.statut_occupation, b.disponibilite, b.service_code, b.direction, b.astech_id,
+            b.statut_occupation, b.disponibilite, b.service_code, b.direction, b.astech_id, b.latitude, b.longitude,
             (SELECT c.numero FROM ${t('contrat_biens')} cb JOIN ${t('contrats')} c ON c.id = cb.contrat_id
               WHERE cb.bien_id = b.id AND c.statut_code = 'en_cours' ORDER BY c.date_debut DESC NULLS LAST LIMIT 1) AS contrat_numero,
             (SELECT c.id FROM ${t('contrat_biens')} cb JOIN ${t('contrats')} c ON c.id = cb.contrat_id

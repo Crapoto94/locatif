@@ -8,6 +8,7 @@ import { useLabel, useRefList } from '../lib/refs';
 import { dateFr, eur } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Field, SectionTitle, Textarea, Notice, toast, statutTone } from '../components/ui';
 import EntityPicker, { type PickItem } from '../components/EntityPicker';
+import StreetViewLink from '../components/StreetViewLink';
 
 export function ContratsListe() {
   const nav = useNavigate(); const { can } = useAuth(); const label = useLabel();
@@ -35,7 +36,7 @@ export function ContratsListe() {
             <DataTable rows={data?.rows || []} sort={sort} dir={dir} onSort={onSort} cols={[
               { key: 'numero', label: 'Réf. contrat', sort: 'numero', render: (c: any) => <Link className="font-bold text-secondary hover:underline tabular-nums" to={`/contrats/${c.id}`}>{c.numero}</Link> },
               { key: 'type', label: "Type d'acte", sort: 'type', render: (c: any) => <div>{label('type_contrat', c.type_code)}<div className="text-[11px] text-on-surface-variant">{c.position === 'preneur' ? 'Preneur' : 'Bailleur'}{c.gratuit ? ' • gratuit' : ''}</div></div> },
-              { key: 'biens', label: 'Bien(s)', render: (c: any) => (c.biens || []).map((b: any) => <div key={b.id}><Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link></div>) || '—' },
+              { key: 'biens', label: 'Bien(s)', render: (c: any) => (c.biens || []).map((b: any) => <div key={b.id} className="flex items-center gap-1"><StreetViewLink bien={b} /><Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link></div>) || '—' },
               { key: 'ct', label: 'Contractant(s)', render: (c: any) => (c.contractants || []).map((x: any) => <div key={x.id}><Link className="hover:text-secondary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link></div>) },
               { key: 'periode', label: 'Période', sort: 'fin', render: (c: any) => <span className="tabular-nums">{dateFr(c.date_debut)} → {dateFr(c.date_fin)}</span> },
               { key: 'loyer', label: 'Loyer', sort: 'loyer', align: 'right', render: (c: any) => <strong className="text-primary">{eur(c.loyer)}</strong> },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Plus, Search, Building2, Pencil } from 'lucide-react';
+import { Plus, Search, Building2, Pencil, MapPin } from 'lucide-react';
 import { api, errMsg } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
@@ -9,6 +9,7 @@ import { trackRecent } from '../lib/recents';
 import { dateFr, eur, num } from '../lib/format';
 import { Card, PageHeader, DataTable, Pagination, Input, Select, Btn, Badge, Loading, ErrorBox, Modal, Field, Dl, SectionTitle, toast, Tone, statutTone } from '../components/ui';
 import DocumentsPanel from '../components/DocumentsPanel';
+import StreetViewLink, { streetViewUrl } from '../components/StreetViewLink';
 
 export function BiensListe() {
   const nav = useNavigate();
@@ -36,7 +37,7 @@ export function BiensListe() {
         {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !data ? <Loading /> : (
           <>
             <DataTable rows={data?.rows || []} sort={sort} dir={dir} onSort={onSort} cols={[
-              { key: 'designation', label: 'Bien', sort: 'designation', render: (b: any) => <div><Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link><div className="text-[11px] text-on-surface-variant">{b.code || ''}{b.categorie ? ` • ${b.categorie}` : ''}</div></div> },
+              { key: 'designation', label: 'Bien', sort: 'designation', render: (b: any) => <div><div className="flex items-center gap-1"><StreetViewLink bien={b} /><Link className="font-semibold text-primary hover:underline" to={`/biens/${b.id}`}>{b.designation}</Link></div><div className="text-[11px] text-on-surface-variant">{b.code || ''}{b.categorie ? ` • ${b.categorie}` : ''}</div></div> },
               { key: 'type', label: 'Type', sort: 'type', render: (b: any) => label('type_bien', b.type_code) },
               { key: 'adresse', label: 'Adresse', sort: 'adresse', render: (b: any) => [b.adresse, b.code_postal, b.ville].filter(Boolean).join(' ') || '—' },
               { key: 'surface', label: 'Surface', sort: 'surface', align: 'right', render: (b: any) => (b.surface ? `${num(b.surface, 1)} m²` : '—') },
@@ -101,7 +102,7 @@ export function BienFiche() {
   return (
     <>
       <PageHeader crumbs={['Biens & locaux', b.designation]} title={b.designation}
-        actions={can('biens.write') && <Btn icon={<Pencil size={16} />} onClick={() => setEdit(true)}>Modifier</Btn>}>
+        actions={<><a href={streetViewUrl(b) || undefined} target="_blank" rel="noopener noreferrer" className={`h-9 px-space-md rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest ${streetViewUrl(b) ? '' : 'hidden'}`}><MapPin size={16} className="text-error" />Street View</a>{can('biens.write') && <Btn icon={<Pencil size={16} />} onClick={() => setEdit(true)}>Modifier</Btn>}</>}>
         <div className="flex gap-2 flex-wrap mt-1">
           <Badge>{label('type_bien', b.type_code)}</Badge>
           <Badge tone={b.statut_occupation === 'occupe' ? 'info' : 'warn'}>{label('statut_occupation', b.statut_occupation)}</Badge>

@@ -35,7 +35,7 @@ router.get('/', requirePerm('contrats.read'), async (req, res) => {
   const rows = await db.all(
     `SELECT c.id, c.numero, c.position, c.type_code, c.statut_code, c.gratuit, c.date_debut, c.date_fin, c.periodicite, c.date_revision_prochaine,
             ${LOYER_SQL} AS loyer,
-            (SELECT json_agg(json_build_object('id', b.id, 'designation', b.designation, 'adresse', b.adresse, 'surface', b.surface))
+            (SELECT json_agg(json_build_object('id', b.id, 'designation', b.designation, 'adresse', b.adresse, 'code_postal', b.code_postal, 'ville', b.ville, 'surface', b.surface, 'latitude', b.latitude, 'longitude', b.longitude))
                FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = c.id) AS biens,
             (SELECT json_agg(json_build_object('id', ct.id, 'nom', ct.nom, 'type', ct.type, 'role', cc.role_code))
                FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = c.id) AS contractants
@@ -49,7 +49,7 @@ router.get('/:id', requirePerm('contrats.read'), async (req, res) => {
   if (!c) throw httpError(404, 'Contrat introuvable');
   delete c.astech_raw;
   const [biens, contractants, conditions, echeances, revisions, depot, avenants, actes, histo, alertes, nbDocs] = await Promise.all([
-    db.all(`SELECT b.id, b.designation, b.adresse, b.code_postal, b.ville, b.surface, b.type_code, b.code FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = $1`, [id]),
+    db.all(`SELECT b.id, b.designation, b.adresse, b.code_postal, b.ville, b.surface, b.type_code, b.code, b.latitude, b.longitude FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = $1`, [id]),
     db.all(`SELECT ct.id, ct.nom, ct.prenom, ct.type, ct.siren, ct.email, ct.telephone, ct.adresse, ct.code_postal, ct.ville, ct.tiers_sedit_id, ct.tiers_sedit_roo, cc.role_code
             FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = $1`, [id]),
     db.all(`SELECT * FROM ${t('conditions_financieres')} WHERE contrat_id = $1 ORDER BY COALESCE(date_effet,'0001-01-01') DESC, id DESC`, [id]),

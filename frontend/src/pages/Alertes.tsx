@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, UserCog, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, UserCog, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { api, errMsg } from '../lib/api';
 import { useFetch } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
@@ -16,42 +16,60 @@ export default function Alertes() {
   const { data: cpt, reload: reloadC } = useFetch<any[]>('/alertes/compteurs');
   const [traiter, setTraiter] = useState<any | null>(null); const [reaff, setReaff] = useState<any | null>(null); const [vers, setVers] = useState('');
   const refresh = () => { reload(); reloadC(); };
+  const [ouvertes, setOuvertes] = useState<Set<number>>(new Set()); // alertes dont le détail est déroulé
+  const basculer = (id: number) => setOuvertes((o) => { const n = new Set(o); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const recalc = async () => { try { const r = await api.post('/alertes/recalculer', { notifier: true }); toast(`${r.data.creees} nouvelle(s) alerte(s)${r.data.notification?.envoyees ? ` — ${r.data.notification.envoyees} notifiée(s) par mail` : ''}`); refresh(); } catch (e) { toast(errMsg(e), 'error'); } };
 
   return (
     <>
       <PageHeader crumbs={['Pilotage & contrôle', 'Alertes']} title="Centre des alertes" actions={w && <Btn icon={<RefreshCw size={16} />} onClick={recalc}>Recalculer & notifier</Btn>} />
-      <Card className="mb-space-md">
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => { setType(''); setOffset(0); }} className={`px-space-sm py-1 rounded text-label-md ${!type ? 'bg-primary-container text-on-primary' : 'bg-surface-container-low hover:bg-surface-container-high'}`}>Toutes</button>
-          {(cpt || []).map((c) => <button key={c.type} onClick={() => { setType(c.type); setOffset(0); }} className={`px-space-sm py-1 rounded text-label-md ${type === c.type ? 'bg-primary-container text-on-primary' : 'bg-surface-container-low hover:bg-surface-container-high'}`}>{TYPES[c.type] || c.type} <span className="opacity-70">{c.n}</span></button>)}
+      <Card className="mb-space-sm !py-2">
+        <div className="flex flex-wrap items-center gap-x-space-md gap-y-space-sm">
+          <div className="flex gap-1">
+            {[['active', 'À traiter'], ['traitee', 'Traitées']].map(([id, l]) => (
+              <button key={id} onClick={() => { setStatut(id); setOffset(0); }} className={`px-space-sm py-1 rounded-lg text-body-md ${statut === id ? 'bg-primary-container text-on-primary font-semibold' : 'text-on-surface-variant hover:bg-surface-container-high'}`}>{l}</button>
+            ))}
+          </div>
+          <span className="w-px h-5 bg-outline-variant" />
+          <div className="flex flex-wrap gap-1 flex-1 min-w-0">
+            <button onClick={() => { setType(''); setOffset(0); }} className={`px-space-sm py-0.5 rounded text-label-md ${!type ? 'bg-secondary text-on-secondary' : 'bg-surface-container-low hover:bg-surface-container-high'}`}>Toutes</button>
+            {(cpt || []).map((c) => <button key={c.type} onClick={() => { setType(c.type); setOffset(0); }} className={`px-space-sm py-0.5 rounded text-label-md ${type === c.type ? 'bg-secondary text-on-secondary' : 'bg-surface-container-low hover:bg-surface-container-high'}`}>{TYPES[c.type] || c.type} <span className="opacity-70">{c.n}</span></button>)}
+          </div>
+          <label className="flex items-center gap-1.5 text-body-md whitespace-nowrap"><input type="checkbox" checked={moi} onChange={(e) => setMoi(e.target.checked)} />Mes alertes ({user?.username})</label>
         </div>
       </Card>
-      <Tabs tabs={[{ id: 'active', label: 'À traiter' }, { id: 'traitee', label: 'Traitées' }]} active={statut} onChange={(s) => { setStatut(s); setOffset(0); }} />
-      <label className="flex items-center gap-1.5 text-body-md mb-space-sm"><input type="checkbox" checked={moi} onChange={(e) => setMoi(e.target.checked)} />Seulement celles qui me sont assignées ({user?.username})</label>
       {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !data ? <Loading /> : (
         <>
           {!data?.rows?.length ? <Card><Empty>{statut === 'active' ? 'Aucune alerte à traiter.' : 'Aucune alerte traitée.'}</Empty></Card> : (
-            <div className="flex flex-col gap-space-sm">
-              {data.rows.map((a: any) => (
-                <Card key={a.id}>
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-space-sm">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap"><span className="text-headline-sm text-primary font-semibold">{a.titre}</span><Badge tone="neutral">{TYPES[a.type] || a.type}</Badge>
-                        {a.jours_restants !== null && a.statut === 'active' && <Badge tone={a.jours_restants < 0 ? 'error' : a.jours_restants < 30 ? 'warn' : 'info'}>{a.jours_restants < 0 ? `En retard de ${-a.jours_restants} j` : `J-${a.jours_restants}`}</Badge>}</div>
-                      <div className="text-body-sm text-on-surface-variant mt-0.5">
-                        {a.objet_type && a.objet_id && <Link className="text-secondary font-semibold hover:underline" to={`/${a.objet_type === 'bien' ? 'biens' : 'contrats'}/${a.objet_id}`}>{a.objet_libelle || `${a.objet_type} ${a.objet_id}`}</Link>}
-                        {a.date_cible && <> • Échéance : <strong className="text-on-surface">{dateFr(a.date_cible)}</strong></>}
-                        {a.assigne_a && <> • Assignée à <strong className="text-on-surface">{a.assigne_a}</strong></>}
-                      </div>
-                      {a.message && <p className="text-body-md mt-1">{a.message}</p>}
-                      {a.statut === 'traitee' && <p className="text-body-sm text-on-surface-variant mt-1">Traitée par <strong>{a.traite_par}</strong> le {dateTimeFr(a.traite_le)} : {a.traitement}</p>}
+            <Card className="!p-0 overflow-hidden">
+              {data.rows.map((a: any) => {
+                const ouvert = ouvertes.has(a.id);
+                return (
+                  <div key={a.id} className="border-b border-surface-container-low last:border-0">
+                    <div className="flex items-center gap-space-sm px-space-md py-1.5 hover:bg-surface-container-low min-w-0">
+                      <Badge tone="neutral" className="flex-shrink-0">{TYPES[a.type] || a.type}</Badge>
+                      <button onClick={() => basculer(a.id)} className="font-semibold text-primary text-left truncate min-w-0 flex-1 hover:underline" title={a.titre}>{a.titre}</button>
+                      {a.objet_type && a.objet_id && <Link className="text-secondary font-semibold hover:underline whitespace-nowrap text-body-sm" to={`/${a.objet_type === 'bien' ? 'biens' : 'contrats'}/${a.objet_id}`}>{a.objet_libelle || `${a.objet_type} ${a.objet_id}`}</Link>}
+                      {a.date_cible && <span className="text-body-sm tabular-nums whitespace-nowrap text-on-surface-variant">{dateFr(a.date_cible)}</span>}
+                      {a.jours_restants !== null && a.statut === 'active' && <Badge tone={a.jours_restants < 0 ? 'error' : a.jours_restants < 30 ? 'warn' : 'info'} className="flex-shrink-0">{a.jours_restants < 0 ? `-${-a.jours_restants} j` : `J-${a.jours_restants}`}</Badge>}
+                      {a.assigne_a && <span className="text-body-sm text-on-surface-variant whitespace-nowrap hidden lg:inline">{a.assigne_a}</span>}
+                      {w && a.statut === 'active' && <>
+                        <button className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title="Réaffecter" onClick={() => { setReaff(a); setVers(''); }}><UserCog size={16} /></button>
+                        <Btn size="sm" variant="primary" icon={<CheckCircle2 size={14} />} onClick={() => setTraiter(a)}>Traiter</Btn>
+                      </>}
+                      <button className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant" title={ouvert ? 'Réduire' : 'Dérouler le détail'} onClick={() => basculer(a.id)}>{ouvert ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>
                     </div>
-                    {w && a.statut === 'active' && <div className="flex gap-space-xs flex-shrink-0"><Btn size="sm" icon={<UserCog size={14} />} onClick={() => { setReaff(a); setVers(''); }}>Réaffecter</Btn><Btn size="sm" variant="primary" icon={<CheckCircle2 size={14} />} onClick={() => setTraiter(a)}>Traiter</Btn></div>}
+                    {ouvert && (
+                      <div className="px-space-md pb-2 pl-12 text-body-md text-on-surface-variant">
+                        {a.message && <p>{a.message}</p>}
+                        {a.assigne_a && <p>Assignée à <strong className="text-on-surface">{a.assigne_a}</strong></p>}
+                        {a.statut === 'traitee' && <p>Traitée par <strong>{a.traite_par}</strong> le {dateTimeFr(a.traite_le)} : {a.traitement}</p>}
+                      </div>
+                    )}
                   </div>
-                </Card>
-              ))}
-            </div>
+                );
+              })}
+            </Card>
           )}
           <Pagination total={data?.total || 0} limit={30} offset={offset} onChange={setOffset} />
         </>

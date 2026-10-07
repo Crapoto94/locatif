@@ -83,10 +83,13 @@ export const LinkBtn = ({ to, children, icon, primary }: { to: string; children:
   <Link to={to} className={`h-9 px-space-md rounded text-label-md font-medium inline-flex items-center gap-1.5 transition-colors ${primary ? 'bg-primary text-on-primary hover:bg-primary-container shadow-sm' : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'}`}>{icon}{children}</Link>
 );
 
-const inputCls = 'w-full h-9 px-space-sm rounded bg-surface-container-low text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-surface-container-lowest';
-export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={`${inputCls} ${p.className || ''}`} />;
-export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => <select {...p} className={`${inputCls} ${p.className || ''}`} />;
-export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={`${inputCls} h-auto py-2 ${p.className || ''}`} />;
+const inputBase = 'h-9 px-space-sm rounded bg-surface-container-low text-on-surface text-body-md placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-surface-container-lowest';
+// Largeur pleine par défaut ; une classe w-* ou flex-* fournie par l'appelant la remplace (filtres sur une seule ligne).
+const largeur = (cls?: string) => (/(^|\s)(w-|flex-|min-w-)/.test(cls || '') ? '' : 'w-full ');
+const inputCls = (cls?: string) => `${largeur(cls)}${inputBase} ${cls || ''}`;
+export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={inputCls(p.className)} />;
+export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => <select {...p} className={inputCls(p.className)} />;
+export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={`${largeur(p.className)}${inputBase} h-auto py-2 ${p.className || ''}`} />;
 
 export const Field = ({ label, children, hint, className = '' }: { label: string; children: ReactNode; hint?: string; className?: string }) => (
   <label className={`flex flex-col gap-1 ${className}`}>

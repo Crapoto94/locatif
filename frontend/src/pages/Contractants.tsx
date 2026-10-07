@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Plus, Search, Pencil, Users, Trash2, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
+import { Plus, Search, Pencil, Users, Trash2, AlertTriangle, ShieldCheck, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { api, errMsg, fileUrl } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
@@ -19,7 +19,7 @@ export function ContractantsListe() {
   const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, tiers, siret, offset, limit: 25, sort, dir });
   useEffect(() => setOffset(0), [dq, type, tiers, siret]);
   const { data: inactifs, reload: reloadInactifs } = useFetch<any[]>('/contractants/siret/inactifs');
-  const [verif, setVerif] = useState(false);
+  const [verif, setVerif] = useState(false); const [inactifsOuverts, setInactifsOuverts] = useState(false);
   const verifier = async () => {
     setVerif(true);
     try { const r = await api.post('/contractants/siret/verifier', {}); toast(`${r.data.verifies} SIRET vérifiés : ${r.data.actif} actifs, ${r.data.ferme} fermés, ${r.data.introuvable} introuvables`); reload(); reloadInactifs(); } catch (e) { toast(errMsg(e), 'error'); } finally { setVerif(false); }
@@ -30,19 +30,26 @@ export function ContractantsListe() {
     <>
       <PageHeader crumbs={['Gestion opérationnelle', 'Contractants']} title="Contractants" actions={<>{can('contractants.write') && <Btn icon={<ShieldCheck size={16} />} disabled={verif} onClick={verifier}>{verif ? 'Vérification…' : 'Vérifier les SIRET'}</Btn>}{can('contractants.write') && <Btn variant="primary" icon={<Plus size={16} />} onClick={() => setCreer(true)}>Nouveau contractant</Btn>}</>} />
       {inactifs && inactifs.length > 0 && (
-        <Card className="mb-space-md">
-          <div className="flex items-center justify-between gap-space-sm flex-wrap">
-            <div className="flex items-center gap-2"><AlertTriangle size={18} className="text-error" /><strong className="text-primary">{inactifs.filter((x) => x.siret_statut === 'ferme').length} SIRET fermé(s)</strong>{inactifs.some((x) => x.siret_statut === 'introuvable') && <Badge tone="warn">{inactifs.filter((x) => x.siret_statut === 'introuvable').length} introuvable(s)</Badge>}</div>
-            <div className="flex gap-space-sm"><Btn size="sm" onClick={() => setSiret('ferme')}>Les afficher</Btn><a href={fileUrl('/contractants/siret/inactifs.xlsx')} className="h-8 px-space-sm rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest"><Download size={14} />Excel</a></div>
+        <Card className="mb-space-sm !py-2">
+          <div className="flex items-center gap-space-sm min-w-0">
+            <AlertTriangle size={18} className="text-error flex-shrink-0" />
+            <strong className="text-primary whitespace-nowrap">{inactifs.filter((x) => x.siret_statut === 'ferme').length} SIRET fermé(s)</strong>
+            {inactifs.some((x) => x.siret_statut === 'introuvable') && <Badge tone="warn">{inactifs.filter((x) => x.siret_statut === 'introuvable').length} introuvable(s)</Badge>}
+            <span className="flex-1 min-w-0 truncate text-body-sm text-on-surface-variant" title={inactifs.map((x) => x.nom).join(' • ')}>{inactifs.map((x) => x.nom).join(' • ')}</span>
+            <Btn size="sm" variant="ghost" icon={inactifsOuverts ? <ChevronUp size={14} /> : <ChevronDown size={14} />} onClick={() => setInactifsOuverts((o) => !o)}>{inactifsOuverts ? 'Réduire' : 'Détails'}</Btn>
+            <Btn size="sm" onClick={() => setSiret('ferme')}>Les afficher</Btn>
+            <a href={fileUrl('/contractants/siret/inactifs.xlsx')} className="h-8 px-space-sm rounded text-label-md font-medium inline-flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest" title="Exporter en Excel"><Download size={14} />Excel</a>
           </div>
+          {inactifsOuverts && (
           <ul className="mt-space-sm text-body-md divide-y divide-surface-container-low">
             {inactifs.slice(0, 6).map((x) => <li key={x.id} className="py-2 flex flex-col gap-1"><div className="flex justify-between gap-2 flex-wrap"><Link className="font-semibold text-primary hover:underline" to={`/contractants/${x.id}`}>{x.nom}</Link><span className="text-on-surface-variant flex items-center gap-2 flex-wrap justify-end"><SiretBadge siret={x.siret} statut={x.siret_statut} fermeture={x.siret_fermeture_le} />{x.contrats_actifs > 0 && <span>• {x.contrats_actifs} contrat(s) en cours</span>}</span></div><NatureSiret x={x} /></li>)}
           </ul>
+          )}
         </Card>
-      )} 
+      )}
       <Card>
-        <div className="flex flex-wrap gap-space-sm mb-space-md">
-          <div className="relative flex-1 min-w-[240px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="Nom, raison sociale, SIREN, adresse, identifiant tiers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+        <div className="flex flex-wrap items-center gap-space-sm mb-space-sm">
+          <div className="relative flex-1 min-w-[220px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="Nom, raison sociale, SIRET, adresse, identifiant tiers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           <Select className="w-48" value={type} onChange={(e) => setType(e.target.value)}><option value="">Tous</option><option value="physique">Personnes physiques</option><option value="morale">Personnes morales</option></Select>
           <Select className="w-56" value={tiers} onChange={(e) => setTiers(e.target.value)}><option value="">Tiers SEDIT : tous</option><option value="rapproche">Rapprochés</option><option value="ambigu">À trancher (ambigus)</option><option value="introuvable">Introuvables</option><option value="manuel">Saisis à la main</option></Select>
           <Select className="w-52" value={siret} onChange={(e) => setSiret(e.target.value)}><option value="">SIRET : tous</option><option value="actif">Actifs</option><option value="ferme">Fermés</option><option value="introuvable">Introuvables</option><option value="non_verifie">Non vérifiés</option><option value="sans">Sans SIRET</option></Select>

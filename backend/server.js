@@ -11,6 +11,7 @@ const apm = require('./src/services/apm');
 const hub = require('./src/services/hubdsi');
 const store = require('./src/modules/documents/store/store');
 const alertes = require('./src/modules/alertes/alertes.service');
+const indicesSync = require('./src/modules/revisions/indices.sync');
 
 const app = express();
 app.disable('x-powered-by');
@@ -80,7 +81,7 @@ function planifier() {
     const now = new Date(); const jour = now.toISOString().slice(0, 10);
     if (now.getHours() !== config.scheduler.heure || dernier === jour) return;
     dernier = jour;
-    try { console.log('[SCHED] alertes :', await alertes.calculer(), await alertes.notifier()); } catch (e) { console.error('[SCHED]', e.message); }
+    try { console.log('[SCHED] indices :', JSON.stringify(await indicesSync.synchroniser('planificateur').then((b) => ({ ajoutes: b.ajoutes.length, ecarts: b.ecarts.length, erreurs: b.erreurs })))); console.log('[SCHED] alertes :', await alertes.calculer(), await alertes.notifier()); } catch (e) { console.error('[SCHED]', e.message); }
   }, 5 * 60 * 1000);
   console.log(`[SCHED] actif, exécution quotidienne à ${config.scheduler.heure}h`);
 }

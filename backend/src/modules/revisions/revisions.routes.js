@@ -7,13 +7,25 @@ const { requirePerm } = require('../../middleware/auth');
 const { httpError, whereBuilder } = require('../../shared/http');
 const audit = require('../../services/audit');
 const ech = require('../echeancier/echeancier.service');
+const indicesSync = require('./indices.sync');
 
 // ---- Valeurs d'indices -----------------------------------------------------------------------
 router.get('/indices', requirePerm('revisions.read'), async (req, res) => {
   const w = whereBuilder();
   if (req.query.type) w.add('type_code = ?', req.query.type);
   if (req.query.annee) w.add('annee = ?', parseInt(req.query.annee, 10));
-  res.json(await db.all(`SELECT * FROM ${t('indices_valeurs')} ${w.clause()} ORDER BY type_code, annee DESC, trimestre DESC LIMIT 400`, w.params));
+  res.json(await db.all(`SELECT * FROM ${t('indices_valeurs')} ${w.clause()} ORDER BY annee DESC, trimestre DESC, date_publication DESC NULLS LAST, type_code LIMIT 500`, w.params));
+});
+
+// Dernier rapprochement avec l'INSEE.
+router.get('/indices/synchronisation', requirePerm('revisions.read'), async (req, res) => {
+  const s = await db.get(`SELECT valeur FROM ${t('settings')} WHERE cle = 'indices_sync'`);
+  res.json(s?.valeur || null);
+});
+
+// Mise à jour automatique des indices depuis l'INSEE (REV-005) : ajoute, complète, signale les écarts sans jamais écraser.
+router.post('/indices/synchroniser', requirePerm('revisions.write'), async (req, res) => {
+  res.json(await indicesSync.synchroniser(req.user));
 });
 
 router.post('/indices', requirePerm('revisions.write'), async (req, res) => {
@@ -27,6 +39,15 @@ router.post('/indices', requirePerm('revisions.write'), async (req, res) => {
     [b.type_code, b.annee, b.trimestre, b.libelle || `${b.type_code} ${b.annee} T${b.trimestre}`, b.valeur === '' ? null : b.valeur, b.date_publication || null]);
   await audit.log(req.user, prev ? 'index.updated' : 'index.created', 'indice', row.id, { champ: 'valeur', ancienne: prev?.valeur, nouvelle: row.valeur, details: { type: b.type_code, annee: b.annee, trimestre: b.trimestre } });
   res.status(prev ? 200 : 201).json(row);
+});
+
+// Décision humaine sur un écart : remplace la valeur de l'application par celle de l'INSEE (ancienne valeur conservée dans l'audit).
+router.post('/indices/:id/appliquer-insee', requirePerm('revisions.write'), async (req, res) => {
+  const idx = await db.get(`SELECT * FROM ${t('indices_valeurs')} WHERE id = $1`, [req.params.id]);
+  if (!idx || idx.valeur_insee === null) throw httpError(404, "Aucune valeur INSEE connue pour cet indice");
+  await db.run(`UPDATE ${t('indices_valeurs')} SET valeur = valeur_insee, statut_insee = 'conforme', source = 'insee' WHERE id = $1`, [idx.id]);
+  await audit.log(req.user, 'index.updated', 'indice', idx.id, { champ: 'valeur', ancienne: idx.valeur, nouvelle: idx.valeur_insee, motif: `Alignement sur la valeur INSEE (${idx.type_code} ${idx.annee} T${idx.trimestre})` });
+  res.json({ ok: true });
 });
 
 // ---- Calcul ----------------------------------------------------------------------------------

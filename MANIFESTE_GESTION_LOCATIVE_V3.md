@@ -1207,7 +1207,7 @@ Authentification des agents : Active Directory via l'APM (`POST /api/v1/ad/authe
 **ADM-011 — DÉCISION DE CONCEPTION / ÉCART À ADM-002 À ARBITRER**
 Un **compte administrateur local** existe en complément de l'AD. Ses identifiants sont **paramétrés dans
 le `.env`** (`LOCAL_ADMIN_USERNAME`, `LOCAL_ADMIN_PASSWORD`, valeurs par défaut documentées dans
-`.env.example` : `admin` / `admin`). Le mot de passe est stocké haché (bcrypt), jamais journalisé.
+`.env.example` : `admin` / `admin`). Le mot de passe n'est jamais stocké en base : il est lu dans le `.env`, comparé à temps constant et jamais journalisé.
 Cette dérogation à ADM-002 est demandée par la maîtrise d'ouvrage ; elle est à arbitrer par AFLC / DSI / RSSI
 avant mise en production (désactivable par `LOCAL_ADMIN_ENABLED=false`).
 
@@ -1220,8 +1220,10 @@ l'APM). Un compte porte un ou plusieurs **profils** ; il peut être désactivé,
 Profils initiaux, paramétrables, fondés sur les acteurs cités à ADM-003 : `ADMIN_GL` (administration
 complète), `AFLC` (gestion locative), `DSF` (lecture + contrôle financier), `DSI` (administration technique,
 lecture), `LECTURE` (consultation). Les **droits par action** sont portés par une table
-`profil × permission` modifiable à l'écran ; les permissions non décidées par le manifeste sont initialisées
-**fermées** (« aucune case non établie ne doit être interprétée comme un droit accordé ») sauf pour `ADMIN_GL`.
+`profil × permission` modifiable à l'écran. Les droits explicitement validés (§19 : pièces sensibles, modèles Word,
+validation de campagne) sont accordés ; les écritures opérationnelles d'AFLC sont ouvertes **par convention de conception,
+modifiables à l'écran** ; DSF, DSI et lecture restent en consultation ; l'administration est réservée à `ADMIN_GL`
+(DSI : GED et reprise).
 La matrice du §19 sert de point de départ ; ADM-005 et ADM-006 restent À CONFIRMER MÉTIER.
 
 ## 33.3 Reprise des données ASTECH
@@ -1257,6 +1259,13 @@ MIG-006) et listés à l'écran Contrôle de reprise (maquette 29).
 **MIG-013 — DÉCISION DE CONCEPTION**
 Chaque exécution produit un **rapport de reprise** (volumes lus / créés / mis à jour / rejetés, anomalies,
 doublons) conservé en base et consultable à l'écran 29. L'import n'écrit jamais dans ASTECH.
+
+**MIG-014 — DÉCISION DE CONCEPTION**
+Constats de la première reprise (octobre 2026) : 249 biens locatifs, 265 contrats (75 en cours, 189 clos), 163 contractants,
+5 037 échéances, 316 révisions. Le type de contrat provient de `CONTRAT_LOCATIF.CONTL_TYPCO` (AOT, COP, BAIL89, BAILCC, ZZZ…) ;
+aucun libellé n'existe dans ASTECH, ils sont à valider par AFLC (REF-007). Le champ `ARBLOC_OCCUPE` est inexploitable :
+l'occupation est déduite des contrats en cours. Documents : 74 rattachés au périmètre, 10 repris ; les 64 autres, déposés
+en 2018, ne subsistent que comme chemins vers des postes distants. Depuis 2024, tous les documents ASTECH sont en base (BLOB).
 
 ## 33.4 Documents et stockage
 

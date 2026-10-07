@@ -7,3 +7,4 @@ dist/
 backend/storage/
 backend/config.json
 .DS_Store
+exports/

@@ -35,6 +35,15 @@ export default function Cartographie() {
   // Contour officiel de la commune (API Géo, INSEE 94041), embarqué dans l'application.
   const [contour, setContour] = useState<any | null>(null);
   useEffect(() => { fetch('/ivry-contour.geojson').then((r) => (r.ok ? r.json() : null)).then(setContour).catch(() => {}); }, []);
+  // Masque : polygone couvrant le monde, percé par la commune (règle pair-impair) => l'extérieur d'Ivry est estompé.
+  const masque = useMemo(() => {
+    if (!contour) return null;
+    const g = contour.geometry ?? contour.features?.[0]?.geometry;
+    const anneaux: number[][][] = g?.type === 'MultiPolygon' ? g.coordinates.map((p: number[][][]) => p[0]) : g?.type === 'Polygon' ? [g.coordinates[0]] : [];
+    if (!anneaux.length) return null;
+    const monde = [[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]];
+    return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [monde, ...anneaux] } } as any;
+  }, [contour]);
   const dans3Mois = useMemo(() => new Date(Date.now() + 92 * 86400000).toISOString().slice(0, 10), []);
 
   const biens = useMemo(() => (data?.biens || []).map((b: any) => ({ ...b, cat: categorie(b, dans3Mois) }))
@@ -55,6 +64,7 @@ export default function Cartographie() {
           <Card className="xl:col-span-3 !p-0 overflow-hidden">
             <MapContainer center={IVRY} zoom={14} scrollWheelZoom style={{ height: 'calc(100vh - 210px)', minHeight: 460 }}>
               <TileLayer url={TILES} attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' maxZoom={19} />
+              {masque && <GeoJSON data={masque} interactive={false} style={{ stroke: false, fillColor: '#f8f9ff', fillOpacity: 0.72, fillRule: 'evenodd' }} />}
               {contour && <GeoJSON data={contour} interactive={false} style={{ color: '#001645', weight: 3, dashArray: '8 6', fillColor: '#316bf3', fillOpacity: 0.05 }} />}
               {biens.map((b: any) => (
                 <CircleMarker key={b.id} center={[b.latitude, b.longitude]} radius={9}

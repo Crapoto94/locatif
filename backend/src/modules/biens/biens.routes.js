@@ -4,10 +4,11 @@ const { db, t } = require('../../db');
 const { requirePerm } = require('../../middleware/auth');
 const { pageParams, orderBy, whereBuilder, like, httpError } = require('../../shared/http');
 const { createRow, updateRow } = require('../../shared/crud');
+const geocodage = require('./geocodage');
 
 const FIELDS = ['parent_id', 'niveau', 'code', 'designation', 'type_code', 'categorie', 'adresse', 'code_postal', 'ville', 'surface',
   'reference_cadastrale', 'statut_occupation', 'disponibilite', 'motif_indisponibilite', 'service_code', 'direction', 'gestionnaire',
-  'hub_site_id', 'commentaire', 'actif'];
+  'hub_site_id', 'latitude', 'longitude', 'geoloc_source', 'commentaire', 'actif'];
 const SORTS = { designation: 'b.designation', code: 'b.code', adresse: 'b.adresse', surface: 'b.surface', type: 'b.type_code' };
 
 router.get('/', requirePerm('biens.read'), async (req, res) => {
@@ -52,6 +53,26 @@ function buildHistorique(manuels, contrats) {
   return [...occ, ...vacances].sort((a, b) => String(b.date_debut).localeCompare(String(a.date_debut)));
 }
 
+// Cartographie : unités locatives positionnées, avec occupant et loyer du contrat en cours (infobulle).
+router.get('/carte', requirePerm('biens.read'), async (req, res) => {
+  const rows = await db.all(
+    `SELECT b.id, b.designation, b.code, b.adresse, b.code_postal, b.ville, b.type_code, b.statut_occupation, b.disponibilite, b.surface, b.latitude, b.longitude,
+            k.id AS contrat_id, k.numero AS contrat_numero, k.date_fin,
+            (SELECT string_agg(DISTINCT ct.nom, ', ') FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = k.id) AS occupant,
+            (SELECT COALESCE(SUM(montant),0) FROM ${t('conditions_financieres')} cf WHERE cf.contrat_id = k.id AND cf.rubrique_code IN ('loyer','redevance') AND cf.date_fin IS NULL) AS loyer
+     FROM ${t('biens')} b
+     LEFT JOIN LATERAL (SELECT c.* FROM ${t('contrat_biens')} cb JOIN ${t('contrats')} c ON c.id = cb.contrat_id
+                        WHERE cb.bien_id = b.id AND c.statut_code = 'en_cours' ORDER BY c.date_debut DESC NULLS LAST LIMIT 1) k ON TRUE
+     WHERE b.actif AND b.niveau = 'unite' ORDER BY b.designation`);
+  const places = rows.filter((r) => r.latitude !== null && r.longitude !== null);
+  res.json({ total: rows.length, localises: places.length, non_localises: rows.length - places.length, biens: places.map((r) => ({ ...r, latitude: Number(r.latitude), longitude: Number(r.longitude) })) });
+});
+
+// Positionne les biens sans coordonnées à partir de leur adresse (géocodage BAN).
+router.post('/geocoder', requirePerm('biens.write'), async (req, res) => {
+  res.json(await geocodage.geocoderBiens(req.user, { tous: Boolean(req.body?.tous) }));
+});
+
 router.get('/:id', requirePerm('biens.read'), async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const bien = await db.get(`SELECT * FROM ${t('biens')} WHERE id = $1`, [id]);
@@ -78,6 +99,7 @@ router.post('/', requirePerm('biens.write'), async (req, res) => {
 });
 
 router.put('/:id', requirePerm('biens.write'), async (req, res) => {
+  if (req.body.latitude !== undefined || req.body.longitude !== undefined) { req.body.geoloc_source = 'manuel'; }
   res.json(await updateRow({ table: 'biens', entite: 'bien', id: parseInt(req.params.id, 10), allowed: FIELDS, body: req.body, user: req.user, motif: req.body.motif }));
 });
 

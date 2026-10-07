@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Landmark, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { errMsg } from '../lib/api';
 import { Field, Input, Btn, Notice } from '../components/ui';
@@ -20,7 +20,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-background p-space-md">
       <form onSubmit={submit} className="w-full max-w-sm bg-surface-container-lowest rounded-xl shadow-lg p-space-xl flex flex-col gap-space-md">
         <div className="flex items-center gap-space-sm">
-          <div className="p-2 bg-surface-container-low rounded-lg"><Landmark className="text-primary" size={24} /></div>
+          <img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-14 w-auto rounded flex-shrink-0" />
           <div>
             <h1 className="text-headline-md text-primary font-bold leading-tight">Patrimoine & Gestion Locative</h1>
             <p className="text-body-sm text-on-surface-variant">Ville d'Ivry-sur-Seine</p>

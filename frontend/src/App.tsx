@@ -16,6 +16,7 @@ import Generation from './pages/Generation';
 import Alertes from './pages/Alertes';
 import Recherche from './pages/Recherche';
 import Etats from './pages/Etats';
+import Cartographie from './pages/Cartographie';
 import Audit from './pages/Audit';
 import Referentiels from './pages/Referentiels';
 import { AdminDroits, AdminGed, AdminReprise } from './pages/Admin';
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="generation" element={<Generation />} />
         <Route path="alertes" element={<Alertes />} />
         <Route path="recherche" element={<Recherche />} />
+        <Route path="cartographie" element={<Cartographie />} />
         <Route path="etats" element={<Etats />} />
         <Route path="audit" element={<Audit />} />
         <Route path="referentiels" element={<Referentiels />} />

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
-import { Landmark, LayoutDashboard, Building2, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, User as UserIcon } from 'lucide-react';
+import { Map as MapIcon, LayoutDashboard, Building2, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
 import { getRecents, type Recent } from '../lib/recents';
@@ -13,6 +13,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     { to: '/biens', label: 'Biens & Locaux', icon: <Building2 size={18} />, perm: 'biens.read' },
     { to: '/contractants', label: 'Contractants', icon: <Users size={18} />, perm: 'contractants.read' },
     { to: '/contrats', label: 'Contrats & Baux', icon: <FileSignature size={18} />, perm: 'contrats.read' },
+    { to: '/cartographie', label: 'Cartographie', icon: <MapIcon size={18} />, perm: 'biens.read' },
   ] },
   { title: 'Finances & Quittancement', items: [
     { to: '/echeancier', label: 'Échéancier', icon: <CalendarClock size={18} />, perm: 'echeancier.read' },
@@ -62,7 +63,7 @@ export default function Layout() {
       <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between select-none">
         <div className="flex flex-col min-h-0">
           <div className="h-14 px-space-md flex items-center gap-space-sm">
-            <div className="p-1 bg-surface-container-lowest rounded-lg shadow-sm"><Landmark size={20} className="text-primary" /></div>
+            <Link to="/" title="Ville d'Ivry-sur-Seine" className="flex-shrink-0"><img src="/logo.jpg" alt="Ville d'Ivry-sur-Seine" className="h-10 w-auto rounded shadow-sm bg-white" /></Link>
             <div className="flex flex-col min-w-0">
               <span className="text-headline-sm text-primary truncate leading-tight">PATRIMOINE</span>
               <span className="text-label-sm text-on-surface-variant truncate uppercase tracking-wider">Ville d'Ivry-sur-Seine</span>

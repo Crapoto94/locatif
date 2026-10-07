@@ -78,7 +78,9 @@ const config = {
 
   // Ouverture d'une fiche dans SEDIT (même schéma que AppDSI : <base>/<page>?<param>=<ROO_IMA_REF>). Page/param à vérifier sur votre SEDIT.
   sedit: { url: (process.env.SEDIT_URL || 'https://seditgfprod.ivry.local/SeditGfSMProd').replace(/\/$/, ''),
-    pageTiers: process.env.SEDIT_URL_TIERS_PAGE || 'FicheTiers.html', paramTiers: process.env.SEDIT_URL_TIERS_PARAM || 'tiersId' },
+    pageTiers: process.env.SEDIT_URL_TIERS_PAGE || 'FicheTiers.html', paramTiers: process.env.SEDIT_URL_TIERS_PARAM || 'tiersId',
+    // Fiche mandat : même page que celle utilisée par AppDSI.
+    pageMandat: process.env.SEDIT_URL_MANDAT_PAGE || 'FicheMandat.html', paramMandat: process.env.SEDIT_URL_MANDAT_PARAM || 'mandatId' },
 
   sofficePath: process.env.SOFFICE_PATH || '',
   mailFooter: {

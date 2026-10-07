@@ -1288,6 +1288,13 @@ introuvable, avec liste et export Excel des SIRET inactifs. Les pièces SEDIT ra
 `OBJECT_TYPE = 'TIERS'`) sont reprises dans la GED de l'application, liées au contractant ; les relevés d'identité bancaire (type 7)
 et toute pièce d'identité sont exclus de l'import (DOC-005).
 
+**MIG-018 — DÉCISION DE CONCEPTION**
+Numéros de mandat : ASTECH ne conserve que des dates (mandatement, transmission à la gestion financière) ; le numéro (`CONTEC_NUMMAN`)
+est vide. Il est retrouvé dans SEDIT (`FI.MVTLIGNE`, lecture seule) par tiers rapproché + mois du libellé + montant TTC **en euros**
+(`MONTANTTC_E` : la colonne `MONTANTTC` est exprimée en francs), les lignes d'un même mandat étant additionnées (redevance + charges).
+« exact » si un seul mandat correspond ; « probable » si seule la date de mandatement (± 45 jours) départage ; rien n'est écrit en cas
+de doute. Le numéro est repris par exercice (la numérotation SEDIT repart chaque année) et ouvre la fiche mandat dans SEDIT.
+
 ## 33.4 Documents et stockage
 
 **DOC-016 — DÉCISION DE CONCEPTION**

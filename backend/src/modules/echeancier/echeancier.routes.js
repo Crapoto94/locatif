@@ -14,7 +14,7 @@ const monthRange = (periode) => {
 
 const SELECT = `SELECT e.id, e.contrat_id, c.numero AS contrat_numero, c.type_code, e.libelle, e.periode_debut, e.periode_fin, e.date_exigibilite,
   e.montant_loyer, e.montant_charges, e.montant_total, e.prorata, e.prorata_jours, e.prorata_base, e.statut, e.anomalie, e.numero_quittance,
-  e.date_quittance, e.campagne_id, e.campagne_retiree,
+  e.date_quittance, e.campagne_id, e.campagne_retiree, e.mandat_numero, e.mandat_exercice, e.mandat_date, e.mandat_bordereau, e.mandat_roo, e.mandat_confiance,
   (SELECT string_agg(ct.nom, ', ') FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = c.id) AS contractants,
   (SELECT string_agg(COALESCE(b.designation,'') || CASE WHEN b.adresse IS NOT NULL THEN ' — ' || b.adresse ELSE '' END, ' ; ') FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = c.id) AS biens
   FROM ${t('echeances')} e JOIN ${t('contrats')} c ON c.id = e.contrat_id`;
@@ -34,7 +34,9 @@ router.get('/', requirePerm('echeancier.read'), async (req, res) => {
   const base = `FROM ${t('echeances')} e JOIN ${t('contrats')} c ON c.id = e.contrat_id ${where}`;
   const tot = await db.get(`SELECT count(*)::int AS n, COALESCE(SUM(e.montant_loyer),0) AS loyers, COALESCE(SUM(e.montant_charges),0) AS charges, COALESCE(SUM(e.montant_total),0) AS total ${base}`, w.params);
   const rows = await db.all(`${SELECT} ${where} ORDER BY e.periode_debut, c.numero LIMIT ${limit} OFFSET ${offset}`, w.params);
-  res.json({ total: tot.n, totaux: { loyers: tot.loyers, charges: tot.charges, total: tot.total }, rows });
+  const { config } = require('../../config');
+  const lien = (r) => (r.mandat_roo ? `${config.sedit.url}/${config.sedit.pageMandat}?${config.sedit.paramMandat}=${encodeURIComponent(r.mandat_roo)}` : null);
+  res.json({ total: tot.n, totaux: { loyers: tot.loyers, charges: tot.charges, total: tot.total }, rows: rows.map((r) => ({ ...r, mandat_url: lien(r) })) });
 });
 
 // Totaux par mois sur une année (vue calendaire).

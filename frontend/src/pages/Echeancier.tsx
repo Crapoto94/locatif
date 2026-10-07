@@ -5,6 +5,7 @@ import { api, errMsg } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
 import { currentPeriode, shiftPeriode, moisLabel, eur, dateFr } from '../lib/format';
+import MandatLink from '../components/MandatLink';
 import { Card, PageHeader, DataTable, Pagination, Btn, Badge, Loading, ErrorBox, Input, Select, Kpi, toast, MotifModal, Field } from '../components/ui';
 
 const STATUTS: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], mandatee: ['Mandatée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
@@ -70,6 +71,7 @@ export default function Echeancier() {
               { key: 'ch', label: 'Charges', align: 'right', render: (e: any) => eur(e.montant_charges) },
               { key: 'pr', label: 'Prorata', align: 'right', render: (e: any) => (e.prorata ? <Badge tone="warn">{e.prorata_jours}/{e.prorata_base} j</Badge> : '—') },
               { key: 't', label: 'Total', align: 'right', render: (e: any) => <strong>{eur(e.montant_total)}</strong> },
+              { key: 'mandat', label: 'Mandat SEDIT', render: (e: any) => <MandatLink e={e} /> },
               { key: 's', label: 'Statut', render: (e: any) => { const [l, t] = STATUTS[e.statut] || [e.statut, 'neutral']; return <div className="flex flex-col gap-0.5"><Badge tone={t}>{l}</Badge>{e.anomalie && <span className="text-[11px] text-error max-w-[220px]">{e.anomalie}</span>}</div>; } },
               { key: 'a', label: '', render: (e: any) => can('echeancier.write') && ['planifiee', 'echue_non_emise'].includes(e.statut) && <Btn size="sm" variant="ghost" onClick={() => setEdit({ ...e })}>Ajuster</Btn> },
             ]} />

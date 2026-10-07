@@ -7,7 +7,7 @@ const { createRow, updateRow } = require('../../shared/crud');
 const audit = require('../../services/audit');
 
 const FIELDS = ['type', 'nom', 'prenom', 'forme_juridique', 'siren', 'email', 'telephone', 'adresse', 'code_postal', 'ville',
-  'tiers_sedit_id', 'commentaire', 'actif'];
+  'tiers_sedit_id', 'tiers_sedit_statut', 'tiers_sedit_note', 'commentaire', 'actif'];
 const SORTS = { nom: 'c.nom', ville: 'c.ville', type: 'c.type' };
 
 router.get('/', requirePerm('contractants.read'), async (req, res) => {
@@ -15,11 +15,12 @@ router.get('/', requirePerm('contractants.read'), async (req, res) => {
   const w = whereBuilder();
   if (req.query.q) w.add(`(c.nom ILIKE ? OR c.prenom ILIKE ? OR c.siren ILIKE ? OR c.adresse ILIKE ? OR c.tiers_sedit_id ILIKE ?)`, like(req.query.q));
   if (req.query.type) w.add('c.type = ?', req.query.type);
+  if (req.query.tiers) w.add('c.tiers_sedit_statut = ?', req.query.tiers);
   if (req.query.actif !== 'tous') w.addRaw('c.actif');
   const base = `FROM ${t('contractants')} c ${w.clause()}`;
   const total = (await db.get(`SELECT count(*)::int AS n ${base}`, w.params)).n;
   const rows = await db.all(
-    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id,
+    `SELECT c.id, c.type, c.nom, c.prenom, c.siren, c.email, c.telephone, c.adresse, c.code_postal, c.ville, c.tiers_sedit_id, c.tiers_sedit_statut,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc JOIN ${t('contrats')} k ON k.id = cc.contrat_id WHERE cc.contractant_id = c.id AND k.statut_code = 'en_cours') AS contrats_actifs,
             (SELECT count(*)::int FROM ${t('contrat_contractants')} cc WHERE cc.contractant_id = c.id) AS contrats_total,
             EXISTS (SELECT 1 FROM ${t('reprise_doublons')} d WHERE d.entite = 'contractant' AND d.statut = 'a_examiner' AND c.id IN (d.id_a, d.id_b)) AS doublon_possible
@@ -56,6 +57,8 @@ router.post('/', requirePerm('contractants.write'), async (req, res) => {
 });
 
 router.put('/:id', requirePerm('contractants.write'), async (req, res) => {
+  // Une saisie manuelle de l'identifiant tiers fait foi : le rapprochement automatique ne l'écrasera plus.
+  if (req.body.tiers_sedit_id !== undefined) { const cur = await db.get(`SELECT tiers_sedit_id FROM ${t('contractants')} WHERE id = $1`, [req.params.id]); if (String(cur?.tiers_sedit_id ?? '') !== String(req.body.tiers_sedit_id ?? '')) { req.body.tiers_sedit_statut = 'manuel'; req.body.tiers_sedit_note = null; } }
   res.json(await updateRow({ table: 'contractants', entite: 'contractant', id: parseInt(req.params.id, 10), allowed: FIELDS, body: req.body, user: req.user, motif: req.body.motif }));
 });
 

@@ -12,10 +12,10 @@ import DocumentsPanel from '../components/DocumentsPanel';
 
 export function ContractantsListe() {
   const nav = useNavigate(); const { can } = useAuth();
-  const [q, setQ] = useState(''); const [type, setType] = useState(''); const [offset, setOffset] = useState(0);
+  const [q, setQ] = useState(''); const [type, setType] = useState(''); const [tiers, setTiers] = useState(''); const [offset, setOffset] = useState(0);
   const [sort, setSort] = useState('nom'); const [dir, setDir] = useState('asc'); const dq = useDebounced(q);
-  const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, offset, limit: 25, sort, dir });
-  useEffect(() => setOffset(0), [dq, type]);
+  const { data, loading, error, reload } = useFetch<any>('/contractants', { q: dq, type, tiers, offset, limit: 25, sort, dir });
+  useEffect(() => setOffset(0), [dq, type, tiers]);
   const [creer, setCreer] = useState(false);
   const onSort = (k: string) => { if (k === sort) setDir(dir === 'asc' ? 'desc' : 'asc'); else { setSort(k); setDir('asc'); } };
   return (
@@ -25,6 +25,7 @@ export function ContractantsListe() {
         <div className="flex flex-wrap gap-space-sm mb-space-md">
           <div className="relative flex-1 min-w-[240px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="Nom, raison sociale, SIREN, adresse, identifiant tiers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
           <Select className="w-48" value={type} onChange={(e) => setType(e.target.value)}><option value="">Tous</option><option value="physique">Personnes physiques</option><option value="morale">Personnes morales</option></Select>
+          <Select className="w-56" value={tiers} onChange={(e) => setTiers(e.target.value)}><option value="">Tiers SEDIT : tous</option><option value="rapproche">Rapprochés</option><option value="ambigu">À trancher (ambigus)</option><option value="introuvable">Introuvables</option><option value="manuel">Saisis à la main</option></Select>
         </div>
         {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !data ? <Loading /> : (
           <>
@@ -32,7 +33,7 @@ export function ContractantsListe() {
               { key: 'nom', label: 'Contractant', sort: 'nom', render: (c: any) => <div><Link className="font-semibold text-primary hover:underline" to={`/contractants/${c.id}`}>{c.nom}{c.prenom ? ` ${c.prenom}` : ''}</Link>{c.doublon_possible && <span title="Doublon possible à examiner" className="ml-1 inline-block text-[#8a5a00]"><AlertTriangle size={13} className="inline" /></span>}</div> },
               { key: 'type', label: 'Nature', sort: 'type', render: (c: any) => <Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge> },
               { key: 'adresse', label: 'Adresse', render: (c: any) => [c.adresse, c.code_postal, c.ville].filter(Boolean).join(' ') || '—' },
-              { key: 'siren', label: 'SIREN / tiers SEDIT', render: (c: any) => <span className="tabular-nums">{[c.siren, c.tiers_sedit_id].filter(Boolean).join(' • ') || '—'}</span> },
+              { key: 'siren', label: 'SIREN / tiers SEDIT', render: (c: any) => <span className="tabular-nums">{[c.siren, c.tiers_sedit_id].filter(Boolean).join(' • ') || '—'}{c.tiers_sedit_statut === 'ambigu' && <Badge tone="warn" className="ml-1">à trancher</Badge>}{c.tiers_sedit_statut === 'introuvable' && <Badge tone="muted" className="ml-1">introuvable</Badge>}</span> },
               { key: 'ct', label: 'Contrats', align: 'right', render: (c: any) => `${c.contrats_actifs} actif${c.contrats_actifs > 1 ? 's' : ''} / ${c.contrats_total}` },
               { key: 'a', label: '', render: (c: any) => <Btn size="sm" variant="ghost" onClick={() => nav(`/contractants/${c.id}`)}>Ouvrir</Btn> },
             ]} />
@@ -87,7 +88,8 @@ export function ContractantFiche() {
   return (
     <>
       <PageHeader crumbs={['Contractants', c.nom]} title={`${c.nom}${c.prenom ? ` ${c.prenom}` : ''}`} actions={can('contractants.write') && <Btn icon={<Pencil size={16} />} onClick={() => setEdit(true)}>Modifier</Btn>}>
-        <div className="flex gap-2 mt-1"><Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge>{!c.actif && <Badge tone="muted">Inactif</Badge>}{c.tiers_sedit_id && <Badge tone="muted">Tiers SEDIT {c.tiers_sedit_id}</Badge>}</div>
+        <div className="flex gap-2 mt-1"><Badge tone={c.type === 'morale' ? 'info' : 'neutral'}>{c.type === 'morale' ? 'Personne morale' : 'Personne physique'}</Badge>{!c.actif && <Badge tone="muted">Inactif</Badge>}{c.tiers_sedit_id && <Badge tone="muted">Tiers SEDIT {c.tiers_sedit_id}</Badge>}{c.astech_tiers_cod && <Badge tone="muted">Tiers ASTECH {c.astech_tiers_cod}</Badge>}</div>
+        {c.tiers_sedit_note && <p className="text-body-sm text-on-surface-variant mt-1">Rapprochement SEDIT ({c.tiers_sedit_statut}) : {c.tiers_sedit_note}</p>}
       </PageHeader>
       {c.doublons?.length > 0 && <div className="mb-space-md"><Notice tone="warn">Doublon(s) possible(s) signalé(s) par la reprise (aucune fusion automatique) : {c.doublons.map((d: any, i: number) => <span key={d.id}>{i > 0 && ', '}<Link className="underline font-semibold" to={`/contractants/${d.id}`}>{d.nom}</Link></span>)}.</Notice></div>}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">

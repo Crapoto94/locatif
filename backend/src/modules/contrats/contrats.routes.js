@@ -54,7 +54,7 @@ router.get('/:id', requirePerm('contrats.read'), async (req, res) => {
     db.all(`SELECT ct.id, ct.nom, ct.prenom, ct.type, ct.siren, ct.email, ct.telephone, ct.adresse, ct.code_postal, ct.ville, ct.tiers_sedit_id, ct.tiers_sedit_roo, cc.role_code
             FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = $1`, [id]),
     db.all(`SELECT * FROM ${t('conditions_financieres')} WHERE contrat_id = $1 ORDER BY COALESCE(date_effet,'0001-01-01') DESC, id DESC`, [id]),
-    db.all(`SELECT id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, prorata, prorata_jours, prorata_base, statut, anomalie, campagne_retiree, mandat_numero, mandat_exercice, mandat_date, mandat_bordereau, mandat_roo, mandat_confiance
+    db.all(`SELECT id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, prorata, prorata_jours, prorata_base, statut, anomalie, campagne_retiree, titre_numero, titre_exercice, titre_date, titre_bordereau, titre_roo, titre_confiance, titre_etat, titre_paiement_le, titre_prise_en_charge_le
             FROM ${t('echeances')} WHERE contrat_id = $1 ORDER BY periode_debut DESC LIMIT 60`, [id]),
     db.all(`SELECT r.*, ip.libelle AS indice_prec, ip.valeur AS valeur_prec, inw.libelle AS indice_nouv, inw.valeur AS valeur_nouv
             FROM ${t('revisions')} r LEFT JOIN ${t('indices_valeurs')} ip ON ip.id = r.indice_prec_id LEFT JOIN ${t('indices_valeurs')} inw ON inw.id = r.indice_nouv_id
@@ -68,7 +68,7 @@ router.get('/:id', requirePerm('contrats.read'), async (req, res) => {
   ]);
   const loyer = conditions.filter((x) => ['loyer', 'redevance'].includes(x.rubrique_code) && !x.date_fin).reduce((s, x) => s + Number(x.montant), 0);
   const { config } = require('../../config');
-  for (const e of echeances) e.mandat_url = e.mandat_roo ? `${config.sedit.url}/${config.sedit.pageMandat}?${config.sedit.paramMandat}=${encodeURIComponent(e.mandat_roo)}` : null;
+  for (const e of echeances) e.titre_url = e.titre_roo ? `${config.sedit.url}/${config.sedit.pageMandat}?${config.sedit.paramMandat}=${encodeURIComponent(e.titre_roo)}` : null;
   for (const x of contractants) x.sedit_url = x.tiers_sedit_roo ? `${config.sedit.url}/${config.sedit.pageTiers}?${config.sedit.paramTiers}=${encodeURIComponent(x.tiers_sedit_roo)}` : null;
   res.json({ ...c, biens, contractants, conditions, echeances, revisions, depot, avenants, actes, historique: histo, alertes, nb_documents: nbDocs.n, loyer_actuel: loyer });
 });
@@ -116,7 +116,7 @@ router.put('/:id', requirePerm('contrats.write'), async (req, res) => {
   let certificat = false;
   if (touche) {
     const n = await db.get(`SELECT count(*)::int AS n FROM ${t('echeances')} e LEFT JOIN ${t('campagnes')} ca ON ca.id = e.campagne_id
-                            WHERE e.contrat_id = $1 AND (e.statut IN ('emise','mandatee') OR ca.statut = 'validee')`, [id]);
+                            WHERE e.contrat_id = $1 AND (e.statut IN ('emise','titree') OR ca.statut = 'validee')`, [id]);
     certificat = n.n > 0;
     if (certificat) await audit.log(req.user, 'contract.certificat_requis', 'contrat', id, { motif: req.body.motif, details: { periodes_traitees: n.n } });
   }

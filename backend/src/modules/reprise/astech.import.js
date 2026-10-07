@@ -319,10 +319,10 @@ async function run({ env = 'prod', documents = false, dryRun = false, user = 'sc
           if (!dd || dd.length !== 10) { count('echeances', 'rejetes'); warn('echeance', r.CONTEC_CONTID, 'Échéance sans date exploitable'); continue; }
           const k = `${cid}|${dd}`; if (vues.has(k)) continue; vues.add(k);
           const total = num(r.CONTEC_MTTC) ?? num(r.CONTEC_MTHT) ?? 0;
-          const statut = fmtDate(r.CONTEC_DATGF) ? 'mandatee' : (r.CONTEC_NUMQUIT || r.CONTEC_DATQUIT) ? 'emise' : (fmtDate(r.CONTEC_DATE) || dd) < today ? 'echue_non_emise' : 'planifiee';
+          const statut = fmtDate(r.CONTEC_DATGF) ? 'titree' : (r.CONTEC_NUMQUIT || r.CONTEC_DATQUIT) ? 'emise' : (fmtDate(r.CONTEC_DATE) || dd) < today ? 'echue_non_emise' : 'planifiee';
           // Le détail loyer / charges n'est pas reconstructible depuis CONTRAT_ECH : le total est porté en loyer (voir rapport).
           await tx.run(
-            `INSERT INTO ${t('echeances')}(contrat_id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, statut, numero_quittance, date_quittance, date_mandatement, source, astech_key)
+            `INSERT INTO ${t('echeances')}(contrat_id, libelle, periode_debut, periode_fin, date_exigibilite, montant_loyer, montant_charges, montant_total, statut, numero_quittance, date_quittance, date_titrage, source, astech_key)
              VALUES ($1,$2,$3,$4,$5,$6,0,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (astech_key) DO NOTHING`,
             [cid, str(r.CONTEC_DES), dd, fmtDate(r.CONTEC_DATEFIN), fmtDate(r.CONTEC_DATE) || dd, total, statut, str(r.CONTEC_NUMQUIT), fmtDate(r.CONTEC_DATQUIT), fmtDate(r.CONTEC_DATGF), source,
               `${pref}:${r.CONTEC_CONTID}:${dd}`]);

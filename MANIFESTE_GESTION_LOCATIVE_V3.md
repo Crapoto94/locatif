@@ -1289,11 +1289,17 @@ introuvable, avec liste et export Excel des SIRET inactifs. Les pièces SEDIT ra
 et toute pièce d'identité sont exclus de l'import (DOC-005).
 
 **MIG-018 — DÉCISION DE CONCEPTION**
-Numéros de mandat : ASTECH ne conserve que des dates (mandatement, transmission à la gestion financière) ; le numéro (`CONTEC_NUMMAN`)
-est vide. Il est retrouvé dans SEDIT (`FI.MVTLIGNE`, lecture seule) par tiers rapproché + mois du libellé + montant TTC **en euros**
-(`MONTANTTC_E` : la colonne `MONTANTTC` est exprimée en francs), les lignes d'un même mandat étant additionnées (redevance + charges).
-« exact » si un seul mandat correspond ; « probable » si seule la date de mandatement (± 45 jours) départage ; rien n'est écrit en cas
-de doute. Le numéro est repris par exercice (la numérotation SEDIT repart chaque année) et ouvre la fiche mandat dans SEDIT.
+Titres de recette : un loyer est une recette ; une échéance émise à la gestion financière est donc « titrée » (et non « mandatée » : le
+mandat désigne une dépense). ASTECH ne conserve que des dates (le numéro `CONTEC_NUMMAN` est vide). Le numéro du titre est retrouvé dans SEDIT
+(`FI.MVTLIGNE` / `FI.MANDAT`, sens « R », lecture seule) par tiers rapproché + mois du libellé + montant TTC **en euros** (`MONTANTTC_E` :
+`MONTANTTC` est en francs), les lignes d'un même titre étant additionnées (redevance + charges). « exact » si un seul titre correspond ;
+« probable » si seule la date de titrage (± 45 jours) départage ; rien n'est écrit en cas de doute. Le numéro, repris par exercice (la
+numérotation SEDIT repart chaque année), ouvre la fiche dans SEDIT.
+
+**MIG-019 — DÉCISION DE CONCEPTION (INT-PAY-002 / 003 : source d'encaissement à confirmer par la DSF)**
+L'état de paiement du titre est lu dans SEDIT : payé (date de paiement renseignée), à payer (pris en charge par le comptable, non payé), non
+pris en charge, rejeté, suspendu. SEDIT ne fournit que la **date** de paiement, pas le montant encaissé : un paiement partiel n'est pas
+visible (INT-PAY-004 reste à spécifier). L'état se rafraîchit à chaque passage de `scripts/rapprocher-titres-sedit.js`.
 
 ## 33.4 Documents et stockage
 

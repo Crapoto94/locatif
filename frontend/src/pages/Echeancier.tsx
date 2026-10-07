@@ -5,17 +5,17 @@ import { api, errMsg } from '../lib/api';
 import { useFetch, useDebounced } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
 import { currentPeriode, shiftPeriode, moisLabel, eur, dateFr } from '../lib/format';
-import MandatLink from '../components/MandatLink';
+import TitreLink from '../components/TitreLink';
 import { Card, PageHeader, DataTable, Pagination, Btn, Badge, Loading, ErrorBox, Input, Select, Kpi, toast, MotifModal, Field } from '../components/ui';
 
-const STATUTS: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], mandatee: ['Mandatée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
+const STATUTS: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], titree: ['Titrée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
 
 export default function Echeancier() {
   const { can } = useAuth();
   const [periode, setPeriode] = useState(currentPeriode());
-  const [statut, setStatut] = useState(''); const [q, setQ] = useState(''); const [prorata, setProrata] = useState(false); const [anomalie, setAnomalie] = useState(false); const [offset, setOffset] = useState(0);
+  const [statut, setStatut] = useState(''); const [paiement, setPaiement] = useState(''); const [q, setQ] = useState(''); const [prorata, setProrata] = useState(false); const [anomalie, setAnomalie] = useState(false); const [offset, setOffset] = useState(0);
   const dq = useDebounced(q);
-  const { data, loading, error, reload } = useFetch<any>('/echeancier', { periode, statut, q: dq, prorata: prorata ? 'oui' : '', anomalie: anomalie ? 'oui' : '', offset, limit: 50 });
+  const { data, loading, error, reload } = useFetch<any>('/echeancier', { periode, statut, paiement, q: dq, prorata: prorata ? 'oui' : '', anomalie: anomalie ? 'oui' : '', offset, limit: 50 });
   const { data: mois } = useFetch<any[]>('/echeancier/mois', { annee: periode.slice(0, 4) });
   const [edit, setEdit] = useState<any | null>(null);
   const change = (p: string) => { setPeriode(p); setOffset(0); };
@@ -57,6 +57,7 @@ export default function Echeancier() {
       <Card>
         <div className="flex flex-wrap gap-space-sm mb-space-md">
           <div className="relative flex-1 min-w-[220px]"><Search size={16} className="absolute left-2.5 top-2.5 text-outline" /><Input className="pl-8" placeholder="Contrat ou contractant…" value={q} onChange={(e) => { setQ(e.target.value); setOffset(0); }} /></div>
+          <Select className="w-52" value={paiement} onChange={(e) => { setPaiement(e.target.value); setOffset(0); }}><option value="">Paiement : tous</option><option value="paye">Titres payés</option><option value="non_paye">Titres non payés</option><option value="rejete">Titres rejetés</option></Select>
           <Select className="w-48" value={statut} onChange={(e) => { setStatut(e.target.value); setOffset(0); }}><option value="">Tous statuts</option>{Object.entries(STATUTS).map(([k, v]) => <option key={k} value={k}>{v[0]}</option>)}</Select>
           <label className="flex items-center gap-1.5 text-body-md"><input type="checkbox" checked={prorata} onChange={(e) => setProrata(e.target.checked)} />Proratisées</label>
           <label className="flex items-center gap-1.5 text-body-md"><input type="checkbox" checked={anomalie} onChange={(e) => setAnomalie(e.target.checked)} />Anomalies</label>
@@ -71,7 +72,7 @@ export default function Echeancier() {
               { key: 'ch', label: 'Charges', align: 'right', render: (e: any) => eur(e.montant_charges) },
               { key: 'pr', label: 'Prorata', align: 'right', render: (e: any) => (e.prorata ? <Badge tone="warn">{e.prorata_jours}/{e.prorata_base} j</Badge> : '—') },
               { key: 't', label: 'Total', align: 'right', render: (e: any) => <strong>{eur(e.montant_total)}</strong> },
-              { key: 'mandat', label: 'Mandat SEDIT', render: (e: any) => <MandatLink e={e} /> },
+              { key: 'titre', label: 'Titre SEDIT / paiement', render: (e: any) => <TitreLink e={e} /> },
               { key: 's', label: 'Statut', render: (e: any) => { const [l, t] = STATUTS[e.statut] || [e.statut, 'neutral']; return <div className="flex flex-col gap-0.5"><Badge tone={t}>{l}</Badge>{e.anomalie && <span className="text-[11px] text-error max-w-[220px]">{e.anomalie}</span>}</div>; } },
               { key: 'a', label: '', render: (e: any) => can('echeancier.write') && ['planifiee', 'echue_non_emise'].includes(e.statut) && <Btn size="sm" variant="ghost" onClick={() => setEdit({ ...e })}>Ajuster</Btn> },
             ]} />

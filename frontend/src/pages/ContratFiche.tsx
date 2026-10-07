@@ -12,9 +12,9 @@ import EntityPicker, { type PickItem } from '../components/EntityPicker';
 import DocumentsPanel from '../components/DocumentsPanel';
 import StreetViewLink from '../components/StreetViewLink';
 import SeditLink from '../components/SeditLink';
-import MandatLink from '../components/MandatLink';
+import TitreLink from '../components/TitreLink';
 
-const ECH_STATUT: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], mandatee: ['Mandatée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
+const ECH_STATUT: Record<string, [string, any]> = { planifiee: ['Planifiée', 'neutral'], emise: ['Émise', 'info'], titree: ['Titrée', 'success'], echue_non_emise: ['Échue (non émise)', 'warn'], annulee: ['Annulée', 'muted'] };
 
 export default function ContratFiche() {
   const { id } = useParams();
@@ -141,7 +141,7 @@ export default function ContratFiche() {
             { key: 'ch', label: 'Charges', align: 'right', render: (e: any) => eur(e.montant_charges) },
             { key: 'pr', label: 'Prorata', align: 'right', render: (e: any) => (e.prorata ? <Badge tone="warn">{e.prorata_jours}/{e.prorata_base} j</Badge> : '—') },
             { key: 't', label: 'Total', align: 'right', render: (e: any) => <strong>{eur(e.montant_total)}</strong> },
-            { key: 'mandat', label: 'Mandat SEDIT', render: (e: any) => <MandatLink e={e} /> },
+            { key: 'titre', label: 'Titre SEDIT / paiement', render: (e: any) => <TitreLink e={e} /> },
             { key: 's', label: 'Statut', render: (e: any) => { const [l, t] = ECH_STATUT[e.statut] || [e.statut, 'neutral']; return <div className="flex flex-col gap-0.5"><Badge tone={t}>{l}</Badge>{e.campagne_retiree && <Badge tone="muted">Retirée de la campagne</Badge>}{e.anomalie && <span className="text-[11px] text-error">{e.anomalie}</span>}</div>; } },
           ]} />
         </Card>

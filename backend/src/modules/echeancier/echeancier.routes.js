@@ -14,7 +14,7 @@ const monthRange = (periode) => {
 
 const SELECT = `SELECT e.id, e.contrat_id, c.numero AS contrat_numero, c.type_code, e.libelle, e.periode_debut, e.periode_fin, e.date_exigibilite,
   e.montant_loyer, e.montant_charges, e.montant_total, e.prorata, e.prorata_jours, e.prorata_base, e.statut, e.anomalie, e.numero_quittance,
-  e.date_quittance, e.campagne_id, e.campagne_retiree, e.mandat_numero, e.mandat_exercice, e.mandat_date, e.mandat_bordereau, e.mandat_roo, e.mandat_confiance,
+  e.date_quittance, e.campagne_id, e.campagne_retiree, e.titre_numero, e.titre_exercice, e.titre_date, e.titre_bordereau, e.titre_roo, e.titre_confiance, e.titre_etat, e.titre_paiement_le, e.titre_prise_en_charge_le,
   (SELECT string_agg(ct.nom, ', ') FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = c.id) AS contractants,
   (SELECT string_agg(COALESCE(b.designation,'') || CASE WHEN b.adresse IS NOT NULL THEN ' — ' || b.adresse ELSE '' END, ' ; ') FROM ${t('contrat_biens')} cb JOIN ${t('biens')} b ON b.id = cb.bien_id WHERE cb.contrat_id = c.id) AS biens
   FROM ${t('echeances')} e JOIN ${t('contrats')} c ON c.id = e.contrat_id`;
@@ -28,6 +28,10 @@ router.get('/', requirePerm('echeancier.read'), async (req, res) => {
   if (req.query.statut) w.add('e.statut = ?', req.query.statut);
   if (req.query.contrat) w.add('e.contrat_id = ?', parseInt(req.query.contrat, 10));
   if (req.query.prorata === 'oui') w.addRaw('e.prorata');
+  // Paiement du titre : paye | non_paye (titré mais ni payé ni rejeté) | rejete
+  if (req.query.paiement === 'paye') w.addRaw("e.titre_etat = 'paye'");
+  else if (req.query.paiement === 'non_paye') w.addRaw("e.titre_etat IN ('a_payer','non_pris_en_charge','suspendu')"); // titres retrouvés dans SEDIT et pas (encore) payés
+  else if (req.query.paiement === 'rejete') w.addRaw("e.titre_etat = 'rejete'");
   if (req.query.anomalie === 'oui') w.addRaw('e.anomalie IS NOT NULL');
   if (req.query.q) w.add(`(c.numero ILIKE ? OR EXISTS (SELECT 1 FROM ${t('contrat_contractants')} cc JOIN ${t('contractants')} ct ON ct.id = cc.contractant_id WHERE cc.contrat_id = c.id AND ct.nom ILIKE ?))`, like(req.query.q));
   const where = w.clause().replace(/\be\./g, 'e.').replace(/\bc\./g, 'c.');
@@ -35,8 +39,8 @@ router.get('/', requirePerm('echeancier.read'), async (req, res) => {
   const tot = await db.get(`SELECT count(*)::int AS n, COALESCE(SUM(e.montant_loyer),0) AS loyers, COALESCE(SUM(e.montant_charges),0) AS charges, COALESCE(SUM(e.montant_total),0) AS total ${base}`, w.params);
   const rows = await db.all(`${SELECT} ${where} ORDER BY e.periode_debut, c.numero LIMIT ${limit} OFFSET ${offset}`, w.params);
   const { config } = require('../../config');
-  const lien = (r) => (r.mandat_roo ? `${config.sedit.url}/${config.sedit.pageMandat}?${config.sedit.paramMandat}=${encodeURIComponent(r.mandat_roo)}` : null);
-  res.json({ total: tot.n, totaux: { loyers: tot.loyers, charges: tot.charges, total: tot.total }, rows: rows.map((r) => ({ ...r, mandat_url: lien(r) })) });
+  const lien = (r) => (r.titre_roo ? `${config.sedit.url}/${config.sedit.pageMandat}?${config.sedit.paramMandat}=${encodeURIComponent(r.titre_roo)}` : null);
+  res.json({ total: tot.n, totaux: { loyers: tot.loyers, charges: tot.charges, total: tot.total }, rows: rows.map((r) => ({ ...r, titre_url: lien(r) })) });
 });
 
 // Totaux par mois sur une année (vue calendaire).
@@ -64,7 +68,7 @@ router.put('/:id', requirePerm('echeancier.write'), async (req, res) => {
   if (!b.motif) throw httpError(400, 'Un motif est requis pour modifier une échéance');
   const avant = await db.get(`SELECT * FROM ${t('echeances')} WHERE id = $1`, [req.params.id]);
   if (!avant) throw httpError(404, 'Échéance introuvable');
-  if (['emise', 'mandatee'].includes(avant.statut)) throw httpError(409, 'Échéance déjà émise : un certificat administratif DSF est nécessaire (CTR-014)');
+  if (['emise', 'titree'].includes(avant.statut)) throw httpError(409, 'Échéance déjà émise : un certificat administratif DSF est nécessaire (CTR-014)');
   const loyer = b.montant_loyer ?? avant.montant_loyer; const charges = b.montant_charges ?? avant.montant_charges;
   const apres = await db.get(
     `UPDATE ${t('echeances')} SET montant_loyer=$2, montant_charges=$3, montant_total=$4, date_exigibilite=COALESCE($5,date_exigibilite), statut=COALESCE($6,statut), updated_at=now() WHERE id=$1 RETURNING *`,

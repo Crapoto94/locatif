@@ -1,5 +1,7 @@
 // Importe dans l'application les pièces SEDIT rattachées aux tiers rapprochés (FI.FIPES_OBJ_PJ, OBJECT_TYPE = 'TIERS').
-//   node scripts/importer-docs-sedit.js [--dry-run] [--avec-rib]
+//   node scripts/importer-docs-sedit.js [--dry-run] [--avec-rib] [--api=https://serveur/api/v1]
+// Avec --api (ou LOCATIF_API_URL), les pièces sont envoyées à l'API de l'application : le serveur écrit lui-même le fichier dans
+// son stockage et la base (indispensable quand le serveur ne voit pas les partages et n'a pas le même disque que ce poste).
 // - Lecture seule côté SEDIT ; le contenu est lu sur le partage UNC indiqué par PJ_PES.CHEMIN_FICHIER (le poste doit y avoir accès).
 // - Les relevés d'identité bancaire (type 7) et pièces d'identité ne sont repris que sur demande explicite (--avec-rib) ;
 //   ils sont alors marqués sensibles (accès restreint aux profils habilités, consultations tracées).
@@ -35,7 +37,33 @@ async function connect() {
   return src.loadOracle().getConnection({ user: e.SEDIT_USER, password: e.SEDIT_PASSWORD, connectString: `${e.SEDIT_HOST}:${e.SEDIT_PORT || 1527}/${e.SEDIT_SERVICE || 'SMPROD'}` });
 }
 
-async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = false } = {}) {
+// Client de l'API de l'application : jeton émis pour un compte existant (même JWT_SECRET que le serveur), aucun mot de passe manipulé.
+async function clientApi(base) {
+  const { signToken } = require('../src/middleware/auth');
+  const u = await db.get(`SELECT id, username FROM ${t('users')} WHERE username = $1 AND actif`, [config.localAdmin.username]);
+  if (!u) throw new Error(`Compte ${config.localAdmin.username} introuvable pour émettre le jeton`);
+  const h = { Authorization: `Bearer ${signToken(u)}` };
+  const url = base.replace(/\/$/, '');
+  const appel = async (chemin, init) => {
+    const r = await fetch(`${url}${chemin}`, { ...init, headers: { ...h, ...(init.headers || {}) } });
+    const b = await r.json().catch(() => null);
+    if (!r.ok) throw new Error(`API ${r.status} : ${b?.error || 'réponse invalide'}`);
+    return b;
+  };
+  return {
+    async aEnvoyer(astech_id, links) { return (await appel('/documents/import/verifier', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pieces: [{ astech_id, links }] }) })).a_envoyer.length > 0; },
+    async envoyer({ buffer, nom, mime, type_code, sensible, astech_id, links, commentaire }) {
+      const f = new FormData();
+      f.append('file', new Blob([buffer], { type: mime || 'application/octet-stream' }), nom);
+      f.append('astech_id', astech_id); f.append('type_code', type_code || ''); f.append('links', JSON.stringify(links)); f.append('commentaire', commentaire || '');
+      if (mime) f.append('mime', mime);
+      if (sensible !== undefined) f.append('sensible', String(sensible));
+      return appel('/documents/import', { method: 'POST', body: f });
+    },
+  };
+}
+
+async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = false, api = null } = {}) {
   const stats = { pieces: 0, importees: 0, deja: 0, sensibles_ecartees: 0, avant_coupure: 0, fichier_inaccessible: 0, trop_volumineux: 0, erreurs: 0 };
   const erreurs = [];
   const tiers = await db.all(`SELECT id, nom, tiers_sedit_roo AS roo FROM ${t('contractants')} WHERE tiers_sedit_roo IS NOT NULL`);
@@ -49,8 +77,12 @@ async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = fals
       if (sensiblePiece && !avecRib) { stats.sensibles_ecartees++; continue; }
       if (jour(p.DATE_CREAT) < config.repriseDepuis) { stats.avant_coupure++; continue; }
       const key = `sedit:${p.ROO}`;
-      const ex = await db.get(`SELECT id FROM ${t('documents')} WHERE astech_id = $1`, [key]);
-      if (ex) { await docs.addLinks(db, ex.id, [{ objet_type: 'contractant', objet_id: c.id }]); stats.deja++; continue; }
+      const lien = [{ objet_type: 'contractant', objet_id: c.id }];
+      if (api) { if (!(await api.aEnvoyer(key, lien))) { stats.deja++; continue; } }
+      else {
+        const ex = await db.get(`SELECT id FROM ${t('documents')} WHERE astech_id = $1`, [key]);
+        if (ex) { await docs.addLinks(db, ex.id, lien); stats.deja++; continue; }
+      }
       const chemin = String(p.CHEMIN_FICHIER || '');
       try {
         const st = fs.statSync(chemin);
@@ -61,8 +93,8 @@ async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = fals
         const nom = /\.[a-z0-9]{2,4}$/i.test(p.NOM_PJ || '') ? p.NOM_PJ : `${p.NOM_PJ || path.basename(chemin, ext)}${ext}`;
         const libType = (TYPES[Number(p.TYPE_PIECE_ID)] || [null, Number(p.TYPE_PIECE_ID) === 7 ? "Relevé d'identité bancaire" : `Type SEDIT ${p.TYPE_PIECE_ID}`])[1];
         const type_code = classer({ nom, typeSedit: Number(p.TYPE_PIECE_ID) });
-        await docs.create({ username: user }, { buffer, nom, mime: MIME[ext] || null, type_code, sensible: sensiblePiece || undefined, astech_id: key,
-          links: [{ objet_type: 'contractant', objet_id: c.id }], commentaire: `Pièce SEDIT du tiers — ${libType}` });
+        const piece = { buffer, nom, mime: MIME[ext] || null, type_code, sensible: sensiblePiece || undefined, astech_id: key, links: lien, commentaire: `Pièce SEDIT du tiers — ${libType}` };
+        if (api) await api.envoyer(piece); else await docs.create({ username: user }, piece);
         stats.importees++;
       } catch (e) {
         if (['ENOENT', 'EACCES', 'EPERM', 'ENOTFOUND', 'EBUSY'].includes(e.code)) stats.fichier_inaccessible++; else { stats.erreurs++; erreurs.push(`${c.nom} / ${p.NOM_PJ} : ${e.message}`); }
@@ -72,13 +104,14 @@ async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = fals
   return { stats, erreurs, tiers: tiers.length };
 }
 
-module.exports = { run, connect };
+module.exports = { run, connect, clientApi };
 
 if (require.main === module) {
   (async () => {
     checkConfig();
     const conn = await connect();
-    const r = await run(conn, { dryRun: process.argv.includes('--dry-run'), avecRib: process.argv.includes('--avec-rib') });
+    const apiUrl = (process.argv.find((a) => a.startsWith('--api=')) || '').slice(6) || process.env.LOCATIF_API_URL || '';
+    const r = await run(conn, { dryRun: process.argv.includes('--dry-run'), avecRib: process.argv.includes('--avec-rib'), api: apiUrl ? await clientApi(apiUrl) : null });
     console.log(JSON.stringify({ tiers: r.tiers, ...r.stats, erreurs: r.erreurs.slice(0, 5) }, null, 1));
     await conn.close(); process.exit(0);
   })().catch((e) => { console.error(e.message); process.exit(1); });

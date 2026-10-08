@@ -41,6 +41,33 @@ async function create(user, { buffer, nom, mime, type_code, sensible, links, dat
   });
 }
 
+// Import idempotent d'une pièce reprise d'un système source (astech_id unique) : crée le document, ajoute les liens
+// et, si le fichier a disparu du stockage actif (volume neuf, autre serveur), le redépose. Retourne { id, statut }.
+async function importer(user, { buffer, nom, mime, type_code, sensible, links, commentaire, astech_id }) {
+  const ex = await db.get(`SELECT id, storage_key, version FROM ${t('documents')} WHERE astech_id = $1`, [astech_id]);
+  if (!ex) return { id: (await create(user, { buffer, nom, mime, type_code, sensible, links, commentaire, astech_id })).id, statut: 'cree' };
+  await addLinks(db, ex.id, links);
+  try { await store.get(ex.storage_key); return { id: ex.id, statut: 'deja' }; } catch { /* fichier absent : redépôt ci-dessous */ }
+  const r = await store.put({ buffer, nom, mime, folder: folderFor(links) });
+  await db.tx(async (tx) => {
+    await tx.run(`UPDATE ${t('documents')} SET storage_key=$2, sha256=$3, taille=$4 WHERE id=$1`, [ex.id, r.storageKey, r.sha256, r.taille]);
+    await tx.run(`UPDATE ${t('document_versions')} SET storage_key=$2, sha256=$3, taille=$4 WHERE document_id=$1 AND version=$5`, [ex.id, r.storageKey, r.sha256, r.taille, ex.version]);
+  });
+  return { id: ex.id, statut: 'repare' };
+}
+
+// Pièces à envoyer parmi des astech_id : inconnues, ou connues mais dont le fichier manque. Les liens des pièces connues sont ajoutés.
+async function aEnvoyer(items) {
+  const out = [];
+  for (const { astech_id, links } of items) {
+    const ex = await db.get(`SELECT id, storage_key FROM ${t('documents')} WHERE astech_id = $1`, [astech_id]);
+    if (!ex) { out.push(astech_id); continue; }
+    await addLinks(db, ex.id, links);
+    try { await store.get(ex.storage_key); } catch { out.push(astech_id); }
+  }
+  return out;
+}
+
 // Nouvelle version : un document inchangé (même empreinte) n'est pas redéposé.
 async function addVersion(user, id, { buffer, nom, mime }) {
   const d = await db.get(`SELECT * FROM ${t('documents')} WHERE id = $1 AND actif`, [id]);
@@ -108,4 +135,4 @@ async function migrateToActive(user) {
   return { total: docs.length, migres: ok, erreurs };
 }
 
-module.exports = { create, addVersion, addLinks, list, migrateToActive, typeEstSensible, OBJETS };
+module.exports = { create, importer, aEnvoyer, addVersion, addLinks, list, migrateToActive, typeEstSensible, OBJETS };

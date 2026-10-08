@@ -39,6 +39,24 @@ router.post('/', requirePerm('documents.write'), upload.single('file'), async (r
   res.status(201).json(doc);
 });
 
+// Import par un script de reprise (poste ayant accès aux partages sources) : le serveur écrit lui-même fichier et base.
+router.post('/import/verifier', requirePerm('documents.write'), async (req, res) => {
+  const items = Array.isArray(req.body?.pieces) ? req.body.pieces : [];
+  res.json({ a_envoyer: await svc.aEnvoyer(items.filter((i) => i?.astech_id)) });
+});
+
+router.post('/import', requirePerm('documents.write'), upload.single('file'), async (req, res) => {
+  if (!req.file) throw httpError(400, 'Fichier manquant');
+  const b = req.body;
+  if (!b.astech_id) throw httpError(400, 'astech_id manquant');
+  if (b.sensible === 'true' && !can(req, 'documents.sensible')) throw httpError(403, 'Droit insuffisant pour une pièce sensible');
+  res.status(201).json(await svc.importer(req.user, {
+    buffer: req.file.buffer, nom: fixName(req.file.originalname), mime: b.mime || (req.file.mimetype !== 'application/octet-stream' ? req.file.mimetype : null),
+    type_code: b.type_code || null, sensible: b.sensible === undefined ? undefined : b.sensible === 'true', links: parseLinks(b.links),
+    commentaire: b.commentaire || null, astech_id: b.astech_id,
+  }));
+});
+
 async function loadDoc(req) {
   const d = await db.get(`SELECT * FROM ${t('documents')} WHERE id = $1 AND actif`, [req.params.id]);
   if (!d) throw httpError(404, 'Document introuvable');

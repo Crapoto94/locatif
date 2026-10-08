@@ -18,9 +18,19 @@ const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toU
 const jours = (a, b) => Math.abs((new Date(a) - new Date(b)) / 86400000);
 const binds = (n) => Array.from({ length: n }, (_, i) => ':' + (i + 1)).join(',');
 
+// Sans identifiants Oracle SEDIT dans le .env, les SELECT passent par l'API centrale APM (/oracle/query, type FINANCES, lecture seule).
+async function apmSelect(sql) {
+  const r = await fetch(`${config.apm.url.replace(/\/$/, '')}/api/v1/oracle/query`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-KEY': config.apm.key }, body: JSON.stringify({ type: 'FINANCES', sql }) });
+  const b = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`APM ${r.status} : ${b?.error || 'réponse invalide'}`);
+  return b;
+}
+// Variables positionnelles (:1, :2…) injectées en littéraux échappés pour l'APM.
+const lire = (conn, sql, b = []) => (conn.apm ? apmSelect(sql.replace(/:(\d+)/g, (_, i) => `'${String(b[Number(i) - 1]).replace(/'/g, "''")}'`)) : src.rows(conn, sql, b));
+
 async function connect() {
   const e = process.env;
-  if (!e.SEDIT_HOST || !e.SEDIT_USER || !e.SEDIT_PASSWORD) throw new Error('Paramètres SEDIT absents (SEDIT_HOST, SEDIT_PORT, SEDIT_SERVICE, SEDIT_USER, SEDIT_PASSWORD)');
+  if (!e.SEDIT_HOST || !e.SEDIT_USER || !e.SEDIT_PASSWORD) return { apm: true, close: async () => {} };
   return src.loadOracle().getConnection({ user: e.SEDIT_USER, password: e.SEDIT_PASSWORD, connectString: `${e.SEDIT_HOST}:${e.SEDIT_PORT || 1527}/${e.SEDIT_SERVICE || 'SMPROD'}` });
 }
 
@@ -45,7 +55,7 @@ async function run(conn, { appliquer = false } = {}) {
 
   if (cibles.length) {
     const roos = [...new Set(cibles.flatMap((e) => e.roos))];
-    const lignes = await src.rows(conn,
+    const lignes = await lire(conn,
       `SELECT TRIM(TIERS) AS TIERS, MANDAT, TO_CHAR(DATMANDAT,'YYYY-MM-DD') AS DM, BORDEREAU, LIBELLE, MONTANTTC_E AS MT FROM FI.MVTLIGNE
        WHERE TRIM(TIERS) IN (${binds(roos.length)}) AND DATMANDAT >= DATE '${depuis}'`, roos);
     const groupes = new Map();
@@ -61,7 +71,7 @@ async function run(conn, { appliquer = false } = {}) {
     const unique = (liste) => [...new Map(liste.map((g) => [`${g.tiers}|${g.mandat}|${g.dm}`, g])).values()]; // un même titre peut ressortir deux fois (ligne et total)
     // Identifiants techniques (lien vers la fiche SEDIT) : un seul ROO par (n°, date), sinon pas de lien.
     const roosTitre = new Map(); const rejetes = new Set(); // titres rejetés : réémis ensuite sous un autre numéro
-    for (const m of await src.rows(conn, `SELECT TRIM(ROO_IMA_REF) AS ROO, MANDAT, TO_CHAR(DATMANDAT,'YYYY-MM-DD') AS DM, REJET, MANDREJETE FROM FI.MANDAT WHERE SENSMVT = 'R' AND DATMANDAT >= DATE '${depuis}'`)) {
+    for (const m of await lire(conn, `SELECT TRIM(ROO_IMA_REF) AS ROO, MANDAT, TO_CHAR(DATMANDAT,'YYYY-MM-DD') AS DM, REJET, MANDREJETE FROM FI.MANDAT WHERE SENSMVT = 'R' AND DATMANDAT >= DATE '${depuis}'`)) {
       const k = `${m.MANDAT}|${m.DM}`; roosTitre.set(k, roosTitre.has(k) ? null : m.ROO);
       if (m.REJET === 'O' || m.MANDREJETE === 'O') rejetes.add(k);
     }
@@ -94,7 +104,7 @@ async function run(conn, { appliquer = false } = {}) {
   const listeRoos = [...parRoo.keys()];
   for (let i = 0; i < listeRoos.length; i += 500) {
     const part = listeRoos.slice(i, i + 500);
-    const rows = await src.rows(conn,
+    const rows = await lire(conn,
       `SELECT TRIM(ROO_IMA_REF) AS ROO, TO_CHAR(DATE_PRISE_EN_CHARGE,'YYYY-MM-DD') AS PEC, TO_CHAR(DATE_PAIEMENT,'YYYY-MM-DD') AS DP, REJET, MANDREJETE, SUSPENSION
        FROM FI.MANDAT WHERE TRIM(ROO_IMA_REF) IN (${binds(part.length)})`, part);
     for (const m of rows) {

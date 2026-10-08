@@ -18,9 +18,20 @@ const TYPES = { 70: ['contrat', 'Contrat ou convention'], 69: ['deliberation', '
 const SENSIBLE = /\b(RIB|IBAN|BIC)\b|identit|passeport|\bCNI\b|titre de s[ée]jour/i;
 const MAX = 50 * 1024 * 1024;
 
+// Sans identifiants Oracle SEDIT dans le .env, les SELECT passent par l'API centrale APM (/oracle/query, type FINANCES, lecture seule).
+async function apmSelect(sql) {
+  const r = await fetch(`${config.apm.url.replace(/\/$/, '')}/api/v1/oracle/query`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-KEY': config.apm.key }, body: JSON.stringify({ type: 'FINANCES', sql }) });
+  const b = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`APM ${r.status} : ${b?.error || 'réponse invalide'}`);
+  return b;
+}
+const lire = (conn, sql, binds = []) => (conn.apm ? apmSelect(sql.replace(/:(\w+)/g, () => `'${String(binds.shift()).replace(/'/g, "''")}'`)) : src.rows(conn, sql, binds));
+// Date renvoyée par Oracle (Date) ou par l'APM (chaîne ISO) -> AAAA-MM-JJ
+const jour = (v) => (v instanceof Date ? src.fmtDate(v) : v ? String(v).slice(0, 10) : '');
+
 async function connect() {
   const e = process.env;
-  if (!e.SEDIT_HOST || !e.SEDIT_USER || !e.SEDIT_PASSWORD) throw new Error('Paramètres SEDIT absents (SEDIT_HOST, SEDIT_PORT, SEDIT_SERVICE, SEDIT_USER, SEDIT_PASSWORD)');
+  if (!e.SEDIT_HOST || !e.SEDIT_USER || !e.SEDIT_PASSWORD) return { apm: true, close: async () => {} };
   return src.loadOracle().getConnection({ user: e.SEDIT_USER, password: e.SEDIT_PASSWORD, connectString: `${e.SEDIT_HOST}:${e.SEDIT_PORT || 1527}/${e.SEDIT_SERVICE || 'SMPROD'}` });
 }
 
@@ -29,14 +40,14 @@ async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = fals
   const erreurs = [];
   const tiers = await db.all(`SELECT id, nom, tiers_sedit_roo AS roo FROM ${t('contractants')} WHERE tiers_sedit_roo IS NOT NULL`);
   for (const c of tiers) {
-    const pj = await src.rows(conn,
+    const pj = await lire(conn,
       `SELECT TRIM(p.ROO_IMA_REF) AS ROO, p.NOM_PJ, p.CHEMIN_FICHIER, p.TYPE_PIECE_ID, p.DATE_CREAT, p.TAILLE
        FROM FI.FIPES_OBJ_PJ l JOIN FI.PJ_PES p ON p.ROO_IMA_REF = l.PJPES_ROO WHERE l.OBJECT_TYPE = 'TIERS' AND TRIM(l.OBJECT_ROO) = :r`, [c.roo]);
     for (const p of pj) {
       stats.pieces++;
       const sensiblePiece = Number(p.TYPE_PIECE_ID) === 7 || SENSIBLE.test(p.NOM_PJ || '') || SENSIBLE.test(p.CHEMIN_FICHIER || '');
       if (sensiblePiece && !avecRib) { stats.sensibles_ecartees++; continue; }
-      if (src.fmtDate(p.DATE_CREAT) < config.repriseDepuis) { stats.avant_coupure++; continue; }
+      if (jour(p.DATE_CREAT) < config.repriseDepuis) { stats.avant_coupure++; continue; }
       const key = `sedit:${p.ROO}`;
       const ex = await db.get(`SELECT id FROM ${t('documents')} WHERE astech_id = $1`, [key]);
       if (ex) { await docs.addLinks(db, ex.id, [{ objet_type: 'contractant', objet_id: c.id }]); stats.deja++; continue; }
@@ -61,7 +72,7 @@ async function run(conn, { dryRun = false, user = 'script-sedit', avecRib = fals
   return { stats, erreurs, tiers: tiers.length };
 }
 
-module.exports = { run };
+module.exports = { run, connect };
 
 if (require.main === module) {
   (async () => {

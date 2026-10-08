@@ -71,7 +71,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   const status = err.status || (err.code === '23505' ? 409 : err.code === '23503' ? 409 : 500);
   if (status >= 500) console.error('[ERR]', req.method, req.originalUrl, err.stack || err.message);
   const message = err.code === '23505' ? 'Cet enregistrement existe déjà' : err.code === '23503' ? 'Opération impossible : des données y sont rattachées'
-    : status >= 500 ? 'Erreur interne du serveur' : err.message;
+    : status >= 500 && status !== 502 ? 'Erreur interne du serveur' : err.message;
   res.status(status).json({ error: message });
 });
 

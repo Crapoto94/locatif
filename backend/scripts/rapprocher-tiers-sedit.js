@@ -60,7 +60,12 @@ async function run(conn, { appliquer = false, user = 'script' } = {}) {
       if (!cands.length) { cands = parCodeAstech; via = `code ASTECH ${c.astech_tiers_cod} (nom différent)`; }
     }
     const sirenC = c.siren || (c.siret ? c.siret.slice(0, 9) : null);
-    if (!cands.length && sirenC && parSiren.has(sirenC)) { cands = parSiren.get(sirenC); via = 'SIRET'; }
+    if (!cands.length && sirenC && parSiren.has(sirenC)) {
+      cands = parSiren.get(sirenC); via = 'SIRET';
+      // Plusieurs établissements sous le même SIREN : le SIRET complet du contractant départage.
+      const exact = c.siret ? cands.filter((x) => x.siret === c.siret) : [];
+      if (cands.length > 1 && exact.length) { cands = exact; via = 'SIRET complet'; }
+    }
     if (!cands.length) { cands = parNom.get(cle([c.nom, c.prenom].filter(Boolean).join(' '))) || parNom.get(cle(c.nom)) || []; via = 'nom exact'; }
     const uniques = [...new Map(cands.map((x) => [x.roo || x.code, x])).values()];
     let statut; let code = null; let roo = null; let note; let siretSedit = null; let candidats = null;

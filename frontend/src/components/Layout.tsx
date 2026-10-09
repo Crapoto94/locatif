@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
-import { Map as MapIcon, LayoutDashboard, Building2, Settings, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, User as UserIcon } from 'lucide-react';
+import { Map as MapIcon, LayoutDashboard, Building2, Settings, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, FileOutput, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
 import { getRecents, type Recent } from '../lib/recents';
@@ -33,6 +33,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     { to: '/admin/general', label: 'Paramètres généraux', icon: <Settings size={18} />, perm: 'admin.users' },
     { to: '/referentiels', label: 'Référentiels', icon: <ListChecks size={18} />, perm: 'referentiels.read' },
     { to: '/admin/droits', label: 'Comptes & droits', icon: <ShieldCheck size={18} />, perm: 'admin.users' },
+    { to: '/admin/filien', label: 'Paramétrage FILIEN', icon: <FileOutput size={18} />, perm: 'admin.filien' },
     { to: '/admin/ged', label: 'Stockage / GED', icon: <HardDrive size={18} />, perm: 'admin.ged' },
     { to: '/admin/reprise', label: 'Reprise ASTECH', icon: <DatabaseZap size={18} />, perm: 'admin.reprise' },
   ] },

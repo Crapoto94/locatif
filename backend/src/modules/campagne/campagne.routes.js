@@ -1,5 +1,5 @@
 // Campagne mensuelle (CAM) : préparation → contrôle → correction des anomalies → validation locative.
-// La suite financière (FILIEN/SEDIT : transmission, pré-titres, statuts) est HORS PÉRIMÈTRE (CAM-012).
+// La facturation (fichier FILIEN + pièces déposés dans un dossier) est dans modules/filien ; la suite côté SEDIT (pré-titres, statuts) reste hors périmètre (CAM-012).
 const router = require('express').Router();
 const { db, t } = require('../../db');
 const { requirePerm } = require('../../middleware/auth');
@@ -39,7 +39,7 @@ router.get('/:periode', requirePerm('campagne.read'), async (req, res) => {
   const periode = periodeOk(req.params.periode);
   const c = await db.get(`SELECT * FROM ${t('campagnes')} WHERE periode = $1`, [periode]);
   if (!c) return res.json({ periode, statut: 'non_preparee' });
-  res.json({ ...(await resume(c)), journal: await db.all(`SELECT * FROM ${t('campagne_journal')} WHERE campagne_id = $1 ORDER BY ts DESC LIMIT 100`, [c.id]) });
+  res.json({ ...(await resume(c)), filien: c.filien_export_id ? await db.get(`SELECT id, nom, dossier, fichier, nb_mouvements, nb_pj, total, premier_mouvement, dernier_mouvement, genere_par, genere_le FROM ${t('filien_exports')} WHERE id = $1`, [c.filien_export_id]) : null, journal: await db.all(`SELECT * FROM ${t('campagne_journal')} WHERE campagne_id = $1 ORDER BY ts DESC LIMIT 100`, [c.id]) });
 });
 
 // Lignes : loyer, charges, période, contractant, adresse du bien (CAM-009/010).

@@ -5,9 +5,10 @@ import { api, errMsg, fileUrl } from '../lib/api';
 import { useFetch } from '../lib/hooks';
 import { useAuth } from '../lib/auth';
 import { currentPeriode, shiftPeriode, moisLabel, eur, dateTimeFr } from '../lib/format';
+import FilienPanel from '../components/FilienPanel';
 import { Card, PageHeader, Btn, Badge, Loading, ErrorBox, Notice, MotifModal, toast, SectionTitle } from '../components/ui';
 
-const ETAPES = [['preparation', 'Préparation du terme'], ['controle', 'Contrôle de conformité'], ['correction', 'Arbitrage des anomalies'], ['validee', 'Validation locative']];
+const ETAPES = [['preparation', 'Préparation du terme'], ['controle', 'Contrôle de conformité'], ['correction', 'Arbitrage des anomalies'], ['validee', 'Validation locative'], ['facturee', 'Facturation FILIEN']];
 
 export default function Campagne() {
   const { can } = useAuth();
@@ -19,7 +20,8 @@ export default function Campagne() {
   const act = async (path: string, ok: string) => { setBusy(true); try { await api.post(`/campagne/${periode}/${path}`); toast(ok); refresh(); } catch (e) { toast(errMsg(e), 'error'); } finally { setBusy(false); } };
 
   const prep = c && c.statut !== 'non_preparee'; const validee = c?.statut === 'validee';
-  const idx = prep ? ETAPES.findIndex((e) => e[0] === c.statut) : -1;
+  const facturee = Boolean(c?.facturee_le);
+  const idx = !prep ? -1 : facturee ? ETAPES.length : validee ? ETAPES.length - 1 : ETAPES.findIndex((e) => e[0] === c.statut);
   const rows = (lignes || []).filter((l) => filtre === 'toutes' ? true : filtre === 'anomalies' ? l.anomalie && !l.campagne_retiree : filtre === 'prorata' ? l.prorata : l.campagne_retiree);
 
   return (
@@ -39,18 +41,18 @@ export default function Campagne() {
 
       {error ? <ErrorBox message={error} onRetry={reload} /> : loading && !c ? <Loading /> : (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-space-sm mb-space-md">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-space-sm mb-space-md">
             {ETAPES.map(([k, l], i) => {
-              const etat = !prep ? 'avenir' : validee ? 'faite' : i < idx ? 'faite' : i === idx ? 'cours' : 'avenir';
+              const etat = !prep ? 'avenir' : i < idx ? 'faite' : i === idx ? 'cours' : 'avenir';
               return (
                 <div key={k} className={`rounded-lg p-space-sm flex items-center gap-space-sm ${etat === 'cours' ? (c.anomalies && k === 'correction' ? 'bg-error-container' : 'bg-primary-container text-on-primary') : etat === 'faite' ? 'bg-secondary-fixed' : 'bg-surface-container-low opacity-70'}`}>
-                  <div className="text-lg">{etat === 'faite' ? <CheckCircle2 size={22} /> : k === 'validee' ? <Lock size={22} /> : <span className="font-bold">{i + 1}</span>}</div>
+                  <div className="text-lg">{etat === 'faite' ? <CheckCircle2 size={22} /> : k === 'validee' || k === 'facturee' ? <Lock size={22} /> : <span className="font-bold">{i + 1}</span>}</div>
                   <div><div className="text-label-sm uppercase">Étape {i + 1} • {etat === 'faite' ? 'Terminée' : etat === 'cours' ? 'En cours' : 'À venir'}</div><div className="text-headline-sm font-bold">{l}</div></div>
                 </div>
               );
             })}
           </div>
-          <Notice><strong>Frontière de responsabilité :</strong> la campagne Gestion Locative couvre la préparation, le contrôle, la correction des anomalies et la validation locative. La suite financière (transmission, pré-titres, statuts, accusés) est à spécifier avec la DSF / FILIEN-SEDIT.</Notice>
+          <Notice><strong>Frontière de responsabilité :</strong> la campagne couvre la préparation, le contrôle, la correction des anomalies, la validation locative, puis la facturation : le fichier FILIEN et ses pièces sont déposés dans le dossier d'échange avec SEDIT. L'intégration dans SEDIT (pré-titres, statuts, paiement) se poursuit côté DSF.</Notice>
           {!prep ? <Card className="mt-space-md"><div className="text-center py-space-xl text-on-surface-variant">Aucune campagne préparée pour {moisLabel(periode)}.{can('campagne.write') && ' Cliquez sur « Préparer la campagne » pour générer et rattacher les échéances du mois.'}</div></Card> : (
             <>
               <Card className="mt-space-md">
@@ -62,6 +64,7 @@ export default function Campagne() {
                   <span className="ml-auto text-body-sm text-on-surface-variant">Conformité {c.taux_conformite} %{validee ? ` • validée par ${c.validee_par} le ${dateTimeFr(c.validee_le)}` : ''}</span>
                 </div>
               </Card>
+              {(validee || can('filien.read')) && <FilienPanel periode={periode} c={c} onDone={refresh} />}
               <Card className="mt-space-md">
                 <div className="flex gap-1 mb-space-md">
                   {([['toutes', `Toutes (${lignes?.length ?? 0})`], ['anomalies', 'Anomalies'], ['prorata', 'Proratisées'], ['retirees', 'Retirées']] as const).map(([k, l]) => (
@@ -101,7 +104,7 @@ export default function Campagne() {
                 <SectionTitle title="Journal d'audit & traçabilité des arbitrages" sub={`${c.journal?.length || 0} opération(s) enregistrée(s)`} />
                 {(c.journal || []).map((j: any) => (
                   <div key={j.id} className="py-2 flex justify-between border-b border-surface-container-low last:border-0 text-body-md">
-                    <div><span className="font-semibold">{({ ajout: 'Préparation', retrait: 'Échéance retirée', reprise: 'Échéance reprise', controle: 'Contrôle', validation: 'Validation locative' } as any)[j.action] || j.action}</span>{j.echeance_id ? ` (échéance ${j.echeance_id})` : ''}<div className="text-body-sm text-on-surface-variant">{j.utilisateur} — {j.motif}</div></div>
+                    <div><span className="font-semibold">{({ ajout: 'Préparation', retrait: 'Échéance retirée', reprise: 'Échéance reprise', controle: 'Contrôle', validation: 'Validation locative', facturation: 'Facturation FILIEN', annulation_facturation: 'Facturation annulée' } as any)[j.action] || j.action}</span>{j.echeance_id ? ` (échéance ${j.echeance_id})` : ''}<div className="text-body-sm text-on-surface-variant">{j.utilisateur} — {j.motif}</div></div>
                     <span className="text-body-sm text-on-surface-variant tabular-nums">{dateTimeFr(j.ts)}</span>
                   </div>
                 ))}

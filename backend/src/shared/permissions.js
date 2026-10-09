@@ -16,11 +16,12 @@ const PERMISSIONS = [
   ['alertes.read', 'Consulter les alertes'], ['alertes.write', 'Traiter / réaffecter les alertes'],
   ['campagne.read', 'Consulter la campagne mensuelle'], ['campagne.write', 'Préparer / contrôler la campagne'],
   ['campagne.valider', 'Valider la campagne (validation locative)'],
+  ['filien.read', 'Consulter les exports FILIEN (facturation)'], ['filien.generer', 'Générer les fichiers FILIEN (facturation de la campagne)'],
   ['etats.read', 'États et statistiques'], ['audit.read', "Historique d'audit"],
   ['referentiels.read', 'Consulter les référentiels'], ['referentiels.write', 'Administrer les référentiels'],
   ['modeles.admin', 'Administrer les modèles Word'],
   ['admin.users', 'Gérer comptes et droits'], ['admin.ged', 'Paramétrer la GED / le stockage'],
-  ['admin.reprise', "Lancer / contrôler la reprise ASTECH"],
+  ['admin.reprise', "Lancer / contrôler la reprise ASTECH"], ['admin.filien', 'Paramétrer FILIEN (SEDIT)'],
 ].map(([code, libelle]) => ({ code, libelle }));
 
 const ALL = PERMISSIONS.map((p) => p.code);
@@ -33,7 +34,7 @@ const PROFILS = [
     // Lecture + écritures opérationnelles + pièces sensibles et modèles Word (explicitement validés, §19).
     permissions: [...READ, 'biens.write', 'contractants.write', 'contrats.write', 'contrats.cloturer', 'echeancier.write',
       'revisions.write', 'charges.write', 'documents.write', 'documents.sensible', 'documents.generer', 'alertes.write',
-      'campagne.write', 'campagne.valider', 'modeles.admin'],
+      'campagne.write', 'campagne.valider', 'modeles.admin', 'filien.generer'],
   },
   { code: 'DSF', libelle: 'Direction des finances', permissions: [...READ, 'documents.sensible'] },
   { code: 'DSI', libelle: 'DSI (administration technique)', permissions: [...READ, 'admin.ged', 'admin.reprise'] },

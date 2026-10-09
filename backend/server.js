@@ -46,6 +46,7 @@ v1.use('/contractants', require('./src/modules/contractants/contractants.routes'
 v1.use('/contrats', require('./src/modules/contrats/contrats.routes'));
 v1.use('/echeancier', require('./src/modules/echeancier/echeancier.routes'));
 v1.use('/campagne', require('./src/modules/campagne/campagne.routes'));
+v1.use('/filien', require('./src/modules/filien/filien.routes'));
 v1.use('/revisions', require('./src/modules/revisions/revisions.routes'));
 v1.use('/charges', require('./src/modules/charges/charges.routes').router);
 v1.use('/documents', require('./src/modules/documents/documents.routes'));

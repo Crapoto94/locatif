@@ -15,8 +15,8 @@
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
     "docxtemplater": "^3.50.0",
+    "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
@@ -25,6 +25,7 @@
     "pdfkit": "^0.15.2",
     "pg": "^8.13.1",
     "pizzip": "^3.1.8",
+    "smb2": "^0.2.11",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

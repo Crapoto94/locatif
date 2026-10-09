@@ -42,11 +42,11 @@ function Parametres({ data, onSaved }: { data: any; onSaved: () => void }) {
 
   const save = async () => {
     setBusy(true);
-    try { await api.put('/filien/config', f); toast('Paramétrage FILIEN enregistré'); onSaved(); } catch (e) { toast(errMsg(e), 'error'); } finally { setBusy(false); }
+    try { await api.put('/filien/config', { ...f, smb_mot_de_passe_defini: undefined }); toast('Paramétrage FILIEN enregistré'); onSaved(); } catch (e) { toast(errMsg(e), 'error'); } finally { setBusy(false); }
   };
   const tester = async () => {
     setBusy(true);
-    try { setTest((await api.post('/filien/test-depot', { dossier_depot: f.dossier_depot, chemin_sedit: f.chemin_sedit })).data); } catch (e) { toast(errMsg(e), 'error'); } finally { setBusy(false); }
+    try { setTest((await api.post('/filien/test-depot', { dossier_depot: f.dossier_depot, chemin_sedit: f.chemin_sedit, smb_utilisateur: f.smb_utilisateur, smb_domaine: f.smb_domaine, smb_mot_de_passe: f.smb_mot_de_passe })).data); } catch (e) { toast(errMsg(e), 'error'); } finally { setBusy(false); }
   };
 
   return (
@@ -96,6 +96,13 @@ function Parametres({ data, onSaved }: { data: any; onSaved: () => void }) {
           <Field label="Dossier de dépôt (écriture par l'application)" hint={`Effectif : ${data.dossier_effectif}`}>{txt('dossier_depot', { placeholder: '\\\\serveur\\partage\\filien' })}</Field>
           <Field label="Chemin vu par SEDIT (/263/)" hint="Vide = identique au dossier de dépôt. À renseigner si SEDIT lit le partage sous un autre nom.">{txt('chemin_sedit', { placeholder: '\\\\serveur\\partage\\filien' })}</Field>
         </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-md mt-space-md">
+          <Field label="Utilisateur SAMBA" hint="Obligatoire si l'application tourne sous Linux/Docker (un chemin \\serveur\partage n'y est pas un dossier). Vide = accès du compte du service.">{txt('smb_utilisateur', { autoComplete: 'off' })}</Field>
+          <Field label="Mot de passe SAMBA" hint={f.smb_mot_de_passe_defini ? 'Défini (chiffré) — laisser vide pour le conserver' : 'Stocké chiffré, jamais réaffiché'}>
+            <Input type="password" autoComplete="new-password" disabled={!edit} value={f.smb_mot_de_passe || ''} onChange={(e) => set('smb_mot_de_passe', e.target.value)} placeholder={f.smb_mot_de_passe_defini ? '••••••••' : ''} /></Field>
+          <Field label="Domaine" hint="WORKGROUP si le serveur n'est pas dans un domaine">{txt('smb_domaine', { placeholder: 'WORKGROUP' })}</Field>
+        </div>
+        {edit && f.smb_mot_de_passe_defini && <label className="flex items-center gap-2 text-body-sm mt-1"><input type="checkbox" checked={Boolean(f.smb_effacer)} onChange={(e) => set('smb_effacer', e.target.checked)} />Effacer le mot de passe enregistré</label>}
         <div className="flex gap-space-sm items-center mt-space-sm">
           <Btn size="sm" disabled={busy} onClick={tester}>Tester l'écriture</Btn>
           {test && <span className={`flex items-center gap-1 text-body-sm ${test.ok ? 'text-secondary' : 'text-error'}`}>{test.ok ? <CheckCircle2 size={15} /> : <XCircle size={15} />}{test.message}</span>}

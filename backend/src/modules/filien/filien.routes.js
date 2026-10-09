@@ -12,15 +12,17 @@ router.get('/config', requirePerm('filien.read'), async (req, res) => {
     db.all(`SELECT code, libelle FROM ${t('ref_valeurs')} WHERE domaine = 'type_contrat' ORDER BY ordre, libelle`),
   ]);
   const docTypes = await db.all(`SELECT code, libelle FROM ${t('ref_valeurs')} WHERE domaine = 'type_document' AND COALESCE((meta->>'sensible')::boolean, false) = false ORDER BY ordre, libelle`);
-  res.json({ config, imputations, problemes: svc.verifierConfig(config), rubriques: svc.RUBRIQUES.map(([code, libelle]) => ({ code, libelle })), types_contrat: types, types_document: docTypes, dossier_effectif: svc.racineDepot(config) });
+  res.json({ config: svc.publique(config), imputations, problemes: svc.verifierConfig(config), rubriques: svc.RUBRIQUES.map(([code, libelle]) => ({ code, libelle })), types_contrat: types, types_document: docTypes, dossier_effectif: svc.racineDepot(config) });
 });
 router.put('/config', requirePerm('admin.filien'), async (req, res) => {
   const config = await svc.ecrireConfig(req.user, req.body || {});
-  res.json({ config, problemes: svc.verifierConfig(config), dossier_effectif: svc.racineDepot(config) });
+  res.json({ config: svc.publique(config), problemes: svc.verifierConfig(config), dossier_effectif: svc.racineDepot(config) });
 });
 router.put('/imputations', requirePerm('admin.filien'), async (req, res) => res.json(await svc.remplacerImputations(req.user, req.body?.imputations)));
 router.post('/test-depot', requirePerm('admin.filien'), async (req, res) => {
-  const cfg = { ...(await svc.lireConfig()), ...(req.body || {}) };
+  const b = req.body || {}; const cur = await svc.lireConfig();
+  const cfg = { ...cur, dossier_depot: b.dossier_depot ?? cur.dossier_depot, chemin_sedit: b.chemin_sedit ?? cur.chemin_sedit, smb_utilisateur: b.smb_utilisateur ?? cur.smb_utilisateur, smb_domaine: b.smb_domaine ?? cur.smb_domaine,
+    smb_mot_de_passe_enc: b.smb_mot_de_passe ? require('../documents/store/store').encrypt(b.smb_mot_de_passe) : cur.smb_mot_de_passe_enc };
   res.json(await svc.testerDepot(cfg));
 });
 

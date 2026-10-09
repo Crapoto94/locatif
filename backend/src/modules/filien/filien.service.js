@@ -10,6 +10,7 @@ const store = require('../documents/store/store');
 const audit = require('../../services/audit');
 const { httpError } = require('../../shared/http');
 const F = require('./filien.format');
+const depotMod = require('./filien.depot');
 
 const CLE = 'filien';
 const MAX_PJ = 5;
@@ -23,12 +24,15 @@ const DEFAUTS = {
   libelle_mouvement: 'Loyer {mois} {annee}', objet: 'Loyer {mois} {annee} - {contrat}', complement: '{bien}',
   detail_prestations: true, tiers_solidaires: false,
   // Pièces jointes
-  dossier_depot: '', chemin_sedit: '', joindre_detail: true, type_piece_detail: '011', joindre_types: ['contrat', 'convention_occupation'], type_piece_autres: '', type_document: '',
+  dossier_depot: '', chemin_sedit: '', smb_utilisateur: '', smb_domaine: 'WORKGROUP', smb_mot_de_passe_enc: '', joindre_detail: true, type_piece_detail: '011', joindre_types: ['contrat', 'convention_occupation'], type_piece_autres: '', type_document: '',
 };
 const RUBRIQUES = [['loyer', 'Loyer / redevance'], ['charges', 'Charges et provisions']];
 const LIBELLE_DEFAUT = { loyer: 'Loyer', charges: 'Charges' };
 
 const PARAM_AVANCEMENT = ['1', '2', '3', '4', '5'];
+
+// Ce que l'API renvoie : jamais le mot de passe, seulement « défini ».
+const publique = (c) => { const { smb_mot_de_passe_enc: enc, ...r } = c; return { ...r, smb_mot_de_passe_defini: Boolean(enc) }; };
 
 async function lireConfig() {
   const row = await db.get(`SELECT valeur FROM ${t('settings')} WHERE cle = $1`, [CLE]);
@@ -53,7 +57,7 @@ function verifierConfig(c) {
 
 const BOOLS = ['rejet_dispo', 'rejet_ca', 'rejet_marche', 'detail_prestations', 'tiers_solidaires', 'joindre_detail'];
 const TEXTES = ['organisme', 'budget', 'avancement', 'type', 'monnaie', 'calendrier', 'existant', 'pre_bordereau', 'mouvement_prochain', 'titre_interne_prochain',
-  'libelle_mouvement', 'objet', 'complement', 'dossier_depot', 'chemin_sedit', 'type_piece_detail', 'type_piece_autres', 'type_document'];
+  'libelle_mouvement', 'objet', 'complement', 'dossier_depot', 'chemin_sedit', 'smb_utilisateur', 'smb_domaine', 'type_piece_detail', 'type_piece_autres', 'type_document'];
 
 async function ecrireConfig(user, body) {
   const cur = await lireConfig();
@@ -61,6 +65,9 @@ async function ecrireConfig(user, body) {
   for (const k of TEXTES) if (body[k] !== undefined) next[k] = String(body[k] ?? '').trim();
   for (const k of BOOLS) if (body[k] !== undefined) next[k] = Boolean(body[k]);
   if (body.exercice !== undefined) next.exercice = body.exercice === '' || body.exercice === null ? null : parseInt(body.exercice, 10);
+  // Mot de passe SAMBA : chiffré (même clé que la GED), jamais renvoyé ; vide = conservé, « effacer » via smb_effacer.
+  if (body.smb_mot_de_passe) next.smb_mot_de_passe_enc = store.encrypt(body.smb_mot_de_passe);
+  if (body.smb_effacer) next.smb_mot_de_passe_enc = '';
   if (body.joindre_types !== undefined) next.joindre_types = [...new Set((Array.isArray(body.joindre_types) ? body.joindre_types : []).map(String).filter(Boolean))];
   next.budget = String(next.budget).toUpperCase();
   const problemes = verifierConfig(next).filter((p) => !(p.startsWith('Code budget') && !next.budget));
@@ -115,6 +122,7 @@ function imputationPour(imps, rubrique, typeContrat) {
 }
 
 // ---------- Dossier de dépôt ----------
+const ouvrirDepot = (c) => depotMod.ouvrir(c, racineDepot(c), c.smb_mot_de_passe_enc ? store.decrypt(c.smb_mot_de_passe_enc) : '');
 const racineDepot = (c) => c.dossier_depot || path.join(config.storage.filerRoot, 'filien');
 // Chemin tel que SEDIT le lira (/263/) : séparateur de la base indiquée (UNC / lecteur Windows ou POSIX).
 function cheminSedit(c, ...segments) {
@@ -124,18 +132,18 @@ function cheminSedit(c, ...segments) {
 }
 
 async function testerDepot(c) {
-  const dir = racineDepot(c);
-  const sonde = path.join(dir, `_test_${Date.now()}.txt`);
+  const dir = racineDepot(c); let d;
   try {
-    await fs.promises.mkdir(dir, { recursive: true });
-    await fs.promises.writeFile(sonde, 'test');
-    const back = await fs.promises.readFile(sonde, 'utf8');
-    await fs.promises.rm(sonde, { force: true });
+    d = ouvrirDepot(c);
+    const sonde = `_test/${Date.now()}.txt`;
+    await d.mkdirp('_test'); await d.ecrire(sonde, Buffer.from('test'));
+    const back = String(await d.lire(sonde));
+    await d.supprimerDossier('_test').catch(() => {});
     if (back !== 'test') return { ok: false, message: 'Relecture du fichier témoin incorrecte' };
-    return { ok: true, message: `Écriture et relecture réussies dans ${dir}`, dossier: dir, vu_par_sedit: cheminSedit(c, 'EXEMPLE.pdf') };
+    return { ok: true, message: `Écriture et relecture réussies dans ${dir}${d.mode === 'smb' ? ' (partage SAMBA)' : ''}`, dossier: dir, vu_par_sedit: cheminSedit(c, 'EXEMPLE.pdf') };
   } catch (e) {
-    return { ok: false, message: `Dossier inaccessible ou non inscriptible (${e.code || e.message}) : ${dir}` };
-  }
+    return { ok: false, message: `Dépôt inaccessible ou non inscriptible (${e.code || e.message}) : ${dir}` };
+  } finally { d?.fermer(); }
 }
 
 // ---------- Pièce « Détail de facture » (PDF) ----------
@@ -328,9 +336,11 @@ async function generer(user, periode) {
     if (!b.mouvements.length) throw httpError(409, 'Aucune échéance à facturer dans cette campagne');
 
     // 1. Fichiers (échec ici = rien en base)
-    runDir = path.join(racineDepot(cfg), runName);
+    runDir = (depotMod.estUnc(racineDepot(cfg)) ? path.win32 : path).join(racineDepot(cfg), runName);
+    let depot;
     try {
-      await fs.promises.mkdir(runDir, { recursive: true });
+      depot = ouvrirDepot(cfg);
+      await depot.mkdirp(runName);
       const nomFichier = `${runName}.filien.txt`;
       const vus = new Set();
       for (const p of b.pieces) {
@@ -341,11 +351,11 @@ async function generer(user, periode) {
           buf = await pdfDetail({ ville: b.ville, objet: m.objet, contractant: m._contractant, contrat: m._echeance.contrat_numero, bien: m._bien, debut: m._echeance.periode_debut,
             fin: m._echeance.periode_fin || finMois(periode), mouvement: m.id, titreInterne: m.titreInterne, prorata: m._prorata, lignes: m.lignes, total: m.lignes.reduce((s, l) => s + l.cents, 0) });
         } else buf = p.source.buffer;
-        await fs.promises.writeFile(path.join(runDir, p.fichier), buf);
+        await depot.ecrire(`${runName}/${p.fichier}`, buf);
       }
-      await fs.promises.writeFile(path.join(runDir, nomFichier), Buffer.from(b.contenu, 'latin1'));
+      await depot.ecrire(`${runName}/${nomFichier}`, Buffer.from(b.contenu, 'latin1'));
     } catch (e) {
-      await fs.promises.rm(runDir, { recursive: true, force: true }).catch(() => {});
+      await depot?.supprimerDossier(runName).catch(() => {}); depot?.fermer();
       throw httpError(502, `Dépôt impossible dans ${racineDepot(cfg)} : ${e.code || e.message}`);
     }
 
@@ -376,9 +386,10 @@ async function generer(user, periode) {
         await audit.log(user, 'filien.generated', 'campagne', camp.id, { details: { periode, export: exp.id, mouvements: b.mouvements.length, total, dossier: runDir } }, tx);
         return exp;
       });
+      depot.fermer();
       return { ...exp, chemin_fichier: path.join(runDir, exp.fichier) };
     } catch (e) {
-      await fs.promises.rm(runDir, { recursive: true, force: true }).catch(() => {});
+      await depot.supprimerDossier(runName).catch(() => {}); depot.fermer();
       throw e;
     }
   } finally { enCours.delete(periode); }
@@ -406,9 +417,10 @@ async function annuler(user, id, motif) {
   });
   // Le dossier n'est pas effacé (SEDIT a pu le lire) : il est seulement renommé pour ne pas être réimporté par erreur.
   let dossier = exp.dossier;
-  try { const cible = `${exp.dossier}_ANNULE`; await fs.promises.rename(exp.dossier, cible); dossier = cible; } catch { /* dossier absent ou verrouillé */ }
+  let d;
+  try { d = ouvrirDepot(await lireConfig()); await d.renommer(exp.nom, `${exp.nom}_ANNULE`); dossier = `${exp.dossier}_ANNULE`; } catch { /* dossier absent, verrouillé ou dépôt reparamétré */ } finally { d?.fermer(); }
   return { ok: true, dossier };
 }
 
-module.exports = { lireConfig, ecrireConfig, verifierConfig, listerImputations, remplacerImputations, testerDepot, apercu, generer, listerExports, lireExport, annuler,
+module.exports = { publique, ouvrirDepot, lireConfig, ecrireConfig, verifierConfig, listerImputations, remplacerImputations, testerDepot, apercu, generer, listerExports, lireExport, annuler,
   construire, imputationPour, DEFAUTS, RUBRIQUES, racineDepot, cheminSedit };

@@ -106,4 +106,4 @@ async function browse(mode, relPath) {
   return a.browse(relPath || '');
 }
 
-module.exports = { put, get, remove, publicConfig, saveConfig, test, browse, active, forKey, sha256, getConfig, decrypt };
+module.exports = { put, get, remove, publicConfig, saveConfig, test, browse, active, forKey, sha256, getConfig, decrypt, encrypt };

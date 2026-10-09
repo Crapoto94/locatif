@@ -13,6 +13,8 @@ const store = require('./src/modules/documents/store/store');
 const alertes = require('./src/modules/alertes/alertes.service');
 const indicesSync = require('./src/modules/revisions/indices.sync');
 
+const lireVersion = () => JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'version.json'), 'utf8'));
+
 const app = express();
 app.disable('x-powered-by');
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
@@ -25,7 +27,7 @@ app.get('/api/status', async (req, res) => {
     apm.status(), hub.status(), store.test().then((r) => ({ ok: r.ok, mode: r.mode, detail: r.ok ? undefined : r.message })),
   ]);
   const ok = dbOk.ok && s.ok;
-  res.status(ok ? 200 : 503).json({ ok, app: 'gestion-locative', version: '1.0.0', schema: SCHEMA, base: dbOk, apm: a, hub: h, stockage: s, localAdmin: config.localAdmin.enabled });
+  res.status(ok ? 200 : 503).json({ ok, app: 'gestion-locative', version: lireVersion().version, schema: SCHEMA, base: dbOk, apm: a, hub: h, stockage: s, localAdmin: config.localAdmin.enabled });
 });
 
 const spec = swaggerJsdoc({
@@ -36,6 +38,8 @@ const spec = swaggerJsdoc({
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
 
 const v1 = express.Router();
+// Version + « Nouveautés » (public : affichées aussi sur l'écran de connexion). Source : version.json, montée par le hook git.
+v1.get('/version', (req, res) => res.json(lireVersion()));
 v1.use('/auth', require('./src/modules/auth/auth.routes'));
 v1.use('/general', require('./src/modules/admin/general.routes').publicRouter); // nom + logo : lisibles avant connexion
 v1.use(authenticate); // tout ce qui suit exige un jeton valide

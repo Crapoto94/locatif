@@ -1,0 +1,6 @@
+#!/bin/sh
+# Monte la version (backend/version.json) à chaque commit et l'inclut dans ce commit. Voir backend/scripts/bump-version.js.
+# Activation (une fois par clone) : git config core.hooksPath .githooks
+# pre-commit : seul hook dont les modifications d'index entrent dans le commit (le message n'existe pas encore :
+# le commentaire de version vient de backend/NOUVEAUTE.md, à rédiger avant de committer).
+node backend/scripts/bump-version.js && git add backend/version.json && { [ ! -f backend/NOUVEAUTE.md ] || git rm -q --cached --ignore-unmatch backend/NOUVEAUTE.md; }

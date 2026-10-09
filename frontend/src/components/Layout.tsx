@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import VersionBadge from './VersionBadge';
 import { Map as MapIcon, LayoutDashboard, Building2, Settings, Users, FileSignature, CalendarClock, ClipboardCheck, FolderOpen, Bell, BarChart3, ListChecks, ShieldCheck, Search, History, LogOut, TrendingUp, Calculator, FileText, ScrollText, HardDrive, DatabaseZap, FileOutput, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
@@ -104,6 +105,7 @@ export default function Layout() {
               <span className="inline-flex items-center gap-1 text-label-sm text-secondary"><span className="w-1.5 h-1.5 rounded-full bg-secondary" />{user?.source === 'local' ? 'Compte local' : 'AD'}</span>
             </div>
             <span className="text-body-sm text-on-surface font-semibold truncate">{user?.profils.join(' · ')}</span>
+            <VersionBadge />
           </div>
         </div>
       </aside>
